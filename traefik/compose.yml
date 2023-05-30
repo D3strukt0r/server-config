@@ -1,0 +1,93 @@
+# Manage domain access to services
+services:
+  traefik:
+    image: traefik:v2.9
+    container_name: traefik
+    restart: "on-failure"
+    command:
+      # Tell Traefik to listen to docker
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=traefik_proxy
+
+      # HTTPS Let's Encrypt
+      # https://doc.traefik.io/traefik/https/acme/
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.le.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.le.acme.storage=acme.json
+      # - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      #- --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.le.acme.dnschallenge=true
+      - --certificatesresolvers.le.acme.dnschallenge.provider=cloudflare
+
+      # Enable Hub communication (open the port 9900 and 9901 by default)
+      - --experimental.hub=true
+      - --hub.tls.insecure=true
+      - --metrics.prometheus.addrouterslabels=true
+
+      - --api.dashboard=true
+      - --log.level=INFO
+      - --global.sendAnonymousUsage
+    networks:
+      - traefik_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    #dns:
+    #  - 1.1.1.1
+    #  - 1.0.0.1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acme.json:/acme.json
+    environment:
+      CF_API_EMAIL: ${CLOUDFLARE_EMAIL}
+      CF_API_KEY: ${CLOUDFLARE_API_KEY}
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.traefik0.entrypoints=web
+      - traefik.http.routers.traefik0.rule=Host(`traefik.d3strukt0r.dev`)
+      - traefik.http.routers.traefik0.middlewares=to_https
+
+      - traefik.http.routers.traefik.entrypoints=websecure
+      - traefik.http.routers.traefik.rule=Host(`traefik.d3strukt0r.dev`)
+      - traefik.http.routers.traefik.middlewares=traefik_auth
+      - traefik.http.routers.traefik.tls=true
+      - traefik.http.routers.traefik.tls.certresolver=le
+      - traefik.http.routers.traefik.service=api@internal
+
+      # Declaring the user list
+      #
+      # Note: all dollar signs in the hash need to be doubled for escaping.
+      # To create user:password pair, it's possible to use this command:
+      # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
+      - traefik.http.middlewares.traefik_auth.basicauth.users=${TRAEFIK_USERS}
+
+      # Standard middleware for other containers to use
+      - traefik.http.middlewares.to_https.redirectscheme.scheme=https
+      - traefik.http.middlewares.to_https_perm.redirectscheme.scheme=https
+      - traefik.http.middlewares.to_https_perm.redirectscheme.permanent=true
+
+  # Start the agent with the latest version
+  hub-agent:
+    image: ghcr.io/traefik/hub-agent-traefik:v1.0.0
+    pull_policy: always
+    container_name: hub-agent
+    restart: "on-failure"
+    command:
+      - run
+      - --hub.token=${TRAEFIK_HUB_TOKEN}
+      - --auth-server.advertise-url=http://hub-agent
+      - --traefik.host=traefik
+      - --traefik.tls.insecure=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - traefik_proxy
+    depends_on:
+      - traefik
+
+networks:
+  traefik_proxy:
+    external: true

@@ -1,0 +1,28 @@
+# Manage docker containers
+services:
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    restart: "on-failure"
+    networks:
+      - traefik_proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/:/data/
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+
+      - traefik.http.routers.portainer0.entrypoints=web
+      - traefik.http.routers.portainer0.rule=Host(`portainer.d3strukt0r.dev`)
+      - traefik.http.routers.portainer0.middlewares=to_https
+
+      - traefik.http.routers.portainer.entrypoints=websecure
+      - traefik.http.routers.portainer.rule=Host(`portainer.d3strukt0r.dev`)
+      - traefik.http.routers.portainer.tls=true
+      - traefik.http.routers.portainer.tls.certresolver=le
+
+networks:
+  traefik_proxy:
+    external: true
