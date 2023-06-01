@@ -2,26 +2,49 @@
 
 ## Setup
 
-Stop nginx
+* Add SSH Key from 1Password Backup (SSH-Key (Ed25519)) and place in `~/.ssh/`
+* If not yet done, backup GPG Private key
+
+```shell
+gpg --export-secret-keys --export-options export-backup --armor --output private.gpg jane.smith@email.com
+```
+
+* Then import on the server
+
+```shell
+gpg --import-options import-restore --import private.gpg
+```
+
+* Setup Git
+
+```shell
+git config --global user.email dev@d3strukt0r.me
+git config --global user.name D3strukt0r
+git config --global user.signingkey C9E5AB85364CA764!
+git config --global init.defaultBranch master
+git config --global commit.gpgsign true
+```
+
+* Stop existing nginx instance on host (so it doesn't interfere with Traefik)
 
 ```shell
 systemctl stop nginx
 ```
 
-Add network
+* Add Docker network for Traefik
 
 ```shell
 docker network create traefik_proxy
 ```
 
-Add acme store
+* Add acme store for Let's Encrypt with Traefik (Requires 600 permission)
 
+```shell
+touch ./traefik/acme.json
+chmod 600 ./traefik/acme.json
 ```
-mkdir traefik
-cd traefik
-touch acme.json
-chmod 600 acme.json
-```
+
+* Copy `.env.dist` to `.env` (`cp .env.dist .env`) and fill with info from 1Password Backup (Traefik | Prod | Config)
 
 ## Backup
 
