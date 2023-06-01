@@ -25,6 +25,12 @@ git config --global init.defaultBranch master
 git config --global commit.gpgsign true
 ```
 
+* Clone this repo to the server (in home directory `/root/x`)
+
+```shell
+git clone git@github.com:D3strukt0r/server-config.git ~/server
+```
+
 * Stop existing nginx instance on host (so it doesn't interfere with Traefik)
 
 ```shell
