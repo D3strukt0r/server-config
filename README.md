@@ -54,12 +54,16 @@ chmod 600 ./traefik/acme.json
 
 ## Backup
 
+Following command backups all git ignored files (e.g. `./traefik/acme.json`)
+
 ```shell
-# TODO
+git clean -dxn | sed 's/^Would remove \(.*\)/\1/g' | tar -czvf backup.tar.gz -T -
 ```
 
 ## Restore
 
+Following command restores all git ignored files (e.g. `./traefik/acme.json`)
+
 ```shell
-# TODO
+tar -xzvf backup.tar.gz
 ```
