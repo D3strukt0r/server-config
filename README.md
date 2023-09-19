@@ -2,6 +2,48 @@
 
 ## Setup
 
+* Update the System
+
+```shell
+apt update
+apt dist-upgrade -y
+```
+
+* Install Docker
+
+```shell
+apt install ca-certificates curl gnupg
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt update
+apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+* Boot Docker on start
+
+```shell
+systemctl enable docker.service
+systemctl enable containerd.service
+```
+
+* Stop existing nginx instance on host (so it doesn't interfere with Traefik)
+
+```shell
+systemctl stop nginx
+systemctl disable nginx
+```
+
+* Login to Docker
+
+```shell
+docker login -u d3strukt0r
+```
+
 * Add SSH Key from 1Password Backup (SSH-Key (Ed25519)) and place in `~/.ssh/`
 
 * Then fix the private key permissions
@@ -36,12 +78,6 @@ git config --global commit.gpgsign true
 
 ```shell
 git clone git@github.com:D3strukt0r/server-config.git ~/server
-```
-
-* Stop existing nginx instance on host (so it doesn't interfere with Traefik)
-
-```shell
-systemctl stop nginx
 ```
 
 * Add Docker network for Traefik
