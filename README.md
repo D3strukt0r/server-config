@@ -3,6 +3,13 @@
 ## Setup
 
 * Add SSH Key from 1Password Backup (SSH-Key (Ed25519)) and place in `~/.ssh/`
+
+* Then fix the private key permissions
+
+```shell
+chmod 600 ~/.ssh/id_ed25519
+```
+
 * If not yet done, backup GPG Private key
 
 ```shell
