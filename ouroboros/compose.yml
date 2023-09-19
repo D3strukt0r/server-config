@@ -2,18 +2,15 @@
 services:
   ouroboros:
     image: pyouroboros/ouroboros
+    pull_policy: always
     container_name: ouroboros
-    restart: "on-failure"
-    #hostname: ouroboros
-    #dns:
-    #  - 1.1.1.1
-    #  - 1.0.0.1
+    restart: on-failure
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      CLEANUP: "true"
+      CLEANUP: 'true'
       INTERVAL: "300"
       LOG_LEVEL: info
-      SELF_UPDATE: "true"
+      SELF_UPDATE: 'true'
       IGNORE: mongo influxdb postgres mariadb
       TZ: Europe/Zurich

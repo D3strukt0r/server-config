@@ -1,20 +1,21 @@
 services:
   nginx:
     image: nginx
-    restart: "on-failure"
+    pull_policy: always
+    restart: on-failure
     networks:
       - traefik_proxy
     labels:
-      - traefik.enable=true
+      traefik.enable: true
 
-      - traefik.http.routers.test0.entrypoints=web
-      - traefik.http.routers.test0.rule=Host(`test.d3strukt0r.dev`)
-      - traefik.http.routers.test0.middlewares=to_https
+      traefik.http.routers.test0.entrypoints: web
+      traefik.http.routers.test0.rule: Host(`test.d3strukt0r.dev`)
+      traefik.http.routers.test0.middlewares: to_https
 
-      - traefik.http.routers.test.entrypoints=websecure
-      - traefik.http.routers.test.rule=Host(`test.d3strukt0r.dev`)
-      - traefik.http.routers.test.tls=true
-      - traefik.http.routers.test.tls.certresolver=le
+      traefik.http.routers.test.entrypoints: websecure
+      traefik.http.routers.test.rule: Host(`test.d3strukt0r.dev`)
+      traefik.http.routers.test.tls: true
+      traefik.http.routers.test.tls.certresolver: le
 
 networks:
   traefik_proxy:
