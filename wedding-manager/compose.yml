@@ -1,0 +1,113 @@
+services:
+  pwa:
+    image: d3strukt0r/wedding-manager:pwa-develop
+    pull_policy: always
+    init: true
+    restart: on-failure
+    environment:
+      API_URL: https://api-wedding-manager.d3strukt0r.dev/
+    networks:
+      - default
+      - traefik_proxy
+    links:
+      - api
+    labels:
+      traefik.enable: true
+
+      traefik.http.routers.wedding-manager0.entrypoints: web
+      traefik.http.routers.wedding-manager0.rule: Host(`wedding-manager.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manager0.middlewares: to_https
+
+      traefik.http.routers.wedding-manager.entrypoints: websecure
+      traefik.http.routers.wedding-manager.rule: Host(`wedding-manager.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manager.tls: true
+      traefik.http.routers.wedding-manager.tls.certresolver: le
+
+  api:
+    image: d3strukt0r/wedding-manager:api-develop
+    pull_policy: always
+    init: true
+    restart: on-failure
+    environment:
+      DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
+    networks:
+      - default
+      - traefik_proxy
+    links:
+      - db
+    labels:
+      traefik.enable: true
+
+      traefik.http.routers.wedding-manager-api0.entrypoints: web
+      traefik.http.routers.wedding-manager-api0.rule: Host(`api-wedding-manager.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manager-api0.middlewares: to_https
+
+      traefik.http.routers.wedding-manager-api.entrypoints: websecure
+      traefik.http.routers.wedding-manager-api.rule: Host(`api-wedding-manager.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manager-api.tls: true
+      traefik.http.routers.wedding-manager-api.tls.certresolver: le
+      
+  db:
+    image: mariadb
+    pull_policy: always
+    init: true
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: on-failure
+    volumes:
+      - ./database:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      # Create "db" user with password ${DB_PASSWORD} if it doesn't exist
+      MARIADB_USER: db
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      # Create database "db" if it doesn't exist
+      MARIADB_DATABASE: db
+    networks:
+      - default
+
+  # Manually create PMA db and user:
+  # $ mariadb --password=${DB_ROOT_PASSWORD}
+  # $ CREATE DATABASE phpmyadmin; GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'pma'@'%' IDENTIFIED BY '${DB_PMA_PASSWORD}';
+  # Then create tables from UI (In container /var/www/html/sql/create_tables.sql)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    pull_policy: always
+    init: true
+    restart: on-failure
+    environment:
+      # Default user to be logged in
+      PMA_USER: db
+      PMA_PASSWORD: ${DB_PASSWORD}
+      # PhpMyAdmin User to manage PMA db
+      PMA_PMADB: phpmyadmin
+      PMA_CONTROLUSER: pma
+      PMA_CONTROLPASS: ${DB_PMA_PASSWORD}
+      # Other settings
+      UPLOAD_LIMIT: 100M
+    networks:
+      - default
+      - traefik_proxy
+    links:
+      - db
+    labels:
+      traefik.enable: true
+
+      traefik.http.routers.wedding-manager-phpmyadmin0.entrypoints: web
+      traefik.http.routers.wedding-manager-phpmyadmin0.rule: Host(`phpmyadmin-wedding-manager.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manager-phpmyadmin0.middlewares: to_https
+
+      traefik.http.routers.wedding-manager-phpmyadmin.entrypoints: websecure
+      traefik.http.routers.wedding-manager-phpmyadmin.rule: Host(`phpmyadmin-wedding-manager.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manager-phpmyadmin.tls: true
+      traefik.http.routers.wedding-manager-phpmyadmin.tls.certresolver: le
+
+networks:
+  traefik_proxy:
+    external: true
