@@ -63,6 +63,12 @@ systemctl disable nginx
 docker login -u d3strukt0r
 ```
 
+* Install [ctop](https://github.com/bcicen/ctop)
+
+```shell
+ln -s ~/server/bin/ctop /usr/local/bin/ctop
+```
+
 * Add SSH Key from 1Password Backup (SSH-Key (Ed25519)) and place in `~/.ssh/`
 
 * Then fix the private key permissions
@@ -113,6 +119,13 @@ chmod 600 ./traefik/acme.json
 ```
 
 * Copy `.env.dist` to `.env` (`cp .env.dist .env`) and fill with info from 1Password Backup (Traefik | Prod | Config)
+
+### Verify downloaded images with cosign (example)
+
+```shell
+wget https://artifacts.elastic.co/cosign.pub
+cosign verify --key cosign.pub docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+```
 
 ### Backup
 

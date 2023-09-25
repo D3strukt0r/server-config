@@ -11,6 +11,8 @@ services:
       - traefik_proxy
     links:
       - api
+    logging:
+      driver: fluentd
     labels:
       traefik.enable: true
 
@@ -35,6 +37,8 @@ services:
       - traefik_proxy
     links:
       - db
+    logging:
+      driver: fluentd
     labels:
       traefik.enable: true
 
@@ -71,6 +75,8 @@ services:
       MARIADB_DATABASE: db
     networks:
       - default
+    logging:
+      driver: fluentd
 
   # Manually create PMA db and user:
   # $ mariadb --password=${DB_ROOT_PASSWORD}
@@ -96,6 +102,8 @@ services:
       - traefik_proxy
     links:
       - db
+    logging:
+      driver: fluentd
     labels:
       traefik.enable: true
 

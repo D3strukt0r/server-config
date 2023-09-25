@@ -1,0 +1,24 @@
+# https://github.com/elastic/elasticsearch/blob/8.10/docs/reference/setup/install/docker/docker-compose.yml
+services:
+  #web:
+  #  image: httpd
+  #  #ports:
+  #  #  - '80:80'
+  #  links:
+  #    - fluentd
+  #  logging:
+  #    driver: fluentd
+  #    options:
+  #      fluentd-address: localhost:24224
+  #      tag: httpd.access
+
+  # Test with:
+  # docker run --rm --log-driver=fluentd --log-opt ubuntu echo '...'
+  fluentd:
+    build:
+      dockerfile: fluentd.Dockerfile
+    restart: on-failure
+    volumes:
+      - ./fluent.conf:/fluentd/etc/fluent.conf
+    ports:
+      - '24224:24224'

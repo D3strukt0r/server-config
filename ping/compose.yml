@@ -1,0 +1,24 @@
+services:
+  nginx:
+    image: nginx
+    pull_policy: always
+    restart: on-failure
+    networks:
+      - traefik_proxy
+    logging:
+      driver: fluentd
+    labels:
+      traefik.enable: true
+
+      traefik.http.routers.ping0.entrypoints: web
+      traefik.http.routers.ping0.rule: Host(`ping.d3strukt0r.dev`)
+      traefik.http.routers.ping0.middlewares: to_https
+
+      traefik.http.routers.ping.entrypoints: websecure
+      traefik.http.routers.ping.rule: Host(`ping.d3strukt0r.dev`)
+      traefik.http.routers.ping.tls: true
+      traefik.http.routers.ping.tls.certresolver: le
+
+networks:
+  traefik_proxy:
+    external: true

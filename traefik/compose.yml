@@ -30,10 +30,14 @@ services:
       # Give more logs
       - --log.level=INFO
     networks:
-      - traefik_proxy
+      - default
+      - proxy
     ports:
+      # HTTP
       - '80:80'
+      # HTTPS
       - '443:443'
+      # HTTP/3
       - '443:443/udp'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -41,6 +45,8 @@ services:
     environment:
       CF_API_EMAIL: ${CLOUDFLARE_EMAIL}
       CF_API_KEY: ${CLOUDFLARE_API_KEY}
+    logging:
+      driver: fluentd
     labels:
       traefik.enable: true
 
@@ -68,5 +74,5 @@ services:
       traefik.http.middlewares.to_https_perm.redirectscheme.permanent: true
 
 networks:
-  traefik_proxy:
-    external: true
+  proxy:
+    driver: bridge

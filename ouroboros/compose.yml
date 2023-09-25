@@ -14,3 +14,5 @@ services:
       SELF_UPDATE: 'true'
       IGNORE: mongo influxdb postgres mariadb
       TZ: Europe/Zurich
+    logging:
+      driver: fluentd
