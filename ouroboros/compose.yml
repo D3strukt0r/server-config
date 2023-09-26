@@ -16,3 +16,5 @@ services:
       TZ: Europe/Zurich
     logging:
       driver: fluentd
+      options:
+        tag: ouroboros

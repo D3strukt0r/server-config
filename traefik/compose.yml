@@ -29,6 +29,7 @@ services:
 
       # Give more logs
       - --log.level=INFO
+      - --log.format=json
     networks:
       - default
       - proxy
@@ -47,6 +48,8 @@ services:
       CF_API_KEY: ${CLOUDFLARE_API_KEY}
     logging:
       driver: fluentd
+      options:
+        tag: traefik
     labels:
       traefik.enable: true
 

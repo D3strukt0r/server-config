@@ -12,6 +12,8 @@ services:
       - ./data/:/data/
     logging:
       driver: fluentd
+      options:
+        tag: portainer
     labels:
       traefik.enable: true
 

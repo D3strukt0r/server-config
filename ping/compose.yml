@@ -7,6 +7,8 @@ services:
       - traefik_proxy
     logging:
       driver: fluentd
+      options:
+        tag: nginx
     labels:
       traefik.enable: true
 

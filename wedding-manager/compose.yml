@@ -77,6 +77,8 @@ services:
       - default
     logging:
       driver: fluentd
+      options:
+        tag: mariadb
 
   # Manually create PMA db and user:
   # $ mariadb --password=${DB_ROOT_PASSWORD}
@@ -104,6 +106,8 @@ services:
       - db
     logging:
       driver: fluentd
+      options:
+        tag: phpmyadmin
     labels:
       traefik.enable: true
 
