@@ -33,6 +33,9 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+    networks:
+      - default
+      - traefik_proxy
     environment:
       # To avoid error "Command listDatabases requires authentication"
       ME_CONFIG_MONGODB_SERVER: mongo
@@ -44,13 +47,17 @@ services:
     labels:
       traefik.enable: true
 
-      traefik.http.services.mongo-express.loadbalancer.server.port: 8081
+      traefik.http.services.fluentd-mongo-express.loadbalancer.server.port: 8081
 
-      traefik.http.routers.mongo-express0.entrypoints: web
-      traefik.http.routers.mongo-express0.rule: Host(`db-logs.d3strukt0r.dev`)
-      traefik.http.routers.mongo-express0.middlewares: to_https
+      traefik.http.routers.fluentd-mongo-express0.entrypoints: web
+      traefik.http.routers.fluentd-mongo-express0.rule: Host(`db-logs.d3strukt0r.dev`)
+      traefik.http.routers.fluentd-mongo-express0.middlewares: to_https
 
-      traefik.http.routers.mongo-express.entrypoints: websecure
-      traefik.http.routers.mongo-express.rule: Host(`db-logs.d3strukt0r.dev`)
-      traefik.http.routers.mongo-express.tls: true
-      traefik.http.routers.mongo-express.tls.certresolver: le
+      traefik.http.routers.fluentd-mongo-express.entrypoints: websecure
+      traefik.http.routers.fluentd-mongo-express.rule: Host(`db-logs.d3strukt0r.dev`)
+      traefik.http.routers.fluentd-mongo-express.tls: true
+      traefik.http.routers.fluentd-mongo-express.tls.certresolver: le
+
+networks:
+  traefik_proxy:
+    external: true
