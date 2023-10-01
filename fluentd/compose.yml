@@ -1,7 +1,8 @@
 # https://github.com/elastic/elasticsearch/blob/8.10/docs/reference/setup/install/docker/docker-compose.yml
 services:
   # Test with:
-  # docker run --rm --log-driver=fluentd --log-opt ubuntu echo '...'
+  # docker run --rm --log-driver=fluentd --log-opt tag="myapp.test" ubuntu echo '{"key":"value"}'
+  # docker run --rm --log-driver=fluentd --log-opt tag="myapp.web" -p 8082:80 nginx
   fluentd:
     build:
       dockerfile: fluentd.Dockerfile
@@ -11,3 +12,45 @@ services:
       - ./logs:/fluentd/log
     ports:
       - '24224:24224'
+    environment:
+      DATABASE_URL: mongodb://${DATABASE_USER:?error}:${DATABASE_PASSWORD:?error}@mongo:27017/fluentd
+
+  mongo:
+    image: mongo
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./database:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DATABASE_ROOT_USER:?error}
+      MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD:?error}
+
+  mongo-express:
+    image: mongo-express
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      # To avoid error "Command listDatabases requires authentication"
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_AUTH_USERNAME: ${DATABASE_ROOT_USER:?error}
+      ME_CONFIG_MONGODB_AUTH_PASSWORD: ${DATABASE_ROOT_PASSWORD:?error}
+
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGOEXPRESS_LOGIN}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGOEXPRESS_PASSWORD}
+    labels:
+      traefik.enable: true
+
+      traefik.http.services.mongo-express.loadbalancer.server.port: 8081
+
+      traefik.http.routers.mongo-express0.entrypoints: web
+      traefik.http.routers.mongo-express0.rule: Host(`db-logs.d3strukt0r.dev`)
+      traefik.http.routers.mongo-express0.middlewares: to_https
+
+      traefik.http.routers.mongo-express.entrypoints: websecure
+      traefik.http.routers.mongo-express.rule: Host(`db-logs.d3strukt0r.dev`)
+      traefik.http.routers.mongo-express.tls: true
+      traefik.http.routers.mongo-express.tls.certresolver: le

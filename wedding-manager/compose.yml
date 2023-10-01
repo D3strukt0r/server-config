@@ -13,6 +13,8 @@ services:
       - api
     logging:
       driver: fluentd
+      options:
+        tag: wedding-manager.pwa
     labels:
       traefik.enable: true
 
@@ -39,6 +41,8 @@ services:
       - db
     logging:
       driver: fluentd
+      options:
+        tag: wedding-manager.api
     labels:
       traefik.enable: true
 
@@ -78,7 +82,7 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: mariadb
+        tag: wedding-manager.mariadb
 
   # Manually create PMA db and user:
   # $ mariadb --password=${DB_ROOT_PASSWORD}
@@ -107,7 +111,7 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: phpmyadmin
+        tag: wedding-manager.phpmyadmin
     labels:
       traefik.enable: true
 
