@@ -95,8 +95,8 @@ services:
     restart: on-failure
     environment:
       # Default user to be logged in
-      PMA_USER: db
-      PMA_PASSWORD: ${DB_PASSWORD}
+      #PMA_USER: db
+      #PMA_PASSWORD: ${DB_PASSWORD}
       # PhpMyAdmin User to manage PMA db
       PMA_PMADB: phpmyadmin
       PMA_CONTROLUSER: pma
