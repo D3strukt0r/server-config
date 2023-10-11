@@ -5,11 +5,12 @@ services:
     init: true
     restart: on-failure
     environment:
-      API_URL: https://api-wedding-manager.d3strukt0r.dev/
+      API_URL: http://api
+      API_URL_PUBLIC: https://api-wedding-manager.d3strukt0r.dev/
     networks:
       - default
       - traefik_proxy
-    links:
+    depends_on:
       - api
     logging:
       driver: fluentd
@@ -37,7 +38,7 @@ services:
     networks:
       - default
       - traefik_proxy
-    links:
+    depends_on:
       - db
     logging:
       driver: fluentd
@@ -64,9 +65,6 @@ services:
       - --collation-server=utf8mb4_unicode_ci
     healthcheck:
       test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
     restart: on-failure
     volumes:
       - ./database:/var/lib/mysql
@@ -106,7 +104,7 @@ services:
     networks:
       - default
       - traefik_proxy
-    links:
+    depends_on:
       - db
     logging:
       driver: fluentd
