@@ -83,7 +83,7 @@ services:
         tag: wedding-manager.mariadb
 
   # Manually create PMA db and user:
-  # $ mariadb --password=${DB_ROOT_PASSWORD}
+  # $ mariadb --password=${MARIADB_ROOT_PASSWORD}
   # $ CREATE DATABASE phpmyadmin; GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'pma'@'%' IDENTIFIED BY '${DB_PMA_PASSWORD}';
   # Then create tables from UI (In container /var/www/html/sql/create_tables.sql)
   phpmyadmin:
