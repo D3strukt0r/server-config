@@ -43,6 +43,8 @@ services:
         limits:
           cpus: '0.5'
           memory: 240M
+    volumes:
+      - ./sessions:/app/var/sessions
     environment:
       APP_SECRET: ${APP_SECRET}
       DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
