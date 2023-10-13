@@ -28,6 +28,18 @@ apt update
 apt dist-upgrade -y
 ```
 
+* Install some useful tools (optional)
+
+```shell
+apt install \
+    # storage
+    ncdu
+    # network (https://askubuntu.com/questions/257263/how-to-display-network-traffic-in-the-terminal)
+    bmon
+    tcptrack
+    net-tools
+```
+
 * Add Swap memory
 
 See [DigitalOcean Article](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-debian-11)
