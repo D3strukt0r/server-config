@@ -6,7 +6,7 @@ services:
     restart: on-failure
     environment:
       API_URL: http://api
-      API_URL_PUBLIC: https://api-wedding-manager.d3strukt0r.dev/
+      API_URL_PUBLIC: https://api-wedding-manager.d3strukt0r.dev
     networks:
       - default
       - traefik_proxy
@@ -35,6 +35,8 @@ services:
     restart: on-failure
     environment:
       DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
+      APP_URL: https://api-wedding-manager.d3strukt0r.dev
+      TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
     networks:
       - default
       - traefik_proxy
