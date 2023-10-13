@@ -30,11 +30,11 @@ services:
       # Give more logs
       - --log.level=INFO
       - --log.format=json
-    #deploy:
-    #  resources:
-    #    limits:
-    #      cpus: '0.5'
-    #      memory: 150M
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 150M
     networks:
       - default
       #- proxy

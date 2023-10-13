@@ -3,11 +3,11 @@ services:
     image: nginx
     pull_policy: always
     restart: on-failure
-    #deploy:
-    #  resources:
-    #    limits:
-    #      cpus: '0.5'
-    #      memory: 50M
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 50M
     networks:
       - traefik_proxy
     logging:

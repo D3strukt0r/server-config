@@ -1,0 +1,23 @@
+# Auto Update containers when new version is available
+services:
+  watchtower:
+    image: containrrr/watchtower
+    pull_policy: always
+    container_name: watchtower
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 50M
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TZ: Europe/Zurich
+      WATCHTOWER_CLEANUP: 'true'
+      WATCHTOWER_LOG_FORMAT: json
+      WATCHTOWER_POLL_INTERVAL: 300 # seconds => 5 minutes
+    logging:
+      driver: fluentd
+      options:
+        tag: watchtower
