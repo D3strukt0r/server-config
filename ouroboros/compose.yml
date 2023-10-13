@@ -5,6 +5,11 @@ services:
     pull_policy: always
     container_name: ouroboros
     restart: on-failure
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '0.5'
+    #      memory: 50M
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:

@@ -28,6 +28,40 @@ apt update
 apt dist-upgrade -y
 ```
 
+* Add Swap memory
+
+See [DigitalOcean Article](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-debian-11)
+
+```shell
+# Check status of swap (should be 0B)
+free -h
+# Check free space on disk (/dev/vda1)
+df -h
+# Create swap file (1G in this example)
+fallocate -l 1G /swapfile
+# Check if swap file was created
+ls -lh /swapfile
+# Enable swap file
+chmod 600 /swapfile
+ls -lh /swapfile
+mkswap /swapfile
+swapon /swapfile
+# Verify it's being used
+swapon --show
+free -h
+# Make swap file permanent
+cp /etc/fstab /etc/fstab.bak
+echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
+# Check swapiness, and recude value to only use it when absolutely necessary
+cat /proc/sys/vm/swappiness
+sysctl vm.swappiness=10
+echo 'vm.swappiness=10' | tee -a /etc/sysctl.conf
+# Reduce cache pressure to 50%
+cat /proc/sys/vm/vfs_cache_pressure
+sysctl vm.vfs_cache_pressure=50
+echo 'vm.vfs_cache_pressure=50' | tee -a /etc/sysctl.conf
+```
+
 * Install Docker
 
 ```shell

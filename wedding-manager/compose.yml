@@ -4,6 +4,11 @@ services:
     pull_policy: always
     init: true
     restart: on-failure
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '0.5'
+    #      memory: 100M
     environment:
       API_URL: http://api
       API_URL_PUBLIC: https://api-wedding-manager.d3strukt0r.dev
@@ -33,10 +38,17 @@ services:
     pull_policy: always
     init: true
     restart: on-failure
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '0.5'
+    #      memory: 200M
     environment:
+      APP_SECRET: ${APP_SECRET}
       DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
       APP_URL: https://api-wedding-manager.d3strukt0r.dev
       TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+      CLEAR_SESSIONS_IN: /app/var/sessions/prod
     networks:
       - default
       - traefik_proxy
@@ -68,6 +80,11 @@ services:
     healthcheck:
       test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD}"]
     restart: on-failure
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '0.5'
+    #      memory: 150M
     volumes:
       - ./database:/var/lib/mysql
     environment:
@@ -93,6 +110,11 @@ services:
     pull_policy: always
     init: true
     restart: on-failure
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '0.5'
+    #      memory: 50M
     environment:
       # Default user to be logged in
       #PMA_USER: db

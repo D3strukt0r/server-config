@@ -5,6 +5,11 @@ services:
     pull_policy: always
     container_name: portainer
     restart: on-failure
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '0.5'
+    #      memory: 50M
     networks:
       - traefik_proxy
     volumes:

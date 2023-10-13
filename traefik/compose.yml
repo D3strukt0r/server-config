@@ -30,9 +30,15 @@ services:
       # Give more logs
       - --log.level=INFO
       - --log.format=json
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '0.5'
+    #      memory: 150M
     networks:
       - default
-      - proxy
+      #- proxy
+      - traefik_proxy
     ports:
       # HTTP
       - '80:80'
@@ -77,5 +83,7 @@ services:
       traefik.http.middlewares.to_https_perm.redirectscheme.permanent: true
 
 networks:
-  proxy:
-    driver: bridge
+  #proxy:
+  #  driver: bridge
+  traefik_proxy:
+    external: true

@@ -7,6 +7,11 @@ services:
     build:
       dockerfile: fluentd.Dockerfile
     restart: on-failure
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '0.5'
+    #      memory: 150M
     volumes:
       - ./fluent.conf:/fluentd/etc/fluent.conf
       - ./logs:/fluentd/log
@@ -22,6 +27,11 @@ services:
       interval: 5s
       timeout: 10s
       retries: 5
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '1'
+    #      memory: 300M
     volumes:
       - ./database:/data/db
     environment:
@@ -33,6 +43,11 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: '0.5'
+    #      memory: 100M
     networks:
       - default
       - traefik_proxy
