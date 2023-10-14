@@ -173,6 +173,14 @@ wget https://artifacts.elastic.co/cosign.pub
 cosign verify --key cosign.pub docker.elastic.co/elasticsearch/elasticsearch:8.10.2
 ```
 
+### Maintenance
+
+#### Clear storage
+
+```shell
+docker system prune
+```
+
 ### Backup
 
 Following command backups all git ignored files (e.g. `./traefik/acme.json`)
