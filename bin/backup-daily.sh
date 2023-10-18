@@ -12,6 +12,6 @@ mkdir --parents "$BACKUP_DIR"
 # Get all uncommited files, remove the "Would remove" prefix, filter out backup folder, and tar them
 git clean -d -x --dry-run \
   | sed 's/^Would remove \(.*\)/\1/g' \
-  | grep --invert-match "^backup/" \
+  | grep --invert-match "^backup" \
   | tar --create --gzip --file="$BACKUP_DIR/backup-$(date +%Y%m%d).tar.gz" -T -
 find "$BACKUP_DIR/*" -mtime +7 -delete
