@@ -51,6 +51,7 @@ services:
       APP_URL: https://api-wedding-manager.d3strukt0r.dev
       TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       CLEAR_SESSIONS_IN: /app/var/sessions/prod
+      CORS_ALLOW_ORIGIN: ^https?://(wedding-manager\.d3strukt0r\.dev|localhost|127\.0\.0\.1)(:[0-9]+)?$
     networks:
       - default
       - traefik_proxy
@@ -71,7 +72,7 @@ services:
       traefik.http.routers.wedding-manager-api.rule: Host(`api-wedding-manager.d3strukt0r.dev`)
       traefik.http.routers.wedding-manager-api.tls: true
       traefik.http.routers.wedding-manager-api.tls.certresolver: le
-      
+
   db:
     image: mariadb
     pull_policy: always
