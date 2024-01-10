@@ -45,6 +45,7 @@ services:
           memory: 240M
     volumes:
       - ./sessions:/app/var/sessions
+      - ./jwt:/app/config/jwt:ro
     environment:
       APP_SECRET: ${APP_SECRET}
       DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
@@ -52,6 +53,7 @@ services:
       TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       CLEAR_SESSIONS_IN: /app/var/sessions/prod
       CORS_ALLOW_ORIGIN: ^https?://(wedding-manager\.d3strukt0r\.dev|(?:www\.)?manuele-robine\.wedding|localhost|127\.0\.0\.1)(:[0-9]+)?$
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
     networks:
       - default
       - traefik_proxy
