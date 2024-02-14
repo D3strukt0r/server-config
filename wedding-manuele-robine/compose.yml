@@ -11,7 +11,7 @@ services:
           memory: 160M
     environment:
       API_URL: http://api
-      PUBLIC_API_URL: https://api-wedding-manager.d3strukt0r.dev
+      PUBLIC_API_URL: https://api-wedding-manuele-robine.d3strukt0r.dev
     networks:
       - default
       - traefik_proxy
@@ -20,18 +20,18 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: wedding-manager.pwa
+        tag: wedding-manuele-robine.pwa
     labels:
       traefik.enable: true
 
-      traefik.http.routers.wedding-manager0.entrypoints: web
-      traefik.http.routers.wedding-manager0.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`wedding-manager.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manager0.middlewares: to_https
+      traefik.http.routers.wedding-manuele-robine0.entrypoints: web
+      traefik.http.routers.wedding-manuele-robine0.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine0.middlewares: to_https
 
-      traefik.http.routers.wedding-manager.entrypoints: websecure
-      traefik.http.routers.wedding-manager.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`wedding-manager.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manager.tls: true
-      traefik.http.routers.wedding-manager.tls.certresolver: le
+      traefik.http.routers.wedding-manuele-robine.entrypoints: websecure
+      traefik.http.routers.wedding-manuele-robine.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine.tls: true
+      traefik.http.routers.wedding-manuele-robine.tls.certresolver: le
 
   api:
     image: d3strukt0r/wedding-manager:api-develop
@@ -52,7 +52,7 @@ services:
       APP_URL: https://api.manuele-robine.wedding
       TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       CLEAR_SESSIONS_IN: /app/var/sessions/prod
-      CORS_ALLOW_ORIGIN: ^https?://(wedding-manager\.d3strukt0r\.dev|(?:www\.)?manuele-robine\.wedding|localhost|127\.0\.0\.1)(:[0-9]+)?$
+      CORS_ALLOW_ORIGIN: ^https?://(wedding-manuele-robine\.d3strukt0r\.dev|(?:www\.)?manuele-robine\.wedding|localhost|127\.0\.0\.1)(:[0-9]+)?$
       JWT_PASSPHRASE: ${JWT_PASSPHRASE}
     networks:
       - default
@@ -62,18 +62,18 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: wedding-manager.api
+        tag: wedding-manuele-robine.api
     labels:
       traefik.enable: true
 
-      traefik.http.routers.wedding-manager-api0.entrypoints: web
-      traefik.http.routers.wedding-manager-api0.rule: Host(`api.manuele-robine.wedding`) || Host(`api-wedding-manager.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manager-api0.middlewares: to_https
+      traefik.http.routers.wedding-manuele-robine-api0.entrypoints: web
+      traefik.http.routers.wedding-manuele-robine-api0.rule: Host(`api.manuele-robine.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-api0.middlewares: to_https
 
-      traefik.http.routers.wedding-manager-api.entrypoints: websecure
-      traefik.http.routers.wedding-manager-api.rule: Host(`api.manuele-robine.wedding`) || Host(`api-wedding-manager.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manager-api.tls: true
-      traefik.http.routers.wedding-manager-api.tls.certresolver: le
+      traefik.http.routers.wedding-manuele-robine-api.entrypoints: websecure
+      traefik.http.routers.wedding-manuele-robine-api.rule: Host(`api.manuele-robine.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-api.tls: true
+      traefik.http.routers.wedding-manuele-robine-api.tls.certresolver: le
 
   db:
     image: mariadb
@@ -104,7 +104,7 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: wedding-manager.mariadb
+        tag: wedding-manuele-robine.mariadb
 
   # Manually create PMA db and user:
   # $ mariadb --password=${MARIADB_ROOT_PASSWORD}
@@ -138,18 +138,18 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: wedding-manager.phpmyadmin
+        tag: wedding-manuele-robine.phpmyadmin
     labels:
       traefik.enable: true
 
-      traefik.http.routers.wedding-manager-phpmyadmin0.entrypoints: web
-      traefik.http.routers.wedding-manager-phpmyadmin0.rule: Host(`phpmyadmin-wedding-manager.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manager-phpmyadmin0.middlewares: to_https
+      traefik.http.routers.wedding-manuele-robine-phpmyadmin0.entrypoints: web
+      traefik.http.routers.wedding-manuele-robine-phpmyadmin0.rule: Host(`phpmyadmin-wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-phpmyadmin0.middlewares: to_https
 
-      traefik.http.routers.wedding-manager-phpmyadmin.entrypoints: websecure
-      traefik.http.routers.wedding-manager-phpmyadmin.rule: Host(`phpmyadmin-wedding-manager.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manager-phpmyadmin.tls: true
-      traefik.http.routers.wedding-manager-phpmyadmin.tls.certresolver: le
+      traefik.http.routers.wedding-manuele-robine-phpmyadmin.entrypoints: websecure
+      traefik.http.routers.wedding-manuele-robine-phpmyadmin.rule: Host(`phpmyadmin-wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-phpmyadmin.tls: true
+      traefik.http.routers.wedding-manuele-robine-phpmyadmin.tls.certresolver: le
 
 networks:
   traefik_proxy:
