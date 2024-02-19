@@ -274,19 +274,19 @@ fi
 # The first one must check for the 'no crontab for root' error
 if [[ $(crontab -l 2>/dev/null | grep 'backup-daily.sh') == '' ]]; then
   echo_info 'Adding daily backup to crontab...'
-  (crontab -l 2>/dev/null || true; echo '15 0 * * * '"$SCRIPT_DIR/backup-daily.sh") | crontab -
+  (crontab -l 2>/dev/null || true; echo '15 0 * * * '"$SCRIPT_DIR/backup-daily.sh 2>&1 | tee -a $SCRIPT_DIR/../backup/cron.log") | crontab -
 else
   echo_skip 'backup-daily.sh is already added to crontab.'
 fi
 if [[ $(crontab -l | grep backup-weekly.sh) == '' ]]; then
   echo_info 'Adding backup-weekly.sh to crontab...'
-  (crontab -l 2>/dev/null; echo '30 0 * * 1 '"$SCRIPT_DIR/backup-weekly.sh") | crontab -
+  (crontab -l 2>/dev/null; echo '30 0 * * 1 '"$SCRIPT_DIR/backup-weekly.sh 2>&1 | tee -a $SCRIPT_DIR/../backup/cron.log") | crontab -
 else
   echo_skip 'backup-weekly.sh is already in crontab.'
 fi
 if [[ $(crontab -l | grep backup-monthly.sh) == '' ]]; then
   echo_info 'Adding backup-monthly.sh to crontab...'
-  (crontab -l 2>/dev/null; echo '45 0 1 * * '"$SCRIPT_DIR/backup-monthly.sh") | crontab -
+  (crontab -l 2>/dev/null; echo '45 0 1 * * '"$SCRIPT_DIR/backup-monthly.sh 2>&1 | tee -a $SCRIPT_DIR/../backup/cron.log") | crontab -
 else
   echo_skip 'backup-monthly.sh is already in crontab.'
 fi
