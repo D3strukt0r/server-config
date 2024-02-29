@@ -290,6 +290,12 @@ if [[ $(crontab -l | grep backup-monthly.sh) == '' ]]; then
 else
   echo_skip 'backup-monthly.sh is already in crontab.'
 fi
+if [[ $(crontab -l | grep docker-prune.sh) == '' ]]; then
+  echo_info 'Adding docker-prune.sh to crontab...'
+  (crontab -l 2>/dev/null; echo '10 0 * * * '"$SCRIPT_DIR/docker-prune.sh 2>&1 | tee -a $SCRIPT_DIR/../backup/cron.log") | crontab -
+else
+  echo_skip 'docker-prune.sh is already in crontab.'
+fi
 
 # Link ctop to /usr/local/bin/ctop (https://github.com/bcicen/ctop)
 if [[ ! -L /usr/local/bin/ctop ]]; then

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e -u -o pipefail
 
+start=`date +%s`
+
 # Script dir (https://stackoverflow.com/a/246128/4156752)
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 BACKUP_DIR=$(realpath "$SCRIPT_DIR/../backup/weekly")
@@ -17,3 +19,7 @@ git clean -d -x --dry-run \
   | grep --invert-match "^backup" \
   | tar --create --gzip --file="$BACKUP_DIR/backup-$(date +%Y%m%d).tar.gz" -T - || true
 find "$BACKUP_DIR" -mtime +31 -delete
+
+end=`date +%s`
+runtime=$((end-start))
+echo "Script $0 took $runtime seconds"
