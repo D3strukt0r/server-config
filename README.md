@@ -57,7 +57,7 @@ cosign verify --key cosign.pub docker.elastic.co/elasticsearch/elasticsearch:8.1
 docker system prune
 ```
 
-### Backup
+#### Backup
 
 Following command backups all git ignored files (e.g. `./traefik/acme.json`)
 
@@ -65,13 +65,32 @@ Following command backups all git ignored files (e.g. `./traefik/acme.json`)
 git clean -dxn | sed 's/^Would remove \(.*\)/\1/g' | tar -czvf backup.tar.gz -T -
 ```
 
-### Restore
+#### Restore
 
 Following command restores all git ignored files (e.g. `./traefik/acme.json`)
 
 ```shell
 tar -xzvf backup.tar.gz
 ```
+
+#### Complete Start/Stop
+
+Start and stop all services except fluentd which is started first and stopped last.
+
+```shell
+(cd fluentd && docker compose up -d)
+for dir in $(ls -d */ | grep -v -E '^(\.git|\.github|backup|bin|fluentd)'); do
+  (cd $dir && docker compose up -d)
+done
+```
+
+```shell
+for dir in $(ls -d */ | grep -v -E '^(\.git|\.github|backup|bin|fluentd)'); do
+  (cd $dir && docker compose down)
+done
+(cd fluentd && docker compose down)
+```
+
 
 ## Built With
 
