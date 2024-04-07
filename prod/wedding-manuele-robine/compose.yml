@@ -25,11 +25,11 @@ services:
       traefik.enable: true
 
       traefik.http.routers.wedding-manuele-robine0.entrypoints: web
-      traefik.http.routers.wedding-manuele-robine0.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine0.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`eleunam-enibor.wedding`) || Host(`www.eleunam-enibor.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
       traefik.http.routers.wedding-manuele-robine0.middlewares: to_https
 
       traefik.http.routers.wedding-manuele-robine.entrypoints: websecure
-      traefik.http.routers.wedding-manuele-robine.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`eleunam-enibor.wedding`) || Host(`www.eleunam-enibor.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
       traefik.http.routers.wedding-manuele-robine.tls: true
       traefik.http.routers.wedding-manuele-robine.tls.certresolver: le
 
@@ -67,11 +67,11 @@ services:
       traefik.enable: true
 
       traefik.http.routers.wedding-manuele-robine-api0.entrypoints: web
-      traefik.http.routers.wedding-manuele-robine-api0.rule: Host(`api.manuele-robine.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-api0.rule: Host(`api.manuele-robine.wedding`) || Host(`api.eleunam-enibor.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
       traefik.http.routers.wedding-manuele-robine-api0.middlewares: to_https
 
       traefik.http.routers.wedding-manuele-robine-api.entrypoints: websecure
-      traefik.http.routers.wedding-manuele-robine-api.rule: Host(`api.manuele-robine.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-api.rule: Host(`api.manuele-robine.wedding`) || Host(`api.eleunam-enibor.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
       traefik.http.routers.wedding-manuele-robine-api.tls: true
       traefik.http.routers.wedding-manuele-robine-api.tls.certresolver: le
 
