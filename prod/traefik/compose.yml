@@ -14,15 +14,12 @@ services:
       # Add HTTP and HTTPS (with Let's Encrypt) entrypoint
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http3
       - --certificatesresolvers.le.acme.email=${ACME_EMAIL}
       - --certificatesresolvers.le.acme.storage=acme.json
       # - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.le.acme.dnschallenge=true
       - --certificatesresolvers.le.acme.dnschallenge.provider=cloudflare
-
-      # Use HTTP/3
-      - --experimental.http3=true
-      - --entrypoints.websecure.http3
 
       # Enable Traefik dashboard
       - --api.dashboard=true
