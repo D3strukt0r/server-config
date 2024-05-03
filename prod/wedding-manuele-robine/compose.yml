@@ -20,18 +20,18 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: wedding-manuele-robine.pwa
+        tag: wedding-manuele-robine.prod.pwa
     labels:
       traefik.enable: true
 
-      traefik.http.routers.wedding-manuele-robine0.entrypoints: web
-      traefik.http.routers.wedding-manuele-robine0.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`eleunam-enibor.wedding`) || Host(`www.eleunam-enibor.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manuele-robine0.middlewares: to_https
+      traefik.http.routers.wedding-manuele-robine-prod0.entrypoints: web
+      traefik.http.routers.wedding-manuele-robine-prod0.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`eleunam-enibor.wedding`) || Host(`www.eleunam-enibor.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-prod0.middlewares: to_https
 
-      traefik.http.routers.wedding-manuele-robine.entrypoints: websecure
-      traefik.http.routers.wedding-manuele-robine.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`eleunam-enibor.wedding`) || Host(`www.eleunam-enibor.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manuele-robine.tls: true
-      traefik.http.routers.wedding-manuele-robine.tls.certresolver: le
+      traefik.http.routers.wedding-manuele-robine-prod.entrypoints: websecure
+      traefik.http.routers.wedding-manuele-robine-prod.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`eleunam-enibor.wedding`) || Host(`www.eleunam-enibor.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-prod.tls: true
+      traefik.http.routers.wedding-manuele-robine-prod.tls.certresolver: le
 
   api:
     image: d3strukt0r/wedding-manager:api-develop
@@ -62,18 +62,18 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: wedding-manuele-robine.api
+        tag: wedding-manuele-robine.prod.api
     labels:
       traefik.enable: true
 
-      traefik.http.routers.wedding-manuele-robine-api0.entrypoints: web
-      traefik.http.routers.wedding-manuele-robine-api0.rule: Host(`api.manuele-robine.wedding`) || Host(`api.eleunam-enibor.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manuele-robine-api0.middlewares: to_https
+      traefik.http.routers.wedding-manuele-robine-api-prod0.entrypoints: web
+      traefik.http.routers.wedding-manuele-robine-api-prod0.rule: Host(`api.manuele-robine.wedding`) || Host(`api.eleunam-enibor.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-api-prod0.middlewares: to_https
 
-      traefik.http.routers.wedding-manuele-robine-api.entrypoints: websecure
-      traefik.http.routers.wedding-manuele-robine-api.rule: Host(`api.manuele-robine.wedding`) || Host(`api.eleunam-enibor.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manuele-robine-api.tls: true
-      traefik.http.routers.wedding-manuele-robine-api.tls.certresolver: le
+      traefik.http.routers.wedding-manuele-robine-api-prod.entrypoints: websecure
+      traefik.http.routers.wedding-manuele-robine-api-prod.rule: Host(`api.manuele-robine.wedding`) || Host(`api.eleunam-enibor.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-api-prod.tls: true
+      traefik.http.routers.wedding-manuele-robine-api-prod.tls.certresolver: le
 
   db:
     image: mariadb
@@ -104,12 +104,8 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: wedding-manuele-robine.mariadb
+        tag: wedding-manuele-robine.prod.mariadb
 
-  # Manually create PMA db and user:
-  # $ mariadb --password=${MARIADB_ROOT_PASSWORD}
-  # $ CREATE DATABASE phpmyadmin; GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'pma'@'%' IDENTIFIED BY '${DB_PMA_PASSWORD}';
-  # Then create tables from UI (In container /var/www/html/sql/create_tables.sql)
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     pull_policy: always
@@ -138,7 +134,7 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: wedding-manuele-robine.phpmyadmin
+        tag: wedding-manuele-robine.prod.phpmyadmin
     labels:
       traefik.enable: true
 
