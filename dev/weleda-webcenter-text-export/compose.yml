@@ -1,0 +1,33 @@
+services:
+  pwa:
+    image: d3strukt0r/weleda-webcenter-text-export:develop
+    pull_policy: always
+    init: true
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 130M
+    networks:
+      - default
+      - traefik_proxy
+    logging:
+      driver: fluentd
+      options:
+        tag: weleda-webcenter-text-export.dev.pwa
+    labels:
+      traefik.enable: true
+
+      traefik.http.routers.weleda-webcenter-text-export-dev0.entrypoints: web
+      traefik.http.routers.weleda-webcenter-text-export-dev0.rule: Host(`weleda-webcenter-text-export-dev.d3strukt0r.dev`)
+      traefik.http.routers.weleda-webcenter-text-export-dev0.middlewares: to_https
+
+      traefik.http.routers.weleda-webcenter-text-export-dev.entrypoints: websecure
+      traefik.http.routers.weleda-webcenter-text-export-dev.rule: Host(`weleda-webcenter-text-export-dev.d3strukt0r.dev`)
+      traefik.http.routers.weleda-webcenter-text-export-dev.tls: true
+      traefik.http.routers.weleda-webcenter-text-export-dev.tls.certresolver: le
+
+networks:
+  traefik_proxy:
+    external: true
