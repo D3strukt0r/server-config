@@ -61,7 +61,7 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.wedding-manuele-robine-api-prod.entrypoints: websecure
-      traefik.http.routers.wedding-manuele-robine-api-prod.rule: Host(`api.manuele-robine.wedding`) || Host(`api.eleunam-enibor.wedding`) || Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
+      traefik.http.routers.wedding-manuele-robine-api-prod.rule: Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
       traefik.http.routers.wedding-manuele-robine-api-prod.tls: true
       traefik.http.routers.wedding-manuele-robine-api-prod.tls.certresolver: le
 
