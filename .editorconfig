@@ -23,3 +23,8 @@ trim_trailing_whitespace = false
 [*.{md,mkd,mkdn,markdown}]
 # Trailing whitespace means manual linebreaks in Markdown thus is not trimmable
 trim_trailing_whitespace = false
+
+[*.html]
+indent_size = 4
+tab_width = 4
+ij_continuation_indent_size = 4

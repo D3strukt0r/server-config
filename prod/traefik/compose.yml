@@ -3,16 +3,18 @@ services:
   traefik:
     image: traefik
     pull_policy: always
-    container_name: traefik
     restart: on-failure
     command:
       # Tell Traefik to listen to docker
       - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
+      - --providers.docker.exposedByDefault=false
       - --providers.docker.network=traefik_proxy
 
       # Add HTTP and HTTPS (with Let's Encrypt) entrypoint
       - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
       - --entrypoints.websecure.address=:443
       - --entrypoints.websecure.http3
       - --certificatesresolvers.le.acme.email=${ACME_EMAIL}
@@ -55,11 +57,6 @@ services:
         tag: traefik
     labels:
       traefik.enable: true
-
-      traefik.http.routers.traefik0.entrypoints: web
-      traefik.http.routers.traefik0.rule: Host(`traefik.d3strukt0r.dev`)
-      traefik.http.routers.traefik0.middlewares: to_https
-
       traefik.http.routers.traefik.entrypoints: websecure
       traefik.http.routers.traefik.rule: Host(`traefik.d3strukt0r.dev`)
       traefik.http.routers.traefik.middlewares: traefik_auth
@@ -73,11 +70,6 @@ services:
       # To create user:password pair, it's possible to use this command:
       # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
       traefik.http.middlewares.traefik_auth.basicauth.users: ${TRAEFIK_USERS}
-
-      # Standard middleware for other containers to use
-      traefik.http.middlewares.to_https.redirectscheme.scheme: https
-      traefik.http.middlewares.to_https_perm.redirectscheme.scheme: https
-      traefik.http.middlewares.to_https_perm.redirectscheme.permanent: true
 
 networks:
   #proxy:

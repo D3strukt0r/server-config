@@ -3,7 +3,6 @@ services:
   watchtower:
     image: containrrr/watchtower
     pull_policy: always
-    container_name: watchtower
     restart: on-failure
     deploy:
       resources:

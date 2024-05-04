@@ -18,11 +18,6 @@ services:
         tag: weleda-webcenter-text-export.prod.pwa
     labels:
       traefik.enable: true
-
-      traefik.http.routers.weleda-webcenter-text-export-prod0.entrypoints: web
-      traefik.http.routers.weleda-webcenter-text-export-prod0.rule: Host(`weleda-webcenter-text-export.d3strukt0r.dev`) || Host(`webcenter-text-export.manuele-vaccari.ch`)
-      traefik.http.routers.weleda-webcenter-text-export-prod0.middlewares: to_https
-
       traefik.http.routers.weleda-webcenter-text-export-prod.entrypoints: websecure
       traefik.http.routers.weleda-webcenter-text-export-prod.rule: Host(`weleda-webcenter-text-export.d3strukt0r.dev`) || Host(`webcenter-text-export.manuele-vaccari.ch`)
       traefik.http.routers.weleda-webcenter-text-export-prod.tls: true

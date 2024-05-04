@@ -3,7 +3,6 @@ services:
   portainer:
     image: portainer/portainer-ce
     pull_policy: always
-    container_name: portainer
     restart: on-failure
     deploy:
       resources:
@@ -21,13 +20,7 @@ services:
         tag: portainer
     labels:
       traefik.enable: true
-
       traefik.http.services.portainer.loadbalancer.server.port: 9000
-
-      traefik.http.routers.portainer0.entrypoints: web
-      traefik.http.routers.portainer0.rule: Host(`portainer.d3strukt0r.dev`)
-      traefik.http.routers.portainer0.middlewares: to_https
-
       traefik.http.routers.portainer.entrypoints: websecure
       traefik.http.routers.portainer.rule: Host(`portainer.d3strukt0r.dev`)
       traefik.http.routers.portainer.tls: true

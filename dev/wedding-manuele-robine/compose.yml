@@ -23,11 +23,6 @@ services:
         tag: wedding-manuele-robine.dev.pwa
     labels:
       traefik.enable: true
-
-      traefik.http.routers.wedding-manuele-robine-dev0.entrypoints: web
-      traefik.http.routers.wedding-manuele-robine-dev0.rule: Host(`wedding-manuele-robine-dev.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manuele-robine-dev0.middlewares: to_https
-
       traefik.http.routers.wedding-manuele-robine-dev.entrypoints: websecure
       traefik.http.routers.wedding-manuele-robine-dev.rule: Host(`wedding-manuele-robine-dev.d3strukt0r.dev`)
       traefik.http.routers.wedding-manuele-robine-dev.tls: true
@@ -65,11 +60,6 @@ services:
         tag: wedding-manuele-robine.dev.api
     labels:
       traefik.enable: true
-
-      traefik.http.routers.wedding-manuele-robine-api-dev0.entrypoints: web
-      traefik.http.routers.wedding-manuele-robine-api-dev0.rule: Host(`api-wedding-manuele-robine-dev.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manuele-robine-api-dev0.middlewares: to_https
-
       traefik.http.routers.wedding-manuele-robine-api-dev.entrypoints: websecure
       traefik.http.routers.wedding-manuele-robine-api-dev.rule: Host(`api-wedding-manuele-robine-dev.d3strukt0r.dev`)
       traefik.http.routers.wedding-manuele-robine-api-dev.tls: true
@@ -137,11 +127,6 @@ services:
         tag: wedding-manuele-robine.dev.phpmyadmin
     labels:
       traefik.enable: true
-
-      traefik.http.routers.wedding-manuele-robine-phpmyadmin-dev0.entrypoints: web
-      traefik.http.routers.wedding-manuele-robine-phpmyadmin-dev0.rule: Host(`phpmyadmin-wedding-manuele-robine-dev.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manuele-robine-phpmyadmin-dev0.middlewares: to_https
-
       traefik.http.routers.wedding-manuele-robine-phpmyadmin-dev.entrypoints: websecure
       traefik.http.routers.wedding-manuele-robine-phpmyadmin-dev.rule: Host(`phpmyadmin-wedding-manuele-robine-dev.d3strukt0r.dev`)
       traefik.http.routers.wedding-manuele-robine-phpmyadmin-dev.tls: true

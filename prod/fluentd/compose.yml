@@ -61,13 +61,7 @@ services:
       ME_CONFIG_BASICAUTH_PASSWORD: ${MONGOEXPRESS_PASSWORD}
     labels:
       traefik.enable: true
-
       traefik.http.services.fluentd-mongo-express.loadbalancer.server.port: 8081
-
-      traefik.http.routers.fluentd-mongo-express0.entrypoints: web
-      traefik.http.routers.fluentd-mongo-express0.rule: Host(`db-logs.d3strukt0r.dev`)
-      traefik.http.routers.fluentd-mongo-express0.middlewares: to_https
-
       traefik.http.routers.fluentd-mongo-express.entrypoints: websecure
       traefik.http.routers.fluentd-mongo-express.rule: Host(`db-logs.d3strukt0r.dev`)
       traefik.http.routers.fluentd-mongo-express.tls: true

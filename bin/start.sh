@@ -18,6 +18,7 @@ do
 done
 
 PROJECTS_DIR=$(realpath "$SCRIPT_DIR/../dev")
+PROJECTS=$(ls $PROJECTS_DIR)
 for PROJECT in $PROJECTS
 do
     cd $PROJECTS_DIR/$PROJECT

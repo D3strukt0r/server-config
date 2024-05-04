@@ -10,17 +10,14 @@ services:
           memory: 50M
     networks:
       - traefik_proxy
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
     logging:
       driver: fluentd
       options:
         tag: ping.nginx
     labels:
       traefik.enable: true
-
-      traefik.http.routers.ping0.entrypoints: web
-      traefik.http.routers.ping0.rule: Host(`ping.d3strukt0r.dev`)
-      traefik.http.routers.ping0.middlewares: to_https
-
       traefik.http.routers.ping.entrypoints: websecure
       traefik.http.routers.ping.rule: Host(`ping.d3strukt0r.dev`)
       traefik.http.routers.ping.tls: true
