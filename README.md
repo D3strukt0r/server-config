@@ -45,14 +45,6 @@ git config --global user.signingkey 'C9E5AB85364CA764!'
 echo '<Personal Access Token (PAT)>' | docker login --username d3strukt0r --password-stdin
 ```
 
-### TODO
-
-* Start and stop all services on system shutdown, reboot and boot.
-
-https://unix.stackexchange.com/a/48974/483304
-
-Create file `/etc/init.d/docker-init` and link to `/etc/rc0.d/K01docker-init` (shutdown), `/etc/rc6.d/K01docker-init` (reboot).
-
 ### Verify downloaded images with cosign (example)
 
 ```shell

@@ -312,3 +312,14 @@ if [[ $(docker system info | grep 'Username') == '' ]]; then
 else
   echo_skip 'Already logged in to Docker Hub.'
 fi
+
+# Install start/stop script for services in /etc/init.d/
+if [[ ! -f /etc/init.d/docker-services ]]; then
+  echo_info 'Installing docker-services script...'
+  cp $SCRIPT_DIR/docker-services.sh /etc/init.d/docker-services
+  # link back so we can edit the script more easily
+  ln --symbolic --force /etc/init.d/docker-services $SCRIPT_DIR/docker-services-link-hidden.sh
+  update-rc.d docker-services defaults
+else
+  echo_skip 'docker-services script is already installed.'
+fi
