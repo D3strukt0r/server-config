@@ -59,6 +59,23 @@ cosign verify --key cosign.pub docker.elastic.co/elasticsearch/elasticsearch:8.1
 A script is installed so the system automatically starts/stops containers on boot
 and shutdown. To manually run it, call `service docker-services {start|stop}`.
 
+#### Check available file system
+
+```shell
+df -a -T -h
+```
+
+example:
+
+```
+Filesystem     Type         Size  Used Avail Use% Mounted on
+...
+/dev/vda1      ext4          34G  8.8G   25G  27% /
+...
+/dev/sda       ext4         100G   18G   77G  19% /mnt/volume_fra1_01
+...
+```
+
 #### Clear storage
 
 ```shell
