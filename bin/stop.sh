@@ -10,7 +10,7 @@ for PROJECT in $PROJECTS
 do
     cd $PROJECTS_DIR/$PROJECT
     echo "Stopping $PROJECT"
-    docker compose down
+    docker compose down || true
 done
 
 # stop all projects except "fluentd"
@@ -20,7 +20,7 @@ for PROJECT in $PROJECTS
 do
     cd $PROJECTS_DIR/$PROJECT
     echo "Stopping $PROJECT"
-    docker compose down
+    docker compose down || true
 done
 
 # "fluentd" must be stopped after all projects are shut down

@@ -66,7 +66,6 @@ services:
       - ./uploads:/code/uploads
     labels:
       traefik.enable: true
-      #traefik.http.services.glitchtip.loadbalancer.server.port: 8080
       traefik.http.routers.glitchtip.entrypoints: websecure
       traefik.http.routers.glitchtip.rule: Host(`glitchtip.d3strukt0r.dev`)
       traefik.http.routers.glitchtip.tls: true

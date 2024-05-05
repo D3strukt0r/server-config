@@ -1,0 +1,18 @@
+services:
+  verdaccio:
+    image: verdaccio/verdaccio
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 300M
+    volumes:
+      - './storage:/verdaccio/storage'
+      - './config:/verdaccio/conf'
+    labels:
+      traefik.enable: true
+      traefik.http.routers.glitchtip.entrypoints: websecure
+      traefik.http.routers.glitchtip.rule: Host(`verdaccio.d3strukt0r.dev`)
+      traefik.http.routers.glitchtip.tls: true
+      traefik.http.routers.glitchtip.tls.certresolver: le
