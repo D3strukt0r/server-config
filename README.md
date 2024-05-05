@@ -33,14 +33,27 @@ wget -O - https://raw.githubusercontent.com/D3strukt0r/server-config/master/bin/
 
 * Enter Git info:
 
-- user.email: dev@d3strukt0r.me
-- user.name: D3strukt0r
-- user.signingkey: C9E5AB85364CA764!
+```shell
+git config --global user.name 'D3strukt0r'
+git config --global user.email 'dev@d3strukt0r.me'
+git config --global user.signingkey 'C9E5AB85364CA764!'
+```
 
 * Login to Docker
 
-- Username: d3strukt0r
-- Password: Personal Access Token (PAT)
+```shell
+echo '<Personal Access Token (PAT)>' | docker login --username d3strukt0r --password-stdin
+```
+
+### TODO
+
+* Start and stop all services on system shutdown, reboot and boot.
+
+https://unix.stackexchange.com/a/48974/483304
+
+Create file `/etc/init.d/docker-init` and link to `/etc/rc0.d/K01docker-init` (shutdown), `/etc/rc6.d/K01docker-init` (reboot).
+
+* Don't start/stop containers in folders with `disabled` in the name.
 
 ### Verify downloaded images with cosign (example)
 
