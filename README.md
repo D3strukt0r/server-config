@@ -53,8 +53,6 @@ https://unix.stackexchange.com/a/48974/483304
 
 Create file `/etc/init.d/docker-init` and link to `/etc/rc0.d/K01docker-init` (shutdown), `/etc/rc6.d/K01docker-init` (reboot).
 
-* Don't start/stop containers in folders with `disabled` in the name.
-
 ### Verify downloaded images with cosign (example)
 
 ```shell

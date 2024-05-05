@@ -9,6 +9,7 @@ PROJECTS=$(ls $PROJECTS_DIR)
 for PROJECT in $PROJECTS
 do
     cd $PROJECTS_DIR/$PROJECT
+    echo "Stopping $PROJECT"
     docker compose down
 done
 
@@ -18,9 +19,11 @@ PROJECTS=$(ls $PROJECTS_DIR | sed 's/fluentd//')
 for PROJECT in $PROJECTS
 do
     cd $PROJECTS_DIR/$PROJECT
+    echo "Stopping $PROJECT"
     docker compose down
 done
 
 # "fluentd" must be stopped after all projects are shut down
 cd $PROJECTS_DIR/fluentd
+echo "Stopping fluentd"
 docker compose down
