@@ -54,6 +54,11 @@ cosign verify --key cosign.pub docker.elastic.co/elasticsearch/elasticsearch:8.1
 
 ### Maintenance
 
+#### Start/Stop
+
+A script is installed so the system automatically starts/stops containers on boot
+and shutdown. To manually run it, call `service docker-services {start|stop}`.
+
 #### Clear storage
 
 ```shell
