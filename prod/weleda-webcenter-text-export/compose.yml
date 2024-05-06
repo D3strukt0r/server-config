@@ -1,14 +1,13 @@
 services:
   pwa:
     image: d3strukt0r/weleda-webcenter-text-export:latest
-    pull_policy: always
     init: true
     restart: on-failure
     deploy:
       resources:
         limits:
           cpus: '0.5'
-          memory: 130M
+          memory: 160M
     networks:
       - default
       - traefik_proxy

@@ -2,7 +2,6 @@
 services:
   watchtower:
     image: containrrr/watchtower
-    pull_policy: always
     restart: on-failure
     deploy:
       resources:

@@ -2,7 +2,6 @@
 services:
   traefik:
     image: traefik
-    pull_policy: always
     restart: on-failure
     command:
       # Tell Traefik to listen to docker

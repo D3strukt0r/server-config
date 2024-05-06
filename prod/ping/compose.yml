@@ -1,7 +1,6 @@
 services:
   nginx:
     image: nginx
-    pull_policy: always
     restart: on-failure
     deploy:
       resources:
