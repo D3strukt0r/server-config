@@ -1,7 +1,7 @@
 services:
   nginx:
     image: nginx
-    restart: on-failure
+    restart: unless-stopped
     deploy:
       resources:
         limits:

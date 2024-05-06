@@ -2,7 +2,7 @@ services:
   pwa:
     image: d3strukt0r/weleda-webcenter-text-export:develop
     init: true
-    restart: on-failure
+    restart: unless-stopped
     deploy:
       resources:
         limits:

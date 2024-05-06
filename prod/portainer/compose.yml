@@ -2,7 +2,7 @@
 services:
   portainer:
     image: portainer/portainer-ce
-    restart: on-failure
+    restart: unless-stopped
     deploy:
       resources:
         limits:

@@ -14,7 +14,7 @@ services:
   #    - DB_NAME=example
   #    - DB_USER=example
   #    - DB_PASS=examplepassword
-  #  restart: always
+  #  restart: unless-stopped
   #  networks:
   #    - example-db-network
 
@@ -63,7 +63,7 @@ services:
       #DB02_CHECKSUM: MD5             # (override) Create a SHA1 checksum
       #DB02_COMPRESSION: BZ           # (override) Compress with BZIP
 
-    restart: always
+    restart: unless-stopped
     networks:
       - example-db-network
 

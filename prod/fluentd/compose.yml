@@ -6,7 +6,7 @@ services:
   fluentd:
     build:
       dockerfile: fluentd.Dockerfile
-    restart: on-failure
+    restart: unless-stopped
     deploy:
       resources:
         limits:

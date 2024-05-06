@@ -2,7 +2,7 @@
 services:
   watchtower:
     image: containrrr/watchtower
-    restart: on-failure
+    restart: unless-stopped
     deploy:
       resources:
         limits:
