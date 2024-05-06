@@ -1,0 +1,26 @@
+services:
+  satis:
+    image: 'ypereirareis/docker-satis:5.4'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 300M
+    networks:
+      - traefik_proxy
+    volumes:
+      - '/data1/satis-qa/config:/satisfy/config'
+      - '/data1/satis-qa/ssh/id_rsa:/var/tmp/id'
+      - '/data1/satis-qa/composer-cache:/var/www/.composer'
+    environment:
+      CRONTAB_FREQUENCY: '1 * * * *'
+      PRIVATE_REPO_DOMAIN_LIST: 'git-qa.<company>.io'
+    labels:
+      - 'traefik.port=80'
+      - 'traefik.docker.network=external-frontend-network2'
+      - 'traefik.frontend.redirect.entryPoint=https'
+      - 'traefik.frontend.rule=Host:satis-qa.<company>.io'
+
+networks:
+  traefik_proxy:
+    external: true

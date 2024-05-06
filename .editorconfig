@@ -28,3 +28,8 @@ trim_trailing_whitespace = false
 indent_size = 4
 tab_width = 4
 ij_continuation_indent_size = 4
+
+[Dockerfile]
+indent_size = 4
+tab_width = 4
+ij_continuation_indent_size = 4
