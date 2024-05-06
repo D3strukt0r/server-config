@@ -73,6 +73,7 @@ install_package git
 install_package ca-certificates
 install_package curl
 install_package gnupg
+install_package apache2-utils # for htpasswd command to add users to .htpasswd file
 
 # If '/etc/apt/keyrings/docker.gpg' doesn't exist, set it up
 if [[ ! -f /etc/apt/keyrings/docker.gpg ]]; then
