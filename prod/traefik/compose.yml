@@ -1,7 +1,7 @@
 # Manage domain access to services
 services:
   traefik:
-    image: traefik
+    image: traefik:3.0
     restart: on-failure
     command:
       # Tell Traefik to listen to docker

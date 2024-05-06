@@ -1,6 +1,6 @@
 services:
   verdaccio:
-    #image: verdaccio/verdaccio
+    #image: verdaccio/verdaccio:5
     build: .
     init: true
     restart: unless-stopped
