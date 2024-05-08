@@ -357,12 +357,18 @@ fi
 # Install start/stop script for services in /etc/init.d/
 if [[ ! -f /etc/init.d/docker-services ]]; then
   echo_info 'Installing docker-services script...'
-  cp $SCRIPT_DIR/docker-services.sh /etc/init.d/docker-services
-  # link back so we can edit the script more easily
-  ln --symbolic --force /etc/init.d/docker-services $SCRIPT_DIR/docker-services-link-hidden.sh
+  cp "$SCRIPT_DIR/docker-services.sh" /etc/init.d/docker-services
   update-rc.d docker-services defaults
 else
   echo_skip 'docker-services script is already installed.'
+fi
+# If script content change (check with cmp), update the script and systemctl
+if [[ $(cmp /etc/init.d/docker-services "$SCRIPT_DIR/docker-services.sh") ]]; then
+  echo_info 'Updating docker-services script...'
+  cp "$SCRIPT_DIR/docker-services.sh" /etc/init.d/docker-services
+  systemctl daemon-reload
+else
+  echo_skip 'docker-services script is already up-to-date.'
 fi
 
 function ensure_in_group() {

@@ -20,7 +20,6 @@ set -e
 # https://unix.stackexchange.com/a/48974/483304
 # To install, copy to "/etc/init.d/" and run "update-rc.d docker-services defaults"
 # Use with "service docker-services {start|stop|restart|status}"
-# If script is updated run "systemctl daemon-reload"
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
