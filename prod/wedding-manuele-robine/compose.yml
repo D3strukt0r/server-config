@@ -86,8 +86,6 @@ services:
       MARIADB_PASSWORD: ${DB_PASSWORD}
       # Create database "db" if it doesn't exist
       MARIADB_DATABASE: db
-    networks:
-      - default
     logging:
       driver: fluentd
       options:

@@ -8,6 +8,7 @@ services:
           cpus: '0.5'
           memory: 50M
     networks:
+      - default
       - traefik_proxy
     volumes:
       - ./index.html:/usr/share/nginx/html/index.html:ro

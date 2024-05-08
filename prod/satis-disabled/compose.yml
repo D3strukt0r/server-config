@@ -7,6 +7,7 @@ services:
           cpus: '1'
           memory: 300M
     networks:
+      - default
       - traefik_proxy
     volumes:
       - '/data1/satis-qa/config:/satisfy/config'
