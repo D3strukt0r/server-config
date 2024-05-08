@@ -40,10 +40,41 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-# Do a full system update
-echo_info 'Doing a full system update...'
-apt-get update
-apt-get dist-upgrade --yes
+# https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+POSITIONAL_ARGS=()
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    #-p|--with-parameter)
+    #  MY_VARIABLE="$2"
+    #  shift # past argument
+    #  shift # past value
+    #  ;;
+    -l|--skip-update)
+      SKIP_UPDATE=true
+      shift # past argument
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+
+# Do a full system update (unless --skip-update is given)
+if [[ -z ${SKIP_UPDATE+x} ]]; then
+  echo_info 'Doing a full system update...'
+  apt-get update
+  apt-get dist-upgrade --yes
+else
+  echo_skip 'Skipping system update.'
+fi
 
 # Install utilies (in a loop, check if they are installed first (using "dpkg-query -W -f='${Status} ${Version}\n' <package>"), and then install)
 # - ncdu: Manage disk usage
@@ -272,6 +303,7 @@ fi
 # - Execute the daily backup script everyday at 12:15 AM
 # - Execute the weekly backup script every Monday at 12:30 AM
 # - Execute the monthly backup script the 1st of every month at 12:45 AM
+# - Execute the docker prune script everyday at 12:10 AM
 # The first one must check for the 'no crontab for root' error
 if [[ $(crontab -l 2>/dev/null | grep 'backup-daily.sh') == '' ]]; then
   echo_info 'Adding daily backup to crontab...'
@@ -323,4 +355,68 @@ if [[ ! -f /etc/init.d/docker-services ]]; then
   update-rc.d docker-services defaults
 else
   echo_skip 'docker-services script is already installed.'
+fi
+
+function ensure_in_group() {
+  if [[ $(groups $1 | grep $2) == '' ]]; then
+    echo_info "Adding $1 to $2 group..."
+    usermod --append --groups $2 $1
+  else
+    echo_skip "$1 is already in $2 group."
+  fi
+}
+
+# Create a new personal user
+if [[ $(id -u d3strukt0r 2>/dev/null) == '' ]]; then
+  echo_info 'Creating a new user (d3strukt0r)...'
+  useradd --create-home --shell /bin/bash d3strukt0r
+  passwd d3strukt0r
+else
+  echo_skip 'User d3strukt0r is already created.'
+fi
+# Ensure that user belongs to sudo and docker group
+ensure_in_group d3strukt0r sudo
+ensure_in_group d3strukt0r docker
+
+# Gitea Setup (requires git user)
+# https://docs.gitea.com/installation/install-with-docker#sshing-shim-with-authorized_keys
+# Check git user exists
+if [[ $(id -u git 2>/dev/null) == '' ]]; then
+  echo_info 'Creating a new user (git)...'
+  useradd --create-home --shell /bin/bash git
+  passwd git
+else
+  echo_skip 'User git is already created.'
+fi
+# Ensure that user belongs to docker group
+ensure_in_group git docker
+# Check SSH key for talking between host and container (no password!)
+if [[ ! -f /home/git/.ssh/id_ed25519 ]]; then
+  echo_info 'Setting up Gitea SSH key...'
+  sudo -u git ssh-keygen -f /home/git/.ssh/id_ed25519 -t ed25519 -C "Gitea Host Key"
+else
+  echo_skip 'Gitea SSH key is already set up.'
+fi
+# Ensure the generated ssh key is contained the authorized_keys with grep or if file doesn't exist
+if [[ ! -f /home/git/.ssh/authorized_keys ]] || [[ $(cat /home/git/.ssh/authorized_keys | grep "$(cat /home/git/.ssh/id_ed25519.pub)") == '' ]]; then
+  echo_info 'Adding Gitea public key to authorized_keys...'
+  sudo -u git cat /home/git/.ssh/id_ed25519.pub | sudo -u git tee -a /home/git/.ssh/authorized_keys >/dev/null
+else
+  echo_skip 'Gitea public key is already in authorized_keys.'
+fi
+
+# Save file content in variable and check if SSHing Shim in /usr/local/bin/gitea
+# doesn't exist yet or if content doesn't match
+GITEA_SHIM_CONTENT=$(cat <<"EOF"
+#!/bin/sh
+set -e -u
+ssh -p 2222 -o StrictHostKeyChecking=no git@127.0.0.1 "SSH_ORIGINAL_COMMAND=\"$SSH_ORIGINAL_COMMAND\" $0 $@"
+EOF
+)
+if [[ ! -f /usr/local/bin/gitea ]] || [[ $(cat /usr/local/bin/gitea) != "$GITEA_SHIM_CONTENT" ]]; then
+  echo_info 'Creating Gitea SSHing Shim...'
+  echo "$GITEA_SHIM_CONTENT" | sudo tee /usr/local/bin/gitea >/dev/null
+  chmod +x /usr/local/bin/gitea
+else
+  echo_skip 'Gitea SSHing Shim is already created.'
 fi

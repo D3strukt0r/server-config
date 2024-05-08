@@ -34,3 +34,8 @@ Administrator-Benutzername: `D3strukt0r`
 E-Mail-Adresse: `gitea-contact@d3st.dev`
 Passwort: x
 Passwort bestätigen: x
+
+## Setup `git` user on host for `git clone` command
+
+See https://docs.gitea.com/installation/install-with-docker#sshing-shim-with-authorized_keys
+but should be already be done by running `setup.sh`

@@ -14,13 +14,17 @@ services:
       - ./gitea:/data
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+
+      # Ensure that the authorized_keys file is shared between the host git user and the container git user
+      - /home/git/.ssh/:/data/git/.ssh
     ports:
-      - "222:22"
+      - "127.0.0.1:2222:22"
     environment:
-      USER_UID: 1000
-      USER_GID: 1000
+      USER_UID: 1002 # Check `id -u git`
+      USER_GID: 1002 # Check `id -g git`
 
       GITEA__APP_NAME: 'Gitea: D3strukt0r'
+      GITEA__server__SSH_DOMAIN: ssh.d3strukt0r.dev
       GITEA__service__DISABLE_REGISTRATION: 'true'
 
       GITEA__security__SECRET_KEY: ${GITEA__security__SECRET_KEY:?GITEA__security__SECRET_KEY not set}
