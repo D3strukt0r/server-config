@@ -84,8 +84,6 @@ fi
 # - git: Version control
 # - ca-certificates, curl, gnupg: Dependencies for docker
 # - docker: Container runtime
-echo_info 'Installing some utilities...'
-
 function install_package() {
   if ! dpkg-query -W -f='${Status} ${Version}\n' "$1" &> /dev/null; then
     echo_info "Installing $1..."
@@ -331,11 +329,21 @@ else
 fi
 
 # Link ctop to /usr/local/bin/ctop (https://github.com/bcicen/ctop)
-if [[ ! -L /usr/local/bin/ctop ]]; then
-  echo_info 'Linking ctop...'
-  ln --symbolic --force $SCRIPT_DIR/ctop /usr/local/bin/ctop
+CTOP_SHIM_CONTENT=$(cat <<"EOF"
+#!/bin/sh
+set -e -u
+docker run --rm -ti \
+  --name=ctop \
+  --volume /var/run/docker.sock:/var/run/docker.sock:ro \
+  quay.io/vektorlab/ctop:latest
+EOF
+)
+if [[ ! -f /usr/local/bin/ctop ]] || [[ $(cat /usr/local/bin/ctop) != "$CTOP_SHIM_CONTENT" ]]; then
+  echo_info 'Creating ctop shim...'
+  echo "$CTOP_SHIM_CONTENT" | tee /usr/local/bin/ctop >/dev/null
+  chmod +x /usr/local/bin/ctop
 else
-  echo_skip 'ctop is already linked.'
+  echo_skip 'ctop shim is already created.'
 fi
 
 # Login to Docker Hub
