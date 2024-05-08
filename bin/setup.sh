@@ -11,7 +11,14 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # - When possible use '' instead of ""
 
 : "${VOLUME_DIR:=/mnt/volume_fra1_01}"
-: "${SWAP_SIZE:=1G}"
+: "${SWAP_SIZE:=4G}"
+# TODO: Improve changing swap size
+# Read manual https://linuxhandbook.com/increase-swap-ubuntu/
+# swapoff /swapfile
+# fallocate -l 4G /swapfile
+# mkswap /swapfile
+# swapon /swapfile
+# free -h
 
 # Custom echo function to output '*blue*[INFO]*reset* message'
 function echo_info() {
@@ -369,6 +376,33 @@ if [[ $(cmp /etc/init.d/docker-services "$SCRIPT_DIR/docker-services.sh") ]]; th
   systemctl daemon-reload
 else
   echo_skip 'docker-services script is already up-to-date.'
+fi
+
+# Ensure defaults config is correctly configured (/etc/default/docker-services)
+SERVICE_DEFAULTS_CONTENT=$(cat <<"EOF"
+# Create defaults file for service
+# Docker SysVinit configuration file
+
+#
+# THIS FILE DOES NOT APPLY TO SYSTEMD
+#
+#   Please see the documentation for "systemd drop-ins":
+#   https://docs.docker.com/engine/admin/systemd/
+#
+
+# To manage different subsets of services on different machines
+SERVER_ENVIRONMENT="digitalocean"
+
+# Where is this repo on the system
+REPO_DIR="$REPO_DIR"
+EOF
+)
+SERVICE_DEFAULTS_CONTENT="${SERVICE_DEFAULTS_CONTENT/\$REPO_DIR/$(dirname "$SCRIPT_DIR")}"
+if [[ ! -f /etc/default/docker-services ]] || [[ $(cat /etc/default/docker-services) != "$SERVICE_DEFAULTS_CONTENT" ]]; then
+  echo_info 'Setting up docker-services defaults...'
+  echo "$SERVICE_DEFAULTS_CONTENT" | tee /etc/default/docker-services >/dev/null
+else
+  echo_skip 'docker-services defaults are already set up.'
 fi
 
 function ensure_in_group() {
