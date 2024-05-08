@@ -3,7 +3,7 @@
 
 # https://glitchtip.com/documentation/install#configuration
 x-environment: &default-environment
-  DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres:5432/postgres
+  DATABASE_URL: postgres://postgres:${DB_PASSWORD:?DB_PASSWORD not set}@postgres:5432/postgres
   SECRET_KEY: ${SECRET_KEY} # best to run openssl rand -hex 32
   EMAIL_URL: consolemail:// # Example smtp://email:password@smtp_url:port https://glitchtip.com/documentation/install#configuration
   GLITCHTIP_DOMAIN: https://glitchtip.d3strukt0r.dev # Change this to your domain
@@ -31,7 +31,7 @@ services:
         tag: glitchtip.prod.postgres
     environment:
       #POSTGRES_USER: db
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD not set}
       #POSTGRES_DB: db
     volumes:
       - ./database:/var/lib/postgresql/data

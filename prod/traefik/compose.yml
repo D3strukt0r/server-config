@@ -16,7 +16,7 @@ services:
       - --entrypoints.web.http.redirections.entrypoint.permanent=true
       - --entrypoints.websecure.address=:443
       - --entrypoints.websecure.http3
-      - --certificatesresolvers.le.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.le.acme.email=${ACME_EMAIL:?ACME_EMAIL not set}
       - --certificatesresolvers.le.acme.storage=acme.json
       # - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.le.acme.dnschallenge=true
@@ -48,8 +48,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./acme.json:/acme.json
     environment:
-      CF_API_EMAIL: ${CLOUDFLARE_EMAIL}
-      CF_API_KEY: ${CLOUDFLARE_API_KEY}
+      CF_API_EMAIL: ${CLOUDFLARE_EMAIL:?CLOUDFLARE_EMAIL not set}
+      CF_API_KEY: ${CLOUDFLARE_API_KEY:?CLOUDFLARE_API_KEY not set}
     logging:
       driver: fluentd
       options:
@@ -68,7 +68,7 @@ services:
       # Note: all dollar signs in the hash need to be doubled for escaping.
       # To create user:password pair, it's possible to use this command:
       # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
-      traefik.http.middlewares.traefik_auth.basicauth.users: ${TRAEFIK_USERS}
+      traefik.http.middlewares.traefik_auth.basicauth.users: ${TRAEFIK_USERS:?TRAEFIK_USERS not set}
 
 networks:
   #proxy:

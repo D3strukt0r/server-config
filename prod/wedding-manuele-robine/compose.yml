@@ -40,13 +40,13 @@ services:
       - ./sessions:/var/cache/sessions
       - ./jwt:/usr/local/src/app/config/jwt:ro
     environment:
-      APP_SECRET: ${APP_SECRET}
+      APP_SECRET: ${APP_SECRET:?APP_SECRET not set}
       DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
       APP_URL: https://api.manuele-robine.wedding
       TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       CLEAR_SESSIONS_IN: /var/cache/sessions/prod
       CORS_ALLOW_ORIGIN: ^https?://(wedding-manuele-robine\.d3strukt0r\.dev|(?:www\.)?manuele-robine\.wedding|localhost|127\.0\.0\.1)(:[0-9]+)?$
-      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE:?JWT_PASSPHRASE not set}
     networks:
       - default
       - traefik_proxy
@@ -70,7 +70,7 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD}"]
+      test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD:?DB_PASSWORD not set}"]
     restart: unless-stopped
     deploy:
       resources:
@@ -80,10 +80,10 @@ services:
     volumes:
       - ./database:/var/lib/mysql
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD not set}
       # Create "db" user with password ${DB_PASSWORD} if it doesn't exist
       MARIADB_USER: db
-      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD not set}
       # Create database "db" if it doesn't exist
       MARIADB_DATABASE: db
     logging:
@@ -107,7 +107,7 @@ services:
       # PhpMyAdmin User to manage PMA db
       PMA_PMADB: phpmyadmin
       PMA_CONTROLUSER: pma
-      PMA_CONTROLPASS: ${DB_PMA_PASSWORD}
+      PMA_CONTROLPASS: ${DB_PMA_PASSWORD:?DB_PMA_PASSWORD not set}
       # Other settings
       UPLOAD_LIMIT: 100M
     networks:
