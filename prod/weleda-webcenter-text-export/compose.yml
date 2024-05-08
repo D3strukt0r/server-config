@@ -1,6 +1,6 @@
 services:
   pwa:
-    image: d3strukt0r/weleda-webcenter-text-export:latest
+    image: d3strukt0r/weleda-webcenter-text-export
     init: true
     restart: unless-stopped
     deploy:
