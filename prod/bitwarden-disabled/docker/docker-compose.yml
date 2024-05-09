@@ -15,9 +15,9 @@
 
 services:
   mssql:
-    image: bitwarden/mssql:latest
+    image: bitwarden/mssql
     container_name: bitwarden-mssql
-    restart: always
+    restart: unless-stopped
     stop_grace_period: 60s
     volumes:
       - ../mssql/data:/var/opt/mssql/data
@@ -29,9 +29,9 @@ services:
       - ../env/mssql.override.env
 
   web:
-    image: bitwarden/web:latest
+    image: bitwarden/web
     container_name: bitwarden-web
-    restart: always
+    restart: unless-stopped
     volumes:
       - ../web:/etc/bitwarden/web
     env_file:
@@ -39,9 +39,9 @@ services:
       - ../env/uid.env
 
   attachments:
-    image: bitwarden/attachments:latest
+    image: bitwarden/attachments
     container_name: bitwarden-attachments
-    restart: always
+    restart: unless-stopped
     volumes:
       - ../core/attachments:/etc/bitwarden/core/attachments
     env_file:
@@ -49,9 +49,9 @@ services:
       - ../env/uid.env
 
   api:
-    image: bitwarden/api:latest
+    image: bitwarden/api
     container_name: bitwarden-api
-    restart: always
+    restart: unless-stopped
     volumes:
       - ../core:/etc/bitwarden/core
       - ../ca-certificates:/etc/bitwarden/ca-certificates
@@ -65,9 +65,9 @@ services:
       - public
 
   identity:
-    image: bitwarden/identity:latest
+    image: bitwarden/identity
     container_name: bitwarden-identity
-    restart: always
+    restart: unless-stopped
     volumes:
       - ../identity:/etc/bitwarden/identity
       - ../core:/etc/bitwarden/core
@@ -82,9 +82,9 @@ services:
       - public
 
   sso:
-    image: bitwarden/sso:latest
+    image: bitwarden/sso
     container_name: bitwarden-sso
-    restart: always
+    restart: unless-stopped
     volumes:
       - ../identity:/etc/bitwarden/identity
       - ../core:/etc/bitwarden/core
@@ -99,9 +99,9 @@ services:
       - public
 
   admin:
-    image: bitwarden/admin:latest
+    image: bitwarden/admin
     container_name: bitwarden-admin
-    restart: always
+    restart: unless-stopped
     depends_on:
       - mssql
     volumes:
@@ -117,9 +117,9 @@ services:
       - public
 
   icons:
-    image: bitwarden/icons:latest
+    image: bitwarden/icons
     container_name: bitwarden-icons
-    restart: always
+    restart: unless-stopped
     volumes:
       - ../ca-certificates:/etc/bitwarden/ca-certificates
       - ../logs/icons:/etc/bitwarden/logs
@@ -131,9 +131,9 @@ services:
       - public
 
   notifications:
-    image: bitwarden/notifications:latest
+    image: bitwarden/notifications
     container_name: bitwarden-notifications
-    restart: always
+    restart: unless-stopped
     volumes:
       - ../ca-certificates:/etc/bitwarden/ca-certificates
       - ../logs/notifications:/etc/bitwarden/logs
@@ -146,9 +146,9 @@ services:
       - public
 
   events:
-    image: bitwarden/events:latest
+    image: bitwarden/events
     container_name: bitwarden-events
-    restart: always
+    restart: unless-stopped
     volumes:
       - ../ca-certificates:/etc/bitwarden/ca-certificates
       - ../logs/events:/etc/bitwarden/logs
@@ -161,9 +161,9 @@ services:
       - public
 
   nginx:
-    image: bitwarden/nginx:latest
+    image: bitwarden/nginx
     container_name: bitwarden-nginx
-    restart: always
+    restart: unless-stopped
     depends_on:
       - web
       - admin
