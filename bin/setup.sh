@@ -111,6 +111,7 @@ install_package curl
 install_package gnupg # To verify git commits
 install_package apache2-utils # for htpasswd command to add users to .htpasswd file
 install_package unzip # Was needed for setting up bitwarden first time
+install_package htop # Better top
 
 # If '/etc/apt/keyrings/docker.gpg' doesn't exist, set it up
 if [[ ! -f /etc/apt/keyrings/docker.gpg ]]; then
@@ -352,6 +353,23 @@ if [[ ! -f /usr/local/bin/ctop ]] || [[ $(cat /usr/local/bin/ctop) != "$CTOP_SHI
   chmod +x /usr/local/bin/ctop
 else
   echo_skip 'ctop shim is already created.'
+fi
+
+# Hadolint script (https://github.com/hadolint/hadolint)
+HADOLINT_SHIM_CONTENT=$(cat <<"EOF"
+#!/bin/sh
+set -e -u
+dockerfile="$1"
+shift
+docker run --rm -i hadolint/hadolint hadolint "$@" - < "$dockerfile"
+EOF
+)
+if [[ ! -f /usr/local/bin/hadolint ]] || [[ $(cat /usr/local/bin/hadolint) != "$HADOLINT_SHIM_CONTENT" ]]; then
+  echo_info 'Creating hadolint shim...'
+  echo "$HADOLINT_SHIM_CONTENT" | tee /usr/local/bin/hadolint >/dev/null
+  chmod +x /usr/local/bin/hadolint
+else
+  echo_skip 'hadolint shim is already created.'
 fi
 
 # Login to Docker Hub
