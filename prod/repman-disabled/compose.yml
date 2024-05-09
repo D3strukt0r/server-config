@@ -14,6 +14,27 @@ services:
       POSTGRES_DB: main
     volumes:
       - postgres-data:/var/lib/postgresql/data
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 50M
+    logging:
+      driver: fluentd
+      options:
+        tag: repman.prod.adminer
+    networks:
+      - default
+      - traefik_proxy
+    labels:
+      traefik.enable: true
+      traefik.http.routers.repman-adminer.entrypoints: websecure
+      traefik.http.routers.repman-adminer.rule: Host(`adminer-repman.d3strukt0r.dev`)
+      traefik.http.routers.repman-adminer.tls: true
+      traefik.http.routers.repman-adminer.tls.certresolver: le
 
   app:
     << : *restart_policy
