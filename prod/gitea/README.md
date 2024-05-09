@@ -31,7 +31,7 @@ and save in env for `GITEA__security__SECRET_KEY` and `GITEA__security__INTERNAL
 Create Admin User
 
 Administrator-Benutzername: `D3strukt0r`
-E-Mail-Adresse: `gitea-contact@d3st.dev`
+E-Mail-Adresse: x
 Passwort: x
 Passwort bestätigen: x
 
