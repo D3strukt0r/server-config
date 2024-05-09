@@ -1,0 +1,29 @@
+services:
+  phpmyadmin:
+    build: .
+    init: true
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 100M
+    networks:
+      - default
+      - traefik_proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    logging:
+      driver: fluentd
+      options:
+        tag: phpmyadmin.prod.phpmyadmin
+    labels:
+      traefik.enable: true
+      traefik.http.routers.phpmyadmin.entrypoints: websecure
+      traefik.http.routers.phpmyadmin.rule: Host(`phpmyadmin.d3strukt0r.dev`)
+      traefik.http.routers.phpmyadmin.tls: true
+      traefik.http.routers.phpmyadmin.tls.certresolver: le
+
+networks:
+  traefik_proxy:
+    external: true

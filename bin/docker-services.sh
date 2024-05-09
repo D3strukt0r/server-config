@@ -31,6 +31,9 @@ DESC="Docker Services"
 # Get lsb functions
 . /lib/lsb/init-functions
 
+# https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash/229585#229585
+stringContain() { case $2 in *$1* ) return 0;; *) return 1;; esac ;}
+
 if [ -f /etc/default/$BASE ]; then
   . /etc/default/$BASE
 fi
@@ -53,24 +56,21 @@ case "$1" in
     # "fluentd" must be started before all projects
     PROJECTS_DIR=$(realpath "$REPO_DIR/prod")
     cd "$PROJECTS_DIR/fluentd"
-    echo "Starting fluentd"
     docker compose up -d >> "$LOGFILE" 2>&1
 
     # start all the other projects
-    PROJECTS=$(ls "$PROJECTS_DIR" | egrep -v '^fluentd$|disabled')
-    for PROJECT in $PROJECTS
-    do
-      cd "$PROJECTS_DIR/$PROJECT"
-      echo "Starting $PROJECT"
+    for PROJECT_DIR in "$PROJECTS_DIR"/*; do
+      PROJECT=$(basename "$PROJECT_DIR")
+      if stringContain 'disabled' "$PROJECT" || [ -f "$PROJECT_DIR/.disabled" ] || stringContain 'fluentd' "$PROJECT"; then continue; fi
+      cd "$PROJECT_DIR"
       docker compose up -d >> "$LOGFILE" 2>&1
     done
 
     PROJECTS_DIR=$(realpath "$REPO_DIR/dev")
-    PROJECTS=$(ls "$PROJECTS_DIR" | egrep -v 'disabled')
-    for PROJECT in $PROJECTS
-    do
-      cd "$PROJECTS_DIR/$PROJECT"
-      echo "Starting $PROJECT"
+    for PROJECT_DIR in "$PROJECTS_DIR"/*; do
+      PROJECT=$(basename "$PROJECT_DIR")
+      if stringContain 'disabled' "$PROJECT" || [ -f "$PROJECT_DIR/.disabled" ]; then continue; fi
+      cd "$PROJECT_DIR"
       docker compose up -d >> "$LOGFILE" 2>&1
     done
 
@@ -81,27 +81,22 @@ case "$1" in
     log_begin_msg "Stopping $DESC: $BASE"
 
     PROJECTS_DIR=$(realpath "$REPO_DIR/dev")
-    PROJECTS=$(ls "$PROJECTS_DIR")
-    for PROJECT in $PROJECTS
-    do
-        cd "$PROJECTS_DIR/$PROJECT"
-        echo "Stopping $PROJECT"
-        docker compose down || true >> "$LOGFILE" 2>&1
+    for PROJECT_DIR in "$PROJECTS_DIR"/*; do
+      cd "$PROJECT_DIR"
+      docker compose down || true >> "$LOGFILE" 2>&1
     done
 
     # stop all projects except "fluentd"
     PROJECTS_DIR=$(realpath "$REPO_DIR/prod")
-    PROJECTS=$(ls "$PROJECTS_DIR" | sed 's/fluentd//')
-    for PROJECT in $PROJECTS
-    do
-        cd "$PROJECTS_DIR/$PROJECT"
-        echo "Stopping $PROJECT"
-        docker compose down || true >> "$LOGFILE" 2>&1
+    for PROJECT_DIR in "$PROJECTS_DIR"/*; do
+      PROJECT=$(basename "$PROJECT_DIR")
+      if stringContain 'fluentd' "$PROJECT"; then continue; fi
+      cd "$PROJECT_DIR"
+      docker compose down || true >> "$LOGFILE" 2>&1
     done
 
     # "fluentd" must be stopped after all projects are shut down
     cd "$PROJECTS_DIR/fluentd"
-    echo "Stopping fluentd"
     docker compose down >> "$LOGFILE" 2>&1
 
     log_end_msg $?
