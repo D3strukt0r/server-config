@@ -32,9 +32,11 @@ chown -R 10001:root storage
 npmrc -c d3strukt0r
 npm config set registry https://verdaccio.d3strukt0r.dev
 
-# Comment out "max_users: -1"
+# Comment out "max_users: -1" for htpasswd auth
+# Set "add_user" to the required sql query for mysql auth
 pnpm adduser
 # Uncomment "max_users: -1"
+# Set "add_user" to "" for mysql auth
 
 pnpm login --auth-type=legacy
 

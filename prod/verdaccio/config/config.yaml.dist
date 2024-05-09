@@ -68,6 +68,8 @@ auth:
       password: "$DB_PASSWORD"
       database: db
     queries:
+      # Declare add_user as an empty string to forbid anyone to create a new user
+      #add_user: ""
       add_user: "INSERT INTO `users`(`username`,`password`) VALUES (?,PASSWORD(?));"
       update_user: "UPDATE `users` SET `password`= PASSWORD(?) WHERE `username`=? AND `password`=PASSWORD(?);"
       auth_user: "SELECT u.`username`, GROUP_CONCAT(g.`name`) AS usergroups FROM `users` u LEFT JOIN `user_group` ug ON ug.`username` = u.`username` LEFT JOIN `groups` g ON ug.`group` = g.`name` WHERE u.`username` = ? AND u.`password` = PASSWORD(?)"
