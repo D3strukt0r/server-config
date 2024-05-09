@@ -108,8 +108,9 @@ install_package jq
 install_package git
 install_package ca-certificates
 install_package curl
-install_package gnupg
+install_package gnupg # To verify git commits
 install_package apache2-utils # for htpasswd command to add users to .htpasswd file
+install_package unzip # Was needed for setting up bitwarden first time
 
 # If '/etc/apt/keyrings/docker.gpg' doesn't exist, set it up
 if [[ ! -f /etc/apt/keyrings/docker.gpg ]]; then
