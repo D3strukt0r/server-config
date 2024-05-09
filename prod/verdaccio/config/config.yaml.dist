@@ -1,16 +1,22 @@
+#
+# This is the default configuration file. As it allows all users to do anything,
+# please read carefully the documentation and best practices to improve security.
+#
 # Do not configure host and port under `listen` in this file
 # as it will be ignored when using docker.
-# see https://github.com/verdaccio/verdaccio/blob/master/wiki/docker.md#docker-and-custom-port-configuration
+# see https://verdaccio.org/docs/en/docker#docker-and-custom-port-configuration
 #
 # Look here for more config file examples:
-# https://github.com/verdaccio/verdaccio/tree/master/docker-examples/v6
-# https://github.com/verdaccio/verdaccio/blob/master/docs/env.variables.md
+# https://github.com/verdaccio/verdaccio/blob/master/packages/config/src/conf/docker.yaml
+#
+# Read about the best practices
+# https://verdaccio.org/docs/best
 
 # https://verdaccio.org/docs/configuration#storage
 # path to a directory with all packages
 # "./storage" will go to "/verdaccio/conf/storage"
 # Setting this is mandatory, even when using minio, otherwise verdaccio won't boot
-storage: /verdaccio/storage
+storage: /verdaccio/storage/data
 
 # https://github.com/barolab/verdaccio-minio
 #store:
@@ -35,35 +41,37 @@ storage: /verdaccio/storage
 #    delay: 50
 
 # https://verdaccio.org/docs/configuration#plugins
+# path to a directory with plugins to include, the plugins folder has the higher priority for loading plugins
+# disable this folder to avoid warnings if is not used
 #plugins: /verdaccio/plugins
 
 # https://verdaccio.org/docs/configuration#authentication
 auth:
-  htpasswd:
-    #file: /verdaccio/conf/htpasswd
-    file: ./htpasswd
-    # Maximum amount of users allowed to register, defaults to "+inf".
-    # You can set this to -1 to disable registration.
-    max_users: -1
-    # Hash algorithm, possible options are: "bcrypt", "md5", "sha1", "crypt".
-    algorithm: bcrypt
-    # Rounds number for "bcrypt", will be ignored for other algorithms.
-    rounds: 10
+  #htpasswd:
+  #  #file: /verdaccio/conf/htpasswd
+  #  file: ./htpasswd
+  #  # Maximum amount of users allowed to register, defaults to "+inf".
+  #  # You can set this to -1 to disable registration.
+  #  max_users: -1
+  #  # Hash algorithm, possible options are: "bcrypt", "md5", "sha1", "crypt".
+  #  algorithm: bcrypt
+  #  # Rounds number for "bcrypt", will be ignored for other algorithms.
+  #  rounds: 10
   # https://github.com/bchanudet/verdaccio-mysql
   # https://github.com/bchanudet/verdaccio-mysql/blob/master/example/mysql-config.yaml
   # https://github.com/bchanudet/verdaccio-mysql/blob/master/example/mysql-database.sql
-  #mysql:
-  #  connection:
-  #    host: db
-  #    port: 3306
-  #    user: "YOUR_MYSQL_USER"
-  #    password: "YOUR_MYSQL_PASSWORD"
-  #    database: db
-  #  queries:
-  #    add_user: "INSERT INTO `users`(`username`,`password`) VALUES (?,PASSWORD(?));"
-  #    update_user: "UPDATE `users` SET `password`= PASSWORD(?) WHERE `username`=? AND `password`=PASSWORD(?);"
-  #    auth_user: "SELECT u.`username`, GROUP_CONCAT(g.`name`) AS usergroups FROM `users` u LEFT JOIN `user_group` ug ON ug.`username` = u.`username` LEFT JOIN `groups` g ON ug.`group` = g.`name` WHERE u.`username` = ? AND u.`password` = PASSWORD(?)"
-  ## https://github.com/youreadforme/verdaccio-gitea-auth
+  mysql:
+    connection:
+      host: db
+      port: 3306
+      user: db
+      password: "$DB_PASSWORD"
+      database: db
+    queries:
+      add_user: "INSERT INTO `users`(`username`,`password`) VALUES (?,PASSWORD(?));"
+      update_user: "UPDATE `users` SET `password`= PASSWORD(?) WHERE `username`=? AND `password`=PASSWORD(?);"
+      auth_user: "SELECT u.`username`, GROUP_CONCAT(g.`name`) AS usergroups FROM `users` u LEFT JOIN `user_group` ug ON ug.`username` = u.`username` LEFT JOIN `groups` g ON ug.`group` = g.`name` WHERE u.`username` = ? AND u.`password` = PASSWORD(?)"
+  # https://github.com/youreadforme/verdaccio-gitea-auth
   #gitea-auth:
   #  url: https://gitea.d3strukt0r.dev
   #  defaultOrg: gitea
@@ -86,17 +94,21 @@ security:
 # defaults are fine
 
 # https://verdaccio.org/docs/configuration#uplinks
-# a list of other known repositories we can talk to
+# A list of other known repositories we can talk to
 uplinks:
   npmjs:
     url: https://registry.npmjs.org/
 
+# Learn how to protect your packages
+# https://verdaccio.org/docs/protect-your-dependencies/
 # https://verdaccio.org/docs/configuration#packages
 # https://verdaccio.org/docs/best#strong-package-access-with-authenticated
 packages:
   '@*/*':
+    # scoped packages
     access: $authenticated
     publish: $authenticated
+    #unpublish: $authenticated
     proxy: npmjs
 
   '**':
@@ -104,8 +116,18 @@ packages:
     # and three keywords: "$all", "$anonymous", "$authenticated"
     access: $authenticated
     publish: $authenticated
+    #unpublish: $authenticated
     # if package is not available locally, proxy requests to 'npmjs' registry
     proxy: npmjs
+
+# https://verdaccio.org/docs/configuration#server
+# You can specify the HTTP/1.1 server keep alive timeout in seconds for incoming connections.
+# A value of 0 makes the http server behave similarly to Node.js versions prior to 8.0.0, which did not have a
+# keep-alive timeout.
+# WORKAROUND: Through given configuration you can work around the following issue:
+# https://github.com/verdaccio/verdaccio/issues/301. Set to 0 in case 60 is not enough.
+server:
+  keepAliveTimeout: 60
 
 # https://verdaccio.org/docs/configuration#max-body-size
 # Cloudflare supports up to 100mb for free

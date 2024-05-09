@@ -3,8 +3,6 @@
 
 FROM verdaccio/verdaccio:5
 
-#ADD docker.yaml /verdaccio/conf/config.yaml
-
 # Install the plugins
 # https://github.com/bchanudet/verdaccio-mysql
 # https://github.com/barolab/verdaccio-minio
@@ -16,4 +14,7 @@ RUN npm install --global \
         verdaccio-minio \
         verdaccio-gitea-auth \
         verdaccio-npm-urls
+
+RUN apk add --no-cache bash
+
 USER $VERDACCIO_USER_UID

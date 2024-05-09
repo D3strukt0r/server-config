@@ -12,9 +12,9 @@ services:
     networks:
       - default
       - traefik_proxy
-    #depends_on:
+    depends_on:
     #  - minio
-    #  - db
+      - db
     logging:
       driver: fluentd
       options:
@@ -22,39 +22,76 @@ services:
     volumes:
       - './config:/verdaccio/conf'
       - './storage:/verdaccio/storage'
+    #environment:
+    #  DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db # TODO: Not supported yet
     labels:
       traefik.enable: true
-      traefik.http.routers.glitchtip.entrypoints: websecure
-      traefik.http.routers.glitchtip.rule: Host(`verdaccio.d3strukt0r.dev`)
-      traefik.http.routers.glitchtip.tls: true
-      traefik.http.routers.glitchtip.tls.certresolver: le
+      traefik.http.routers.verdaccio.entrypoints: websecure
+      traefik.http.routers.verdaccio.rule: Host(`verdaccio.d3strukt0r.dev`)
+      traefik.http.routers.verdaccio.tls: true
+      traefik.http.routers.verdaccio.tls.certresolver: le
 
-  #db:
-  #  image: mariadb:11
-  #  init: true
-  #  command:
-  #    - --character-set-server=utf8mb4
-  #    - --collation-server=utf8mb4_unicode_ci
-  #  healthcheck:
-  #    test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD}"]
-  #  restart: unless-stopped
-  #  deploy:
-  #    resources:
-  #      limits:
-  #        cpus: '0.5'
-  #        memory: 200M
-  #  volumes:
-  #    - ./database:/var/lib/mysql
-  #    - ./database-init:/docker-entrypoint-initdb.d
-  #  environment:
-  #    MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-  #    # Create "db" user with password ${DB_PASSWORD} if it doesn't exist
-  #    MARIADB_USER: db
-  #    MARIADB_PASSWORD: ${DB_PASSWORD}
-  #    # Create database "db" if it doesn't exist
-  #    MARIADB_DATABASE: db
-  #  networks:
-  #    - default
+  db:
+    image: mariadb:11
+    init: true
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD}"]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 200M
+    volumes:
+      - ./database:/var/lib/mysql
+      - ./database-init:/docker-entrypoint-initdb.d
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      # Create "db" user with password ${DB_PASSWORD} if it doesn't exist
+      MARIADB_USER: db
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      # Create database "db" if it doesn't exist
+      MARIADB_DATABASE: db
+    networks:
+      - default
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    init: true
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 100M
+    environment:
+      # Default user to be logged in
+      #PMA_USER: db
+      #PMA_PASSWORD: ${DB_PASSWORD}
+      # PhpMyAdmin User to manage PMA db
+      PMA_PMADB: phpmyadmin
+      PMA_CONTROLUSER: pma
+      PMA_CONTROLPASS: ${DB_PMA_PASSWORD}
+      # Other settings
+      UPLOAD_LIMIT: 100M
+    networks:
+      - default
+      - traefik_proxy
+    depends_on:
+      - db
+    logging:
+      driver: fluentd
+      options:
+        tag: verdaccio.prod.phpmyadmin
+    labels:
+      traefik.enable: true
+      traefik.http.routers.verdaccio-phpmyadmin.entrypoints: websecure
+      traefik.http.routers.verdaccio-phpmyadmin.rule: Host(`phpmyadmin-verdaccio.d3strukt0r.dev`)
+      traefik.http.routers.verdaccio-phpmyadmin.tls: true
+      traefik.http.routers.verdaccio-phpmyadmin.tls.certresolver: le
 
   # https://github.com/barolab/verdaccio-minio
   #minio:
