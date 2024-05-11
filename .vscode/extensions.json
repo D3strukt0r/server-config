@@ -1,0 +1,16 @@
+{
+    "recommendations": [
+        "github.copilot",
+        "mads-hartmann.bash-ide-vscode",
+        "ms-azuretools.vscode-docker",
+        "editorconfig.editorconfig",
+        "eamodio.gitlens",
+        "github.copilot-chat",
+        "exiasr.hadolint",
+        "meronz.manpages",
+        "tetradresearch.vscode-h2o",
+        "foxundermoon.shell-format",
+        "timonwong.shellcheck",
+        "redhat.vscode-yaml"
+    ]
+}
