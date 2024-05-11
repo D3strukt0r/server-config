@@ -2,6 +2,7 @@ services:
   phpmyadmin:
     build: .
     init: true
+    # https://github.com/phpmyadmin/docker/blob/2335c3151b93ea6a4cf8779c4c90cb21572b6c50/Dockerfile-debian.template#L146
     command: >
       bash -c 'sed -i "71i echo \"Test\";" /etc/phpmyadmin/config.inc.php
       && apache2-foreground'
