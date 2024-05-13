@@ -92,16 +92,13 @@ else
     SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 fi
 
-echo $SCRIPT_DIR
-exit 0
-
 # Do a full system update (unless --skip-update is given)
-if [[ -z ${SKIP_UPDATE+x} ]]; then
-  echo_info 'Doing a full system update...'
-  apt-get update
-  apt-get dist-upgrade --yes
+if [[ "$SKIP_UPDATE" == 'false' ]]; then
+    echo_info 'Doing a full system update...'
+    apt-get update
+    apt-get dist-upgrade --yes
 else
-  echo_skip 'Skipping system update.'
+    echo_skip 'Skipping system update.'
 fi
 
 # Install utilies (in a loop, check if they are installed first (using "dpkg-query -W -f='${Status} ${Version}\n' <package>"), and then install)
