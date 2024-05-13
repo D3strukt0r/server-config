@@ -10,15 +10,7 @@ set -e -u -o pipefail
 # Default values
 : "${SKIP_UPDATE:=false}"
 : "${VOLUME_DIR:=/mnt/volume_fra1_01}"
-: "${SWAP_SIZE:=4G}"
-
-# TODO: Improve changing swap size
-# Read manual https://linuxhandbook.com/increase-swap-ubuntu/
-# swapoff /swapfile
-# fallocate -l 4G /swapfile
-# mkswap /swapfile
-# swapon /swapfile
-# free -h
+: "${SWAP_SIZE:=1G}"
 
 # Custom echo function to output '*blue*[INFO]*reset* message'
 function echo_info() {
@@ -92,6 +84,26 @@ else
     SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 fi
 
+# Helper functions to reduce code duplication
+function install_package() {
+    if ! dpkg-query -W -f='${Status} ${Version}\n' "$1" &> /dev/null; then
+        echo_info "Installing $1..."
+        apt-get install --yes "$1"
+    else
+        echo_skip "$1 is already installed."
+    fi
+}
+function ensure_in_group() {
+    if [[ $(groups $1 | grep $2) == '' ]]; then
+        echo_info "Adding $1 to $2 group..."
+        usermod --append --groups $2 $1
+    else
+        echo_skip "$1 is already in $2 group."
+    fi
+}
+
+### BEGIN SETUP ###
+
 # Do a full system update (unless --skip-update is given)
 if [[ "$SKIP_UPDATE" == 'false' ]]; then
     echo_info 'Doing a full system update...'
@@ -102,34 +114,32 @@ else
 fi
 
 # Install utilies (in a loop, check if they are installed first (using "dpkg-query -W -f='${Status} ${Version}\n' <package>"), and then install)
-# - ncdu: Manage disk usage
 # - bmon, tcptrack, net-tools: Network monitoring
 #     https://askubuntu.com/questions/257263/how-to-display-network-traffic-in-the-terminal
-# - jq: JSON parser
-# - git: Version control
-# - ca-certificates, curl, gnupg: Dependencies for docker
-# - docker: Container runtime
-function install_package() {
-  if ! dpkg-query -W -f='${Status} ${Version}\n' "$1" &> /dev/null; then
-    echo_info "Installing $1..."
-    apt-get install --yes "$1"
-  else
-    echo_skip "$1 is already installed."
-  fi
-}
-
-install_package ncdu
+install_package ncdu # Manage disk usage
 install_package bmon
 install_package tcptrack
 install_package net-tools
-install_package jq
-install_package git
-install_package ca-certificates
-install_package curl
-install_package gnupg # To verify git commits
+install_package jq # JSON parser
+install_package git # Version control
+install_package ca-certificates # Dependency for docker
+install_package curl # Dependency for docker
+install_package gnupg # To verify git commits, Dependency for docker
 install_package apache2-utils # for htpasswd command to add users to .htpasswd file
 install_package unzip # Was needed for setting up bitwarden first time
 install_package htop # Better top
+
+# Clone from GitHub (D3strukt0r/server-config) to $VOLUME_DIR/server
+if [[ -f ~/.ssh/id_ed25519 ]] && [[ -f ~/.ssh/id_ed25519.pub ]]; then
+    if [[ ! -d "$VOLUME_DIR/server" ]]; then
+        echo_info 'Cloning server-config...'
+        git clone git@github.com:D3strukt0r/server-config.git "$VOLUME_DIR/server"
+    else
+        echo_skip 'server-config is already cloned.'
+    fi
+else
+    echo_info 'SSH key is not set up, skipping cloning server-config.'
+fi
 
 # If '/etc/apt/keyrings/docker.gpg' doesn't exist, set it up
 if [[ ! -f /etc/apt/keyrings/docker.gpg ]]; then
@@ -151,7 +161,7 @@ if [[ ! -f /etc/apt/sources.list.d/docker.list ]]; then
 else
   echo_skip 'Docker sources are already set up.'
 fi
-install_package docker-ce
+install_package docker-ce # Container runtime
 install_package docker-ce-cli
 install_package containerd.io
 install_package docker-buildx-plugin
@@ -222,16 +232,25 @@ else
   echo_skip 'Swap file is already set up.'
 fi
 
-# TODO: Check if swapsize doesn't match and update
-#if [[ $(free --human --giga | grep Swap | awk '{print $2}') != "$SWAP_SIZE" ]]; then
-#  echo_info 'Updating swap file size...'
-#  swapoff /swapfile
-#  fallocate -l "$SWAP_SIZE" /swapfile
-#  mkswap /swapfile
-#  swapon /swapfile
-#else
-#  echo_skip 'Swap file size is already correct.'
-#fi
+# Check if swapsize doesn't match and update
+# Read manual https://linuxhandbook.com/increase-swap-ubuntu/
+# Issue: fallocate uses G while free prints X.0Gi
+_target_swap_size=$(echo "$SWAP_SIZE" | grep -o '[0-9.]\+')
+_target_swap_size=$(bc -l <<< "scale=1; ${_target_swap_size} * 1.0")
+_current_swap_size=$(free --human --gibi | grep Swap | awk '{print $2}' | grep -o '[0-9.]\+')
+_current_swap_size=$(bc -l <<< "scale=1; ${_current_swap_size} * 1.0")
+if [[ "$_current_swap_size" != "$_target_swap_size" ]]; then
+    echo_info 'Updating swap file size...'
+    swapoff /swapfile
+    rm /swapfile # Decreasing swap requires deleting the file
+    fallocate --length "$SWAP_SIZE" /swapfile
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    # Check with `free -h`
+else
+    echo_skip 'Swap file size is already correct.'
+fi
 
 # Check swapiness, and recude value to only use it when absolutely necessary
 if [[ $(cat /proc/sys/vm/swappiness) != '10' ]]; then
@@ -302,18 +321,6 @@ if [[ $(gpg --list-secret-keys | grep 'sec') != '' ]]; then
   fi
 else
   echo_info 'GPG key is not imported, skipping git commit.gpgsign and git user.signingkey.'
-fi
-
-# Clone from GitHub (D3strukt0r/server-config) to $VOLUME_DIR/server
-if [[ -f ~/.ssh/id_ed25519 ]] && [[ -f ~/.ssh/id_ed25519.pub ]]; then
-  if [[ ! -d "$VOLUME_DIR/server" ]]; then
-    echo_info 'Cloning server-config...'
-    git clone git@github.com:D3strukt0r/server-config.git "$VOLUME_DIR/server"
-  else
-    echo_skip 'server-config is already cloned.'
-  fi
-else
-  echo_info 'SSH key is not set up, skipping cloning server-config.'
 fi
 
 # Link ../backup to $VOLUME_DIR/backup
@@ -441,15 +448,6 @@ if [[ ! -f /etc/default/docker-services ]] || [[ $(cat /etc/default/docker-servi
 else
   echo_skip 'docker-services defaults are already set up.'
 fi
-
-function ensure_in_group() {
-  if [[ $(groups $1 | grep $2) == '' ]]; then
-    echo_info "Adding $1 to $2 group..."
-    usermod --append --groups $2 $1
-  else
-    echo_skip "$1 is already in $2 group."
-  fi
-}
 
 # Create a new personal user
 if [[ $(id -u d3strukt0r 2>/dev/null) == '' ]]; then
