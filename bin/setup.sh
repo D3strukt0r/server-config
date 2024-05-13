@@ -74,14 +74,14 @@ set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
 # Check BASH_SOURCE as it might be wrong when using curl or wget
 if [[ -z ${BASH_SOURCE+x} ]] || [[ $BASH_SOURCE == /dev/fd/* ]]; then
-    # wget -q -O - <url>/setup.sh | bash -s - <parameters>
-    # wget -q -O - <url>/setup.sh | ENV=VALUE bash
-    # curl -s <url>/setup.sh | bash -s - <parameters>
+    # wget -q -O - <url>.sh | bash -s - <parameters>
+    # wget -q -O - <url>.sh | ENV=VALUE bash
+    # curl -s <url>.sh | bash -s - <parameters>
     # will result in: BASH_SOURCE: unbound variable
-    # bash <(curl -s <url>/setup.sh)
+    # bash <(curl -s <url>.sh)
     # will result in: BASH_SOURCE = /dev/fd/<number>
 
-    if [[ -z "$SCRIPT_DIR" ]]; then
+    if [[ -z "$VOLUME_DIR" ]]; then
         echo_info "We cant figure out where to save the repository. Please provide the directory with -d or --dir"
         exit 1
     else

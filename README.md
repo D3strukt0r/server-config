@@ -28,7 +28,17 @@ gpg --export-secret-keys --export-options export-backup --armor --output private
 * Download and run script from GitHub (repo: D3strukt0r/server-config, branch: master, path: bin/setup.sh)
 
 ```shell
-wget -O - https://raw.githubusercontent.com/D3strukt0r/server-config/master/bin/setup.sh | bash
+wget -q -O - https://raw.githubusercontent.com/D3strukt0r/server-config/master/bin/setup.sh | bash
+
+# How to pass parameters
+wget -q -O - https://raw.githubusercontent.com/D3strukt0r/server-config/master/bin/setup.sh | bash -s - <parameters>
+wget -q -O - https://raw.githubusercontent.com/D3strukt0r/server-config/master/bin/setup.sh | ENV=VALUE bash
+
+# Using curl
+curl -s https://raw.githubusercontent.com/D3strukt0r/server-config/master/bin/setup.sh | bash
+curl -s https://raw.githubusercontent.com/D3strukt0r/server-config/master/bin/setup.sh | bash -s - <parameters>
+curl -s https://raw.githubusercontent.com/D3strukt0r/server-config/master/bin/setup.sh | ENV=VALUE bash
+bash <(curl -s https://raw.githubusercontent.com/D3strukt0r/server-config/master/bin/setup.sh)
 ```
 
 * Enter Git info:
