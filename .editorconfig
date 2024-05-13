@@ -24,6 +24,11 @@ trim_trailing_whitespace = false
 # Trailing whitespace means manual linebreaks in Markdown thus is not trimmable
 trim_trailing_whitespace = false
 
+[*.sh]
+indent_size = 4
+tab_width = 4
+ij_continuation_indent_size = 4
+
 [*.html]
 indent_size = 4
 tab_width = 4

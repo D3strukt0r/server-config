@@ -1,17 +1,17 @@
 #!/bin/bash
 set -e -u -o pipefail
 
-# Script dir (https://stackoverflow.com/a/246128/4156752)
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
 # For Copilot:
 # - Use bash brackets [[ ]]
 # - Use $(command) instead of `command`
 # - Never use 'apt', use alternatives like 'apt-get' or 'aptitude'
 # - When possible use '' instead of ""
 
+# Default values
+: "${SKIP_UPDATE:=false}"
 : "${VOLUME_DIR:=/mnt/volume_fra1_01}"
 : "${SWAP_SIZE:=4G}"
+
 # TODO: Improve changing swap size
 # Read manual https://linuxhandbook.com/increase-swap-ubuntu/
 # swapoff /swapfile
@@ -22,57 +22,78 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # Custom echo function to output '*blue*[INFO]*reset* message'
 function echo_info() {
-  echo -e "\e[34m[INFO]\e[0m $1"
+    echo -e "\e[34m[INFO]\e[0m $1"
 }
 # Custom echo function to output '*yellow*[SKIP]*reset* message'
 function echo_skip() {
-  echo -e "\e[33m[SKIP]\e[0m $1"
+     echo -e "\e[33m[SKIP]\e[0m $1"
 }
 
 # Check with /etc/os-release if the OS is using a Debian based system
 if [[ -f /etc/os-release ]]; then
-  . /etc/os-release
-  if [ "$ID" != 'debian' ] && [ "$ID" != 'ubuntu' ]; then
-    echo_info "This script is only tested on Debian and Ubuntu. Your OS is $ID, which is not supported."
-    exit 1
-  fi
+    . /etc/os-release
+    if [[ "$ID" != 'debian' ]] && [[ "$ID" != 'ubuntu' ]]; then
+        echo_info "This script is only tested on Debian and Ubuntu. Your OS is $ID, which is not supported."
+        exit 1
+    fi
 else
-  echo_info 'This script is only tested on Debian, Ubuntu. Your OS is not supported.'
-  exit 1
+    echo_info 'This script is only tested on Debian, Ubuntu. Your OS is not supported.'
+    exit 1
 fi
 
 # Check if this script is run as root
 if [[ $EUID -ne 0 ]]; then
-  echo_info 'This script must be run as root.'
-  exit 1
+    echo_info 'This script must be run as root.'
+    exit 1
 fi
 
 # https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
 POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]; do
-  case $1 in
-    #-p|--with-parameter)
-    #  MY_VARIABLE="$2"
-    #  shift # past argument
-    #  shift # past value
-    #  ;;
-    -l|--skip-update)
-      SKIP_UPDATE=true
-      shift # past argument
-      ;;
-    -*|--*)
-      echo "Unknown option $1"
-      exit 1
-      ;;
-    *)
-      POSITIONAL_ARGS+=("$1") # save positional arg
-      shift # past argument
-      ;;
-  esac
+    case $1 in
+        -d|--dir)
+            VOLUME_DIR="$2"
+            shift # past argument
+            shift # past value
+        ;;
+        -l|--skip-update)
+            SKIP_UPDATE=true
+            shift # past argument
+            ;;
+        -*|--*)
+            echo "Unknown option $1"
+            exit 1
+            ;;
+        *)
+            POSITIONAL_ARGS+=("$1") # save positional arg
+            shift # past argument
+            ;;
+    esac
 done
-
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
+# Check BASH_SOURCE as it might be wrong when using curl or wget
+if [[ -z ${BASH_SOURCE+x} ]] || [[ $BASH_SOURCE == /dev/fd/* ]]; then
+    # wget -q -O - <url>/setup.sh | bash -s - <parameters>
+    # wget -q -O - <url>/setup.sh | ENV=VALUE bash
+    # curl -s <url>/setup.sh | bash -s - <parameters>
+    # will result in: BASH_SOURCE: unbound variable
+    # bash <(curl -s <url>/setup.sh)
+    # will result in: BASH_SOURCE = /dev/fd/<number>
+
+    if [[ -z "$SCRIPT_DIR" ]]; then
+        echo_info "We cant figure out where to save the repository. Please provide the directory with -d or --dir"
+        exit 1
+    else
+        SCRIPT_DIR=$VOLUME_DIR/server/bin
+    fi
+else
+    # Script dir (https://stackoverflow.com/a/246128/4156752)
+    SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+fi
+
+echo $SCRIPT_DIR
+exit 0
 
 # Do a full system update (unless --skip-update is given)
 if [[ -z ${SKIP_UPDATE+x} ]]; then
