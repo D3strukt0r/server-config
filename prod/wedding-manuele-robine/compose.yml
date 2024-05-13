@@ -11,6 +11,7 @@ services:
     environment:
       API_URL: http://api
       VITE_PUBLIC_API_URL: https://api-wedding-manuele-robine.d3strukt0r.dev
+      VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:?VITE_GOOGLE_MAPS_API_KEY not set}
     networks:
       - default
       - traefik_proxy
