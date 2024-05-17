@@ -30,6 +30,8 @@ services:
       - --ping=true
       # Enable Access log
       - --accesslog=true
+      # Enable Metrics
+      - --metrics.prometheus=true
     deploy:
       resources:
         limits:

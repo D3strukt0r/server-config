@@ -3,6 +3,14 @@ services:
     volumes:
       - ./prometheus-config:/etc/prometheus/
       - ./prometheus:/prometheus/
+    labels:
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.middlewares=${COMPOSE_PROJECT_NAME}_prometheus_auth
+      # Declaring the user list
+      #
+      # Note: all dollar signs in the hash need to be doubled for escaping.
+      # To create user:password pair, it's possible to use this command:
+      # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}_prometheus_auth.basicauth.users=${PROMETHEUS_USERS:?PROMETHEUS_USERS not set}
   grafana:
     environment:
       GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
