@@ -1,13 +1,22 @@
+include:
+  - path: ../../common/mariadb.compose.yml
+    env_file: .mariadb.env
+  - path: ../../common/phpmyadmin.compose.yml
+    env_file: .phpmyadmin.env
+
 services:
   pwa:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: d3strukt0r/wedding-manager:pwa-develop
-    init: true
-    restart: unless-stopped
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 160M
+    healthcheck:
+      test: curl --fail http://localhost || exit 1
+      start_period: 20s
     environment:
       API_URL: http://api
       VITE_PUBLIC_API_URL: https://api-wedding-manuele-robine.d3strukt0r.dev
@@ -20,112 +29,56 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: wedding-manuele-robine.prod.pwa
+        tag: ${COMPOSE_PROJECT_NAME}.prod.pwa
     labels:
-      traefik.enable: true
-      traefik.http.routers.wedding-manuele-robine-prod.entrypoints: websecure
-      traefik.http.routers.wedding-manuele-robine-prod.rule: Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`eleunam-enibor.wedding`) || Host(`www.eleunam-enibor.wedding`) || Host(`wedding-manuele-robine.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manuele-robine-prod.tls: true
-      traefik.http.routers.wedding-manuele-robine-prod.tls.certresolver: le
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pwa.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pwa.rule=Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`eleunam-enibor.wedding`) || Host(`www.eleunam-enibor.wedding`) || Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pwa.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pwa.tls.certresolver=le
 
   api:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: d3strukt0r/wedding-manager:api-develop
-    init: true
-    restart: unless-stopped
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 300M
+    healthcheck:
+      # TODO: Find out why `php-fpm-healthcheck` doesn't work
+      #test: php-fpm-healthcheck && curl --fail http://localhost/ping || exit 1
+      test: curl --fail http://localhost/ping || exit 1
+      start_period: 30s
     volumes:
       - ./sessions:/var/cache/sessions
       - ./jwt:/usr/local/src/app/config/jwt:ro
     environment:
       APP_SECRET: ${APP_SECRET:?APP_SECRET not set}
       DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
-      APP_URL: https://api.manuele-robine.wedding
+      APP_URL: https://${COMPOSE_PROJECT_NAME}.d3strukt0r.dev
       TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       CLEAR_SESSIONS_IN: /var/cache/sessions/prod
-      CORS_ALLOW_ORIGIN: ^https?://(wedding-manuele-robine\.d3strukt0r\.dev|(?:www\.)?manuele-robine\.wedding|localhost|127\.0\.0\.1)(:[0-9]+)?$
+      CORS_ALLOW_ORIGIN: ^https?://(wedding-manuele-robine\.d3strukt0r\.dev|(?:www\.)?manuele-robine\.wedding|(?:www\.)?eleunam-enibor\.wedding|localhost|127\.0\.0\.1)(:[0-9]+)?$
       JWT_PASSPHRASE: ${JWT_PASSPHRASE:?JWT_PASSPHRASE not set}
     networks:
       - default
       - traefik_proxy
     depends_on:
-      - db
+      - mariadb
+    links:
+      - mariadb:db
     logging:
       driver: fluentd
       options:
-        tag: wedding-manuele-robine.prod.api
+        tag: ${COMPOSE_PROJECT_NAME}.prod.api
     labels:
-      traefik.enable: true
-      traefik.http.routers.wedding-manuele-robine-api-prod.entrypoints: websecure
-      traefik.http.routers.wedding-manuele-robine-api-prod.rule: Host(`api-wedding-manuele-robine.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manuele-robine-api-prod.tls: true
-      traefik.http.routers.wedding-manuele-robine-api-prod.tls.certresolver: le
-
-  db:
-    image: mariadb:11
-    init: true
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD:?DB_PASSWORD not set}"]
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 200M
-    volumes:
-      - ./database:/var/lib/mysql
-    environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD not set}
-      # Create "db" user with password ${DB_PASSWORD} if it doesn't exist
-      MARIADB_USER: db
-      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD not set}
-      # Create database "db" if it doesn't exist
-      MARIADB_DATABASE: db
-    logging:
-      driver: fluentd
-      options:
-        tag: wedding-manuele-robine.prod.mariadb
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    init: true
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 100M
-    environment:
-      # Default user to be logged in
-      #PMA_USER: db
-      #PMA_PASSWORD: ${DB_PASSWORD}
-      # PhpMyAdmin User to manage PMA db
-      PMA_PMADB: phpmyadmin
-      PMA_CONTROLUSER: pma
-      PMA_CONTROLPASS: ${DB_PMA_PASSWORD:?DB_PMA_PASSWORD not set}
-      # Other settings
-      UPLOAD_LIMIT: 100M
-    networks:
-      - default
-      - traefik_proxy
-    depends_on:
-      - db
-    logging:
-      driver: fluentd
-      options:
-        tag: wedding-manuele-robine.prod.phpmyadmin
-    labels:
-      traefik.enable: true
-      traefik.http.routers.wedding-manuele-robine-phpmyadmin.entrypoints: websecure
-      traefik.http.routers.wedding-manuele-robine-phpmyadmin.rule: Host(`phpmyadmin-wedding-manuele-robine.d3strukt0r.dev`)
-      traefik.http.routers.wedding-manuele-robine-phpmyadmin.tls: true
-      traefik.http.routers.wedding-manuele-robine-phpmyadmin.tls.certresolver: le
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.rule=Host(`api-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.tls.certresolver=le
 
 networks:
   traefik_proxy:
