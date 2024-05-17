@@ -15,6 +15,8 @@ Then create tables from UI (In container /var/www/html/sql/create_tables.sql)
 
 ## Setup
 
+Go to minio dashboard and add a bucket called `default`
+
 To add user to htpasswd run
 
 ```shell

@@ -1,110 +1,53 @@
+include:
+  - path: ../../common/mariadb.compose.yml
+    env_file: .mariadb.env
+  - path: ../../common/phpmyadmin.compose.yml
+    env_file: .phpmyadmin.env
+  # https://github.com/barolab/verdaccio-minio
+  - path: ../../common/minio.compose.yml
+    env_file: .minio.env
+
 services:
   verdaccio:
-    #image: verdaccio/verdaccio:5
-    build: .
-    init: true
-    restart: unless-stopped
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
+    build:
+      context: .
+      args:
+        VERDACCIO_VERSION: 5
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 140M
+    #environment:
+    #  S3_BUCKET: default3
+    #  S3_ENDPOINT: http://${S3_SERVICE:-minio}:9000
+    #  S3_ACCESS_KEY_ID: minio
+    #  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?S3_SECRET_ACCESS_KEY not set}
     networks:
       - default
       - traefik_proxy
     depends_on:
-    #  - minio
-      - db
+      - minio
+      - mariadb
+    links:
+      - mariadb:db
     logging:
       driver: fluentd
       options:
-        tag: verdaccio.verdaccio
+        tag: ${COMPOSE_PROJECT_NAME}.prod.verdaccio
     volumes:
       - './config:/verdaccio/conf'
       - './storage:/verdaccio/storage'
     #environment:
     #  DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db # TODO: Not supported yet
     labels:
-      traefik.enable: true
-      traefik.http.routers.verdaccio.entrypoints: websecure
-      traefik.http.routers.verdaccio.rule: Host(`verdaccio.d3strukt0r.dev`)
-      traefik.http.routers.verdaccio.tls: true
-      traefik.http.routers.verdaccio.tls.certresolver: le
-
-  db:
-    image: mariadb:11
-    init: true
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD}"]
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 200M
-    volumes:
-      - ./database:/var/lib/mysql
-      - ./database-init:/docker-entrypoint-initdb.d
-    environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      # Create "db" user with password ${DB_PASSWORD} if it doesn't exist
-      MARIADB_USER: db
-      MARIADB_PASSWORD: ${DB_PASSWORD}
-      # Create database "db" if it doesn't exist
-      MARIADB_DATABASE: db
-    networks:
-      - default
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    init: true
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 100M
-    environment:
-      # Default user to be logged in
-      #PMA_USER: db
-      #PMA_PASSWORD: ${DB_PASSWORD}
-      # PhpMyAdmin User to manage PMA db
-      PMA_PMADB: phpmyadmin
-      PMA_CONTROLUSER: pma
-      PMA_CONTROLPASS: ${DB_PMA_PASSWORD}
-      # Other settings
-      UPLOAD_LIMIT: 100M
-    networks:
-      - default
-      - traefik_proxy
-    depends_on:
-      - db
-    logging:
-      driver: fluentd
-      options:
-        tag: verdaccio.prod.phpmyadmin
-    labels:
-      traefik.enable: true
-      traefik.http.routers.verdaccio-phpmyadmin.entrypoints: websecure
-      traefik.http.routers.verdaccio-phpmyadmin.rule: Host(`phpmyadmin-verdaccio.d3strukt0r.dev`)
-      traefik.http.routers.verdaccio-phpmyadmin.tls: true
-      traefik.http.routers.verdaccio-phpmyadmin.tls.certresolver: le
-
-  # https://github.com/barolab/verdaccio-minio
-  #minio:
-  #  image: minio/minio:RELEASE.2020-02-07T23-28-16Z
-  #  init: true
-  #  command: server /data
-  #  volumes:
-  #    - minio:/data
-  #  ports:
-  #    - 9000:9000
-  #  environment:
-  #    MINIO_ACCESS_KEY: this-is-not-so-secret
-  #    MINIO_SECRET_KEY: this-is-not-so-secret
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
 
 networks:
   traefik_proxy:

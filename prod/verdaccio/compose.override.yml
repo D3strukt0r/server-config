@@ -1,0 +1,8 @@
+services:
+  mariadb:
+    volumes:
+      - ./database:/var/lib/mysql
+      - ./database-init:/docker-entrypoint-initdb.d
+  minio:
+    volumes:
+      - ./minio:/data

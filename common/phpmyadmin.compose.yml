@@ -1,0 +1,49 @@
+services:
+  phpmyadmin:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: phpmyadmin/phpmyadmin:${VERSION:-latest}
+    healthcheck:
+      test: curl --fail http://localhost || exit 1
+      #test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
+      interval: 60s
+      timeout: 3s
+      # Be healthy during startup as fast as possible
+      start_period: 10s
+      start_interval: 1s
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-100M}
+    environment:
+      # Default user to be logged in
+      #PMA_USER: db
+      #PMA_PASSWORD: ${DB_PASSWORD}
+      # PhpMyAdmin User to manage PMA db
+      PMA_PMADB: ${PMA_DATABASE:-phpmyadmin}
+      PMA_CONTROLUSER: ${PMA_USER:-pma}
+      PMA_CONTROLPASS: ${PMA_PASSWORD:?PMA_PASSWORD not set}
+      # Other settings
+      UPLOAD_LIMIT: 100M
+    networks:
+      - default
+      - traefik_proxy
+    depends_on:
+      - ${DB_SERVICE:-mariadb}
+    links:
+      - ${DB_SERVICE:-mariadb}:db
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.${ENV:-prod}.phpmyadmin
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-phpmyadmin.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-phpmyadmin.rule=Host(`phpmyadmin-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-phpmyadmin.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-phpmyadmin.tls.certresolver=le
+
+networks:
+  traefik_proxy:
+    external: true

@@ -1,0 +1,9 @@
+services:
+  common-service:
+    init: true
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '${CPU_LIMIT:-0.5}'
+          memory: ${MEMORY_LIMIT:-50M}

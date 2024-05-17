@@ -1,0 +1,40 @@
+services:
+  minio:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: quay.io/minio/minio:${VERSION:-latest}
+    command: server /data --console-address ':9001'
+    #healthcheck:
+    #  test: curl --fail http://localhost || exit 1
+    #  #test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
+    #  interval: 60s
+    #  timeout: 3s
+    #  # Be healthy during startup as fast as possible
+    #  start_period: 10s
+    #  start_interval: 1s
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-300M}
+    environment:
+      MINIO_ROOT_USER: ${MAIN_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MAIN_PASSWORD:?MAIN_PASSWORD not set}
+    networks:
+      - default
+      - traefik_proxy
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.${ENV:-prod}.minio
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}-minio.loadbalancer.server.port=9001
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-minio.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-minio.rule=Host(`minio-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-minio.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-minio.tls.certresolver=le
+
+networks:
+  traefik_proxy:
+    external: true

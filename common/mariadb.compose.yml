@@ -1,0 +1,32 @@
+services:
+  mariadb:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: mariadb:${VERSION:-latest}
+    command:
+      - --character-set-server=${CHARACTER_SET:-utf8mb4}
+      - --collation-server=${COLLATION:-utf8mb4_unicode_ci}
+    healthcheck:
+      test: mariadb-admin ping --user=${MAIN_USER:-db} --password=${MAIN_PASSWORD:?MAIN_PASSWORD not set} || exit 1
+      interval: 60s
+      timeout: 3s
+      # Be healthy during startup as fast as possible
+      start_period: 10s
+      start_interval: 1s
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-200M}
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.${ENV:-prod}.mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${ROOT_PASSWORD:?ROOT_PASSWORD not set}
+      # Create "db" user with password "MAIN_PASSWORD" if it doesn't exist
+      # Note: cannot use "USER", already set by system
+      MARIADB_USER: ${MAIN_USER:-db}
+      MARIADB_PASSWORD: ${MAIN_PASSWORD:?MAIN_PASSWORD not set}
+      # Create database "db" if it doesn't exist
+      MARIADB_DATABASE: ${DATABASE:-db}

@@ -2,3 +2,4 @@ storage
 config/config.yaml
 config/htpasswd
 database
+minio
