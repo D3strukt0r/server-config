@@ -1,3 +1,7 @@
+include:
+  - path: ../../common/prometheus.compose.yml
+  - path: ../../common/grafana.compose.yml
+
 # Auto Update containers when new version is available
 services:
   watchtower:
@@ -26,69 +30,3 @@ services:
       driver: fluentd
       options:
         tag: ${COMPOSE_PROJECT_NAME}.prod.watchtower
-  prometheus:
-    extends:
-      file: ../../common/snippets.yml
-      service: common-service
-    image: prom/prometheus
-    deploy:
-      resources:
-        limits:
-          memory: 80M
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:9090 || exit 1
-    # If you are running as root then set it to 0 else find the right id with
-    # the `id -u` command. /var/lib/grafana needs to be writable by the grafana user.
-    user: '0'
-    networks:
-      - default
-      - traefik_proxy
-    volumes:
-      - ./prometheus-config:/etc/prometheus/
-      - ./prometheus:/prometheus/
-    logging:
-      driver: fluentd
-      options:
-        tag: ${COMPOSE_PROJECT_NAME}.prod.prometheus
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.entrypoints=websecure
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.rule=Host(`prometheus-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.tls=true
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.tls.certresolver=le
-  grafana:
-    extends:
-      file: ../../common/snippets.yml
-      service: common-service
-    image: grafana/grafana
-    deploy:
-      resources:
-        limits:
-          memory: 100M
-    healthcheck:
-      test: curl --fail http://localhost:3000 || exit 1
-    logging:
-      driver: fluentd
-      options:
-        tag: ${COMPOSE_PROJECT_NAME}.prod.grafana
-    environment:
-      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
-    # If you are running as root then set it to 0 else find the right id with
-    # the `id -u` command. /var/lib/grafana needs to be writable by the grafana user.
-    user: '0'
-    networks:
-      - default
-      - traefik_proxy
-    volumes:
-      - ./grafana:/var/lib/grafana
-      - ./grafana-init:/etc/grafana/provisioning
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.entrypoints=websecure
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.rule=Host(`grafana-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.tls=true
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.tls.certresolver=le
-
-networks:
-  traefik_proxy:
-    external: true

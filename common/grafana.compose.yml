@@ -1,0 +1,32 @@
+services:
+  grafana:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: grafana/grafana:${VERSION:-latest}
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-100M}
+    healthcheck:
+      test: curl --fail http://localhost:3000 || exit 1
+    # If you are running as root then set it to 0 else find the right id with
+    # the `id -u` command. /var/lib/grafana needs to be writable by the grafana user.
+    user: '0'
+    networks:
+      - default
+      - traefik_proxy
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.grafana
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.rule=Host(`grafana-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.tls.certresolver=le
+
+networks:
+  traefik_proxy:
+    external: true

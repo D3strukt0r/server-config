@@ -1,0 +1,32 @@
+services:
+  prometheus:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: prom/prometheus:${VERSION:-latest}
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-80M}
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:9090 || exit 1
+    # If you are running as root then set it to 0 else find the right id with
+    # the `id -u` command. /prometheus needs to be writable by the prometheus user.
+    user: '0'
+    networks:
+      - default
+      - traefik_proxy
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.prometheus
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.rule=Host(`prometheus-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.tls.certresolver=le
+
+networks:
+  traefik_proxy:
+    external: true

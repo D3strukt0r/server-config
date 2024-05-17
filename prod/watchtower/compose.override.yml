@@ -1,0 +1,12 @@
+services:
+  prometheus:
+    volumes:
+      - ./prometheus-config:/etc/prometheus/
+      - ./prometheus:/prometheus/
+  grafana:
+    environment:
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./grafana-init:/etc/grafana/provisioning
+
