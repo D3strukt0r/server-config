@@ -34,6 +34,8 @@ services:
       resources:
         limits:
           memory: 80M
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:9090 || exit 1
     # If you are running as root then set it to 0 else find the right id with
     # the `id -u` command. /var/lib/grafana needs to be writable by the grafana user.
     user: '0'
@@ -62,6 +64,8 @@ services:
       resources:
         limits:
           memory: 100M
+    healthcheck:
+      test: curl --fail http://localhost:3000 || exit 1
     logging:
       driver: fluentd
       options:
