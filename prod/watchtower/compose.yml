@@ -11,12 +11,79 @@ services:
       #test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
     environment:
-      TZ: Europe/Zurich
       WATCHTOWER_CLEANUP: 'true'
+      WATCHTOWER_DEBUG: 'true'
       WATCHTOWER_LOG_FORMAT: json
       WATCHTOWER_POLL_INTERVAL: 300 # seconds => 5 minutes
+      WATCHTOWER_HTTP_API_TOKEN: ${WATCHTOWER_HTTP_API_TOKEN:?WATCHTOWER_HTTP_API_TOKEN not set}
+      WATCHTOWER_HTTP_API_METRICS: 'true'
+      REPO_USER: d3strukt0r
+      REPO_PASS: ${REPO_PASS:?REPO_PASS not set}
     logging:
       driver: fluentd
       options:
         tag: ${COMPOSE_PROJECT_NAME}.prod.watchtower
+  prometheus:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
+    image: prom/prometheus
+    deploy:
+      resources:
+        limits:
+          memory: 80M
+    # If you are running as root then set it to 0 else find the right id with
+    # the `id -u` command. /var/lib/grafana needs to be writable by the grafana user.
+    user: '0'
+    networks:
+      - default
+      - traefik_proxy
+    volumes:
+      - ./prometheus-config:/etc/prometheus/
+      - ./prometheus:/prometheus/
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.prometheus
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.rule=Host(`prometheus-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-prometheus.tls.certresolver=le
+  grafana:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
+    image: grafana/grafana
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.grafana
+    environment:
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    # If you are running as root then set it to 0 else find the right id with
+    # the `id -u` command. /var/lib/grafana needs to be writable by the grafana user.
+    user: '0'
+    networks:
+      - default
+      - traefik_proxy
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./grafana-init:/etc/grafana/provisioning
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.rule=Host(`grafana-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-grafana.tls.certresolver=le
+
+networks:
+  traefik_proxy:
+    external: true
