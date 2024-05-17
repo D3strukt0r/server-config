@@ -7,3 +7,9 @@ services:
         limits:
           cpus: '${CPU_LIMIT:-0.5}'
           memory: ${MEMORY_LIMIT:-50M}
+    healthcheck:
+      interval: 60s
+      timeout: 3s
+      # Be healthy during startup as fast as possible
+      start_period: 10s
+      start_interval: 1s

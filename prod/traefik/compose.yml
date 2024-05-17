@@ -1,8 +1,9 @@
-# Manage domain access to services
 services:
   traefik:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: traefik:3.0
-    restart: unless-stopped
     command:
       # Tell Traefik to listen to docker
       - --providers.docker=true
@@ -28,22 +29,24 @@ services:
       # Give more logs
       - --log.level=INFO
       - --log.format=json
+
+      # Enable ping
+      - --ping=true
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 150M
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8080/ping || exit 1
+      #test: traefik healthcheck
     networks:
       - default
       #- proxy
       - traefik_proxy
     ports:
-      # HTTP
-      - '80:80'
-      # HTTPS
-      - '443:443'
-      # HTTP/3
-      - '443:443/udp'
+      - '80:80' # HTTP
+      - '443:443' # HTTPS
+      - '443:443/udp' # HTTP/3
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./acme.json:/acme.json
@@ -53,22 +56,22 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: traefik
+        tag: ${COMPOSE_PROJECT_NAME}.prod.traefik
     labels:
-      traefik.enable: true
-      traefik.http.routers.traefik.entrypoints: websecure
-      traefik.http.routers.traefik.rule: Host(`traefik.d3strukt0r.dev`)
-      traefik.http.routers.traefik.middlewares: traefik_auth
-      traefik.http.routers.traefik.tls: true
-      traefik.http.routers.traefik.tls.certresolver: le
-      traefik.http.routers.traefik.service: api@internal
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.middlewares=traefik_auth
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.service=api@internal
 
       # Declaring the user list
       #
       # Note: all dollar signs in the hash need to be doubled for escaping.
       # To create user:password pair, it's possible to use this command:
       # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
-      traefik.http.middlewares.traefik_auth.basicauth.users: ${TRAEFIK_USERS:?TRAEFIK_USERS not set}
+      - traefik.http.middlewares.traefik_auth.basicauth.users=${TRAEFIK_USERS:?TRAEFIK_USERS not set}
 
 networks:
   #proxy:

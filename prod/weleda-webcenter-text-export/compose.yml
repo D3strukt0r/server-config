@@ -1,26 +1,28 @@
 services:
   pwa:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: d3strukt0r/weleda-webcenter-text-export
-    init: true
-    restart: unless-stopped
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 160M
+    healthcheck:
+      test: curl --fail http://localhost || exit 1
     networks:
       - default
       - traefik_proxy
     logging:
       driver: fluentd
       options:
-        tag: weleda-webcenter-text-export.prod.pwa
+        tag: ${COMPOSE_PROJECT_NAME}.prod.pwa
     labels:
-      traefik.enable: true
-      traefik.http.routers.weleda-webcenter-text-export-prod.entrypoints: websecure
-      traefik.http.routers.weleda-webcenter-text-export-prod.rule: Host(`weleda-webcenter-text-export.d3strukt0r.dev`) || Host(`webcenter-text-export.manuele-vaccari.ch`)
-      traefik.http.routers.weleda-webcenter-text-export-prod.tls: true
-      traefik.http.routers.weleda-webcenter-text-export-prod.tls.certresolver: le
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`webcenter-text-export.manuele-vaccari.ch`) || Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
 
 networks:
   traefik_proxy:

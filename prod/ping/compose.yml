@@ -1,12 +1,11 @@
 services:
   nginx:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: nginx
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 50M
+    healthcheck:
+      test: curl --fail http://localhost || exit 1
     networks:
       - default
       - traefik_proxy
@@ -15,13 +14,13 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: ping.nginx
+        tag: ${COMPOSE_PROJECT_NAME}.prod.nginx
     labels:
-      traefik.enable: true
-      traefik.http.routers.ping.entrypoints: websecure
-      traefik.http.routers.ping.rule: Host(`ping.d3strukt0r.dev`)
-      traefik.http.routers.ping.tls: true
-      traefik.http.routers.ping.tls.certresolver: le
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
 
 networks:
   traefik_proxy:

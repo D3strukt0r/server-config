@@ -1,12 +1,17 @@
 # Manage docker containers
 services:
   portainer:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: portainer/portainer-ce
-    restart: unless-stopped
+    # TODO: Not supported
+    #healthcheck:
+    #  test: curl --fail http://localhost:9000 || exit 1
+    #  #test: wget --no-verbose --tries=1 --spider http://localhost:9000 || exit 1
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 100M
     networks:
       - default
@@ -17,14 +22,14 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: portainer
+        tag: ${COMPOSE_PROJECT_NAME}.prod.portainer
     labels:
-      traefik.enable: true
-      traefik.http.services.portainer.loadbalancer.server.port: 9000
-      traefik.http.routers.portainer.entrypoints: websecure
-      traefik.http.routers.portainer.rule: Host(`portainer.d3strukt0r.dev`)
-      traefik.http.routers.portainer.tls: true
-      traefik.http.routers.portainer.tls.certresolver: le
+      - traefik.enable=true
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}.loadbalancer.server.port=9000
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
 
 networks:
   traefik_proxy:

@@ -4,13 +4,14 @@ services:
   # docker run --rm --log-driver=fluentd --log-opt tag="myapp.test" ubuntu echo '{"key":"value"}'
   # docker run --rm --log-driver=fluentd --log-opt tag="myapp.web" -p 8082:80 nginx
   fluentd:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     build:
       dockerfile: Dockerfile
-    restart: unless-stopped
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 200M
     volumes:
       - ./fluent.conf:/fluentd/etc/fluent.conf
