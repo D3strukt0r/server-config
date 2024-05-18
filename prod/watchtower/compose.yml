@@ -9,10 +9,7 @@ services:
       file: ../../common/snippets.yml
       service: common-service
     image: containrrr/watchtower
-    # TODO: How do we check?
-    #healthcheck:
-      #test: curl --fail http://localhost || exit 1
-      #test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
+    # healthcheck already done by container `/watchtower --health-check`
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro

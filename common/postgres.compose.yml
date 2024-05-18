@@ -1,0 +1,23 @@
+services:
+  postgres:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: postgres:${VERSION:-latest}
+    healthcheck:
+      test: pg_isready --username=${MAIN_USER:-db} --dbname=${DATABASE:-db} || exit 1
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-160M}
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.${ENV:-prod}.postgres
+    environment:
+      # Create "db" user with password "MAIN_PASSWORD" if it doesn't exist
+      # Note: cannot use "USER", already set by system
+      POSTGRES_USER: ${MAIN_USER:-db}
+      POSTGRES_PASSWORD: ${MAIN_PASSWORD:?MAIN_PASSWORD not set}
+      # Create database "db" if it doesn't exist
+      POSTGRES_DB: ${DATABASE:-db}

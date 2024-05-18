@@ -1,0 +1,13 @@
+services:
+  redis:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: redis:${VERSION:-latest}
+    # https://stackoverflow.com/questions/67904609/how-do-you-perform-a-healthcheck-in-the-redis-docker-image
+    healthcheck:
+      test: redis-cli ping | grep PONG || exit 1
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.${ENV:-prod}.redis

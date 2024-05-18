@@ -1,3 +1,9 @@
+include:
+  - path: ../../common/postgres.compose.yml
+    env_file: .postgres.env
+  - path: ../../common/adminer.compose.yml
+  - path: ../../common/redis.compose.yml
+
 # https://glitchtip.com/documentation/install#docker-compose
 # https://glitchtip.com/assets/docker-compose.sample.yml
 
@@ -8,78 +14,32 @@ x-environment: &default-environment
   EMAIL_URL: consolemail:// # Example smtp://email:password@smtp_url:port https://glitchtip.com/documentation/install#configuration
   GLITCHTIP_DOMAIN: https://glitchtip.d3strukt0r.dev # Change this to your domain
   DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL} # Change this to your email
-  CELERY_WORKER_AUTOSCALE: "1,3"  # Scale between 1 and 3 to prevent excessive memory usage. Change it or remove to set it to the number of cpu cores.
-  CELERY_WORKER_MAX_TASKS_PER_CHILD: "10000"
-  ENABLE_USER_REGISTRATION: "false" # Set to "false" to disable user registration
+  CELERY_WORKER_AUTOSCALE: '1,3' # Scale between 1 and 3 to prevent excessive memory usage. Change it or remove to set it to the number of cpu cores.
+  CELERY_WORKER_MAX_TASKS_PER_CHILD: '10000'
+  ENABLE_USER_REGISTRATION: 'false' # Set to "false" to disable user registration
 
 x-depends_on: &default-depends_on
   - postgres
   - redis
 
 services:
-  postgres:
-    image: postgres:16
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 160M
-    logging:
-      driver: fluentd
-      options:
-        tag: glitchtip.prod.postgres
-    environment:
-      #POSTGRES_USER: db
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD not set}
-      #POSTGRES_DB: db
-    volumes:
-      - ./database:/var/lib/postgresql/data
-  adminer:
-    image: adminer
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 50M
-    logging:
-      driver: fluentd
-      options:
-        tag: glitchtip.prod.adminer
-    networks:
-      - default
-      - traefik_proxy
-    labels:
-      traefik.enable: true
-      traefik.http.routers.glitchtip-adminer.entrypoints: websecure
-      traefik.http.routers.glitchtip-adminer.rule: Host(`adminer-glitchtip.d3strukt0r.dev`)
-      traefik.http.routers.glitchtip-adminer.tls: true
-      traefik.http.routers.glitchtip-adminer.tls.certresolver: le
-  redis:
-    image: redis
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 50M
-    logging:
-      driver: fluentd
-      options:
-        tag: glitchtip.prod.redis
   web:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: glitchtip/glitchtip
-    restart: unless-stopped
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 400M
+    # TODO: How to handle this?
+    #healthcheck:
+    #  test: curl --fail http://localhost || exit 1
+    #  test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
     logging:
       driver: fluentd
       options:
-        tag: glitchtip.prod.web
+        tag: ${COMPOSE_PROJECT_NAME}.prod.web
     depends_on: *default-depends_on
     environment: *default-environment
     networks:
@@ -88,40 +48,51 @@ services:
     volumes:
       - ./uploads:/code/uploads
     labels:
-      traefik.enable: true
-      traefik.http.routers.glitchtip.entrypoints: websecure
-      traefik.http.routers.glitchtip.rule: Host(`glitchtip.d3strukt0r.dev`)
-      traefik.http.routers.glitchtip.tls: true
-      traefik.http.routers.glitchtip.tls.certresolver: le
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
   worker:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: glitchtip/glitchtip
     command: ./bin/run-celery-with-beat.sh
-    restart: unless-stopped
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 480M
+    # TODO: How to handle this?
+    #healthcheck:
+    #  test: curl --fail http://localhost || exit 1
+    #  test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
     logging:
       driver: fluentd
       options:
-        tag: glitchtip.prod.worker
+        tag: ${COMPOSE_PROJECT_NAME}.prod.worker
     depends_on: *default-depends_on
     environment: *default-environment
     volumes:
       - ./uploads:/code/uploads
   migrate:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: glitchtip/glitchtip
     command: "./manage.py migrate"
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 200M
+    # TODO: How to handle this?
+    #healthcheck:
+    #  test: curl --fail http://localhost || exit 1
+    #  test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
     logging:
       driver: fluentd
       options:
-        tag: glitchtip.prod.migrate
+        tag: ${COMPOSE_PROJECT_NAME}.prod.migrate
     depends_on: *default-depends_on
     environment: *default-environment
 

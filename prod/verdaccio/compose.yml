@@ -22,8 +22,8 @@ services:
           memory: 140M
     # TODO: How do we check?
     #healthcheck:
-      #test: curl --fail http://localhost || exit 1
-      #test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
+    #  test: curl --fail http://localhost || exit 1
+    #  test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
     #environment:
     #  S3_BUCKET: default3
     #  S3_ENDPOINT: http://${S3_SERVICE:-minio}:9000
