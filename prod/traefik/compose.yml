@@ -1,3 +1,7 @@
+include:
+  - path: ../../common/prometheus.compose.yml
+  - path: ../../common/grafana.compose.yml
+
 services:
   traefik:
     extends:
@@ -31,6 +35,8 @@ services:
       # Enable Access log
       - --accesslog=true
       # Enable Metrics
+      # https://medium.com/@ugenef/application-monitoring-with-traefik-prometheus-grafana-and-docker-compose-for-beginners-2fe25d1b60a8
+      # https://github.com/ugenef/simple-infrastructure/tree/main/compose
       - --metrics.prometheus=true
     deploy:
       resources:

@@ -4,6 +4,8 @@ services:
       file: ./snippets.yml
       service: common-service
     image: prom/prometheus:${VERSION:-latest}
+    command:
+      - --storage.tsdb.retention.size=256MB
     deploy:
       resources:
         limits:

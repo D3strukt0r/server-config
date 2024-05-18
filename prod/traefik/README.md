@@ -15,3 +15,5 @@ chmod 600 ./traefik/acme.json
 ```
 
 * Copy `.env.dist` to `.env` (`cp .env.dist .env`) and fill with info from 1Password Backup (Traefik | Prod | Config)
+
+* After starting, login to Grafana with default admin/admin credentials and change the password.
