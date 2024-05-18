@@ -5,6 +5,12 @@ services:
       service: common-service
     image: prom/prometheus:${VERSION:-latest}
     command:
+      # Existing commands in Dockerfile
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+      # Our additions
       - --storage.tsdb.retention.size=256MB
     deploy:
       resources:
