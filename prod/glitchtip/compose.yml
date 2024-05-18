@@ -3,6 +3,7 @@ include:
     env_file: .postgres.env
   - path: ../../common/adminer.compose.yml
   - path: ../../common/redis.compose.yml
+    env_file: .redis.env
 
 # https://glitchtip.com/documentation/install#docker-compose
 # https://glitchtip.com/assets/docker-compose.sample.yml
