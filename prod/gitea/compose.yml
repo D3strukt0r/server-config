@@ -1,12 +1,21 @@
+include:
+  - path: ../../common/mariadb.compose.yml
+    env_file: .mariadb.env
+  - path: ../../common/phpmyadmin.compose.yml
+    env_file: .phpmyadmin.env
+
 services:
   gitea:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: gitea/gitea:1
-    restart: unless-stopped
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 500M
+    healthcheck:
+      test: curl --fail http://localhost:3000 || exit 1
     networks:
       - default
       - traefik_proxy
@@ -17,8 +26,10 @@ services:
 
       # Ensure that the authorized_keys file is shared between the host git user and the container git user
       - /home/git/.ssh/:/data/git/.ssh
+    links:
+      - mariadb:db
     ports:
-      - "127.0.0.1:2222:22"
+      - '127.0.0.1:2222:22'
     environment:
       USER_UID: 1002 # Check `id -u git`
       USER_GID: 1002 # Check `id -g git`
@@ -42,74 +53,17 @@ services:
       #GITEA__mailer__HOST: ${GITEA__mailer__HOST:?GITEA__mailer__HOST not set}
       #GITEA__mailer__USER: ${GITEA__mailer__USER:-apikey}
       #GITEA__mailer__PASSWD: """${GITEA__mailer__PASSWD:?GITEA__mailer__PASSWD not set}"""
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.gitea
     labels:
-      traefik.enable: true
-      traefik.http.services.gitea.loadbalancer.server.port: 3000
-      traefik.http.routers.gitea.entrypoints: websecure
-      traefik.http.routers.gitea.rule: Host(`gitea.d3strukt0r.dev`)
-      traefik.http.routers.gitea.tls: true
-      traefik.http.routers.gitea.tls.certresolver: le
-
-  db:
-    image: mariadb:11
-    init: true
-    healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD:?DB_PASSWORD not set}"]
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 280M
-    volumes:
-      - ./database:/var/lib/mysql
-    environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD not set}
-      # Create "db" user with password ${DB_PASSWORD} if it doesn't exist
-      MARIADB_USER: db
-      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD not set}
-      # Create database "db" if it doesn't exist
-      MARIADB_DATABASE: db
-    #logging:
-    #  driver: fluentd
-    #  options:
-    #    tag: gitea.prod.mariadb
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    init: true
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 100M
-    environment:
-      # Default user to be logged in
-      #PMA_USER: db
-      #PMA_PASSWORD: ${DB_PASSWORD}
-      # PhpMyAdmin User to manage PMA db
-      PMA_PMADB: phpmyadmin
-      PMA_CONTROLUSER: pma
-      PMA_CONTROLPASS: ${DB_PMA_PASSWORD:?DB_PMA_PASSWORD not set}
-      # Other settings
-      UPLOAD_LIMIT: 100M
-    networks:
-      - default
-      - traefik_proxy
-    depends_on:
-      - db
-    #logging:
-    #  driver: fluentd
-    #  options:
-    #    tag: gitea.prod.phpmyadmin
-    labels:
-      traefik.enable: true
-      traefik.http.routers.gitea-phpmyadmin.entrypoints: websecure
-      traefik.http.routers.gitea-phpmyadmin.rule: Host(`phpmyadmin-gitea.d3strukt0r.dev`)
-      traefik.http.routers.gitea-phpmyadmin.tls: true
-      traefik.http.routers.gitea-phpmyadmin.tls.certresolver: le
-
+      - traefik.enable=true
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}.loadbalancer.server.port=3000
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
 
 networks:
   traefik_proxy:
