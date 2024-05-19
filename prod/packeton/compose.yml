@@ -1,3 +1,11 @@
+include:
+  - path: ../../common/mariadb.compose.yml
+    env_file: .mariadb.env
+  - path: ../../common/phpmyadmin.compose.yml
+    env_file: .phpmyadmin.env
+  - path: ../../common/redis.compose.yml
+    env_file: .redis.env
+
 # https://github.com/vtsykun/packeton/blob/master/docker-compose-split.yml
 # https://docs.packeton.org/installation-docker.html
 
@@ -7,130 +15,55 @@ x-volumes: &default-volume
     - ./var:/var/www/packagist/var
     - ./config.yaml:/var/www/packagist/config/packages/config.yaml
 
-x-restart-policy: &restart_policy
-  restart: unless-stopped
-
 x-environment: &default-environment
   REDIS_URL: redis://redis
-  DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
+  DATABASE_URL: mysql://db:${DB_PASSWORD:?DB_PASSWORD not set}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
   SKIP_INIT: 1
 
 services:
-  redis:
-    image: redis:7
-    init: true
-    <<: *restart_policy
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 50M
-    volumes:
-      - ./redis:/data
-    logging:
-      driver: fluentd
-      options:
-        tag: packeton.prod.redis
-
-  db:
-    image: mariadb:11
-    init: true
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "--user=db", "--password=${DB_PASSWORD:?DB_PASSWORD not set}"]
-    <<: *restart_policy
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 200M
-    volumes:
-      - ./database:/var/lib/mysql
-    environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD not set}
-      # Create "db" user with password ${DB_PASSWORD} if it doesn't exist
-      MARIADB_USER: db
-      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD not set}
-      # Create database "db" if it doesn't exist
-      MARIADB_DATABASE: db
-    logging:
-      driver: fluentd
-      options:
-        tag: packeton.prod.mariadb
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    init: true
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 100M
-    environment:
-      # Default user to be logged in
-      #PMA_USER: db
-      #PMA_PASSWORD: ${DB_PASSWORD}
-      # PhpMyAdmin User to manage PMA db
-      PMA_PMADB: phpmyadmin
-      PMA_CONTROLUSER: pma
-      PMA_CONTROLPASS: ${DB_PMA_PASSWORD:?DB_PMA_PASSWORD not set}
-      # Other settings
-      UPLOAD_LIMIT: 100M
-    networks:
-      - default
-      - traefik_proxy
-    depends_on:
-      - db
-    logging:
-      driver: fluentd
-      options:
-        tag: packeton.prod.phpmyadmin
-    labels:
-      traefik.enable: true
-      traefik.http.routers.packeton-phpmyadmin.entrypoints: websecure
-      traefik.http.routers.packeton-phpmyadmin.rule: Host(`phpmyadmin-packeton.d3strukt0r.dev`)
-      traefik.http.routers.packeton-phpmyadmin.tls: true
-      traefik.http.routers.packeton-phpmyadmin.tls.certresolver: le
-
   php-fpm:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: packeton/packeton
-    init: true
     command: ['php-fpm', '-F']
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 150M
-    <<: [*restart_policy, *default-volume]
+    # TODO: How to check this
+    # healthcheck:
+    #   test: curl --fail http://localhost || exit 1
+    #   test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
+    <<: [*default-volume]
     environment:
       <<: *default-environment
       SKIP_INIT: 0
       WAIT_FOR_HOST: 'db:3306'
     depends_on:
-      - db
+      - mariadb
       - redis
+    links:
+      - mariadb:db
     logging:
       driver: fluentd
       options:
-        tag: packeton.prod.php-fpm
+        tag: ${COMPOSE_PROJECT_NAME}.prod.php-fpm
 
   nginx:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: packeton/packeton
-    init: true
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 50M
-    <<: [*restart_policy, *default-volume]
+    command: >
+      bash -c 'sed s/_PHP_FPM_HOST_/php-fpm:9000/g < docker/nginx/nginx-tpl.conf > /etc/nginx/nginx.conf && nginx'
+    healthcheck:
+      test: curl --fail http://localhost || exit 1
+      start_period: 20s
+    <<: [*default-volume]
     networks:
       - default
       - traefik_proxy
-    command: >
-      bash -c 'sed s/_PHP_FPM_HOST_/php-fpm:9000/g < docker/nginx/nginx-tpl.conf > /etc/nginx/nginx.conf && nginx'
     environment:
       <<: *default-environment
       WAIT_FOR_HOST: 'php-fpm:9000'
@@ -139,26 +72,31 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: packeton.prod.nginx
+        tag: ${COMPOSE_PROJECT_NAME}.prod.nginx
     labels:
-      traefik.enable: true
-      traefik.http.routers.packeton.entrypoints: websecure
-      traefik.http.routers.packeton.rule: Host(`packeton.d3strukt0r.dev`)
-      traefik.http.routers.packeton.tls: true
-      traefik.http.routers.packeton.tls.certresolver: le
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
 
   worker:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: packeton/packeton
-    init: true
-    hostname: packeton-worker
     command: ['bin/console', 'packagist:run-workers', '-v']
+    hostname: packeton-worker
     deploy:
       resources:
         limits:
-          cpus: '0.5'
           memory: 60M
+    # TODO: How to check this
+    # healthcheck:
+    #   test: curl --fail http://localhost || exit 1
+    #   test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
     user: www-data
-    <<: [*restart_policy, *default-volume]
+    <<: [*default-volume]
     environment:
       <<: *default-environment
       WAIT_FOR_HOST: 'php-fpm:9000'
@@ -167,20 +105,21 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: packeton.prod.worker
+        tag: ${COMPOSE_PROJECT_NAME}.prod.worker
 
   cron:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
     image: packeton/packeton
-    init: true
     hostname: packeton-cron
     command: ['bin/console', 'okvpn:cron', '--demand', '--time-limit=3600']
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 50M
+    # TODO: How to check this
+    # healthcheck:
+    #   test: curl --fail http://localhost || exit 1
+    #   test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
     user: www-data
-    <<: [*restart_policy, *default-volume]
+    <<: [*default-volume]
     environment:
       <<: *default-environment
       WAIT_FOR_HOST: 'php-fpm:9000'
@@ -189,7 +128,7 @@ services:
     logging:
       driver: fluentd
       options:
-        tag: packeton.prod.cron
+        tag: ${COMPOSE_PROJECT_NAME}.prod.cron
 
 networks:
   traefik_proxy:
