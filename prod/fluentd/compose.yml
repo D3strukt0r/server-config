@@ -1,3 +1,9 @@
+include:
+  - path: ../../common/mongo.compose.yml
+    env_file: .mongo.env
+  - path: ../../common/mongo-express.compose.yml
+    env_file: .mongo-express.env
+
 # https://github.com/elastic/elasticsearch/blob/8.10/docs/reference/setup/install/docker/docker-compose.yml
 services:
   # Test with:
@@ -7,12 +13,15 @@ services:
     extends:
       file: ../../common/snippets.yml
       service: common-service
-    build:
-      dockerfile: Dockerfile
+    build: .
     deploy:
       resources:
         limits:
           memory: 200M
+    # TODO: How to handle this?
+    #healthcheck:
+    #  test: curl --fail http://localhost || exit 1
+    #  test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
     volumes:
       - ./fluent.conf:/fluentd/etc/fluent.conf
       - ./logs:/fluentd/log
@@ -20,53 +29,6 @@ services:
       - '24224:24224'
     environment:
       DATABASE_URL: mongodb://${DATABASE_USER:?DATABASE_USER not set}:${DATABASE_PASSWORD:?DATABASE_PASSWORD not set}@mongo:27017/fluentd
-
-  mongo:
-    image: mongo
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 5s
-      timeout: 10s
-      retries: 5
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 300M
-    volumes:
-      - ./database:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DATABASE_ROOT_USER:?DATABASE_ROOT_USER not set}
-      MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD:?DATABASE_ROOT_PASSWORD not set}
-
-  mongo-express:
-    image: mongo-express
-    depends_on:
-      mongo:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 120M
-    networks:
-      - default
-      - traefik_proxy
-    environment:
-      # To avoid error "Command listDatabases requires authentication"
-      ME_CONFIG_MONGODB_SERVER: mongo
-      ME_CONFIG_MONGODB_AUTH_USERNAME: ${DATABASE_ROOT_USER:?DATABASE_ROOT_USER not set}
-      ME_CONFIG_MONGODB_AUTH_PASSWORD: ${DATABASE_ROOT_PASSWORD:?DATABASE_ROOT_PASSWORD not set}
-
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGOEXPRESS_LOGIN:?MONGOEXPRESS_LOGIN not set}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGOEXPRESS_PASSWORD:?MONGOEXPRESS_PASSWORD not set}
-    labels:
-      traefik.enable: true
-      traefik.http.services.fluentd-mongo-express.loadbalancer.server.port: 8081
-      traefik.http.routers.fluentd-mongo-express.entrypoints: websecure
-      traefik.http.routers.fluentd-mongo-express.rule: Host(`db-logs.d3strukt0r.dev`)
-      traefik.http.routers.fluentd-mongo-express.tls: true
-      traefik.http.routers.fluentd-mongo-express.tls.certresolver: le
 
 networks:
   traefik_proxy:
