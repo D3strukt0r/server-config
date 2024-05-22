@@ -3,6 +3,8 @@ include:
     env_file: .mariadb.env
   - path: ../../common/phpmyadmin.compose.yml
     env_file: .phpmyadmin.env
+  - path: ../../common/minio.compose.yml
+    env_file: .minio.env
 
 services:
   pwa:
@@ -62,6 +64,9 @@ services:
       CLEAR_SESSIONS_IN: /var/cache/sessions/prod
       CORS_ALLOW_ORIGIN: ^https?://(wedding-manuele-robine\.d3strukt0r\.dev|(?:www\.)?manuele-robine\.wedding|(?:www\.)?eleunam-enibor\.wedding|localhost|127\.0\.0\.1)(:[0-9]+)?$
       JWT_PASSPHRASE: ${JWT_PASSPHRASE:?JWT_PASSPHRASE not set}
+      DEFAULT_STORAGE_SOURCE: default.storage.aws
+      S3_STORAGE_KEY: minio
+      S3_STORAGE_SECRET: ${MINIO_PASSWORD:?MINIO_PASSWORD not set}
     networks:
       - default
       - traefik_proxy
@@ -79,6 +84,26 @@ services:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.rule=Host(`api-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.tls=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}-api.tls.certresolver=le
+
+  # https://stackoverflow.com/questions/76401435/why-i-cant-get-access-to-minio-console-from-docker-container
+  minio-setup:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
+    image: minio/mc:latest
+    environment:
+      MC_HOST_minio: http://minio:${MINIO_PASSWORD}@minio:9000
+    entrypoint:
+      - sh
+      - -c
+      - |
+        until mc ls minio > /dev/null 2>&1; do
+          sleep 0.5
+        done
+
+        mc mb minio/default
+        #mc anonymous set download minio/default/public
+        #mc anonymous links minio/default --recursive
 
 networks:
   traefik_proxy:

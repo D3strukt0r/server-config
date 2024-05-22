@@ -5,6 +5,14 @@ services:
       service: common-service
     image: quay.io/minio/minio:${VERSION:-latest}
     command: server /data --console-address ':9001'
+    # TODO: Doesn't work yet
+    #command:
+    #  - sh
+    #  - -c
+    #  - |
+    #    mc config host rm local
+    #    mc config host add local http://localhost:9000 ${MAIN_USER:-minio} ${MAIN_PASSWORD:?MAIN_PASSWORD not set}
+    #    minio server /data --console-address ':9001'
     # TODO: How to handle this?
     #healthcheck:
     #  test: curl --fail http://localhost || exit 1

@@ -12,3 +12,10 @@ services:
       options:
         # TODO: Use "${COMPOSE_PROJECT_NAME}" if we can remove "-dev" from the string
         tag: wedding-manuele-robine.dev.phpmyadmin
+  minio:
+    volumes:
+      - ./minio:/data
+    logging:
+      options:
+        # TODO: Use "${COMPOSE_PROJECT_NAME}" if we can remove "-dev" from the string
+        tag: wedding-manuele-robine.dev.minio

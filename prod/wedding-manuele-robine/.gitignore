@@ -1,3 +1,4 @@
 database/
 sessions/
 jwt/*.pem
+minio
