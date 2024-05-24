@@ -43,7 +43,6 @@ services:
         tag: ${COMPOSE_PROJECT_NAME}.prod.verdaccio
     volumes:
       - './config:/verdaccio/conf'
-      - './storage:/verdaccio/storage'
     #environment:
     #  DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db # TODO: Not supported yet
     labels:
