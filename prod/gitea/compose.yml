@@ -3,6 +3,8 @@ include:
     env_file: .mariadb.env
   - path: ../../common/phpmyadmin.compose.yml
     env_file: .phpmyadmin.env
+  - path: ../../common/minio.compose.yml
+    env_file: .minio.env
 
 services:
   gitea:
@@ -26,8 +28,6 @@ services:
 
       # Ensure that the authorized_keys file is shared between the host git user and the container git user
       - /home/git/.ssh/:/data/git/.ssh
-    links:
-      - mariadb:db
     ports:
       - '127.0.0.1:2222:22'
     environment:
@@ -42,7 +42,7 @@ services:
       GITEA__security__INTERNAL_TOKEN: ${GITEA__security__INTERNAL_TOKEN:?GITEA__security__INTERNAL_TOKEN not set}
 
       GITEA__database__DB_TYPE: mysql
-      GITEA__database__HOST: db:3306
+      GITEA__database__HOST: mariadb:3306
       GITEA__database__NAME: db
       GITEA__database__USER: db
       GITEA__database__PASSWD: ${DB_PASSWORD:?DB_PASSWORD not set}
@@ -53,6 +53,15 @@ services:
       #GITEA__mailer__HOST: ${GITEA__mailer__HOST:?GITEA__mailer__HOST not set}
       #GITEA__mailer__USER: ${GITEA__mailer__USER:-apikey}
       #GITEA__mailer__PASSWD: """${GITEA__mailer__PASSWD:?GITEA__mailer__PASSWD not set}"""
+
+      # https://docs.gitea.com/1.21/administration/config-cheat-sheet?_highlight=minio#storage-storage
+      GITEA__storage__STORAGE_TYPE: minio
+      GITEA__storage__MINIO_ENDPOINT: minio:9000
+      GITEA__storage__MINIO_ACCESS_KEY_ID: minio
+      GITEA__storage__MINIO_SECRET_ACCESS_KEY: ${MINIO_PASSWORD:?MINIO_PASSWORD not set}
+      GITEA__storage__MINIO_BUCKET: default
+      GITEA__storage__MINIO_LOCATION: eu-west-1
+      GITEA__storage__SERVE_DIRECT: 'false' # TODO: Broken, will redirect the browser to "http://minio:9000/"
     logging:
       driver: fluentd
       options:
@@ -64,6 +73,24 @@ services:
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
+
+  # https://stackoverflow.com/questions/76401435/why-i-cant-get-access-to-minio-console-from-docker-container
+  minio-setup:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
+    image: minio/mc:latest
+    restart: 'no'
+    environment:
+      MC_HOST_minio: http://minio:${MINIO_PASSWORD:?MINIO_PASSWORD not set}@minio:9000
+    entrypoint:
+      - sh
+      - -c
+      - |
+        until mc ls minio > /dev/null 2>&1; do
+          sleep 0.5
+        done
+        mc mb minio/default
 
 networks:
   traefik_proxy:

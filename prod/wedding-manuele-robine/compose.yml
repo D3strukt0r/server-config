@@ -58,7 +58,7 @@ services:
       - ./jwt:/usr/local/src/app/config/jwt:ro
     environment:
       APP_SECRET: ${APP_SECRET:?APP_SECRET not set}
-      DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
+      DATABASE_URL: mysql://db:${DB_PASSWORD}@mariadb:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
       APP_URL: https://${COMPOSE_PROJECT_NAME}.d3strukt0r.dev
       TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       CLEAR_SESSIONS_IN: /var/cache/sessions/prod
@@ -72,8 +72,6 @@ services:
       - traefik_proxy
     depends_on:
       - mariadb
-    links:
-      - mariadb:db
     logging:
       driver: fluentd
       options:
@@ -93,7 +91,7 @@ services:
     image: minio/mc:latest
     restart: 'no'
     environment:
-      MC_HOST_minio: http://minio:${MINIO_PASSWORD}@minio:9000
+      MC_HOST_minio: http://minio:${MINIO_PASSWORD:?MINIO_PASSWORD not set}@minio:9000
     entrypoint:
       - sh
       - -c

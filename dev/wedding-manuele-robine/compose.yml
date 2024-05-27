@@ -59,7 +59,7 @@ services:
       - ./jwt:/usr/local/src/app/config/jwt:ro
     environment:
       APP_SECRET: ${APP_SECRET}
-      DATABASE_URL: mysql://db:${DB_PASSWORD}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
+      DATABASE_URL: mysql://db:${DB_PASSWORD}@mariadb:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
       APP_URL: https://api-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev
       TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       CLEAR_SESSIONS_IN: /var/cache/sessions/prod
@@ -73,8 +73,6 @@ services:
       - traefik_proxy
     depends_on:
       - mariadb
-    links:
-      - mariadb:db
     logging:
       driver: fluentd
       options:

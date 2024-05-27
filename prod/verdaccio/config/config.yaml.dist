@@ -65,7 +65,7 @@ auth:
   # https://github.com/bchanudet/verdaccio-mysql/blob/master/example/mysql-database.sql
   mysql:
     connection:
-      host: db
+      host: mariadb
       port: 3306
       user: db
       password: "$DB_PASSWORD"

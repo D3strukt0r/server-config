@@ -35,8 +35,6 @@ services:
     depends_on:
       - minio
       - mariadb
-    links:
-      - mariadb:db
     logging:
       driver: fluentd
       options:

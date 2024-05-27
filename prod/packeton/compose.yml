@@ -23,7 +23,7 @@ x-environment: &default-environment
   SKIP_INIT: 1
   STORAGE_SOURCE: s3
   STORAGE_AWS_BUCKET: default
-  STORAGE_AWS_ARGS: '{"endpoint": "http://minio:9000", "accessKeyId": "minio", "accessKeySecret": "${MINIO_PASSWORD}", "region": "eu-west-1"}'
+  STORAGE_AWS_ARGS: '{"endpoint": "http://minio:9000", "accessKeyId": "minio", "accessKeySecret": "${MINIO_PASSWORD:?MINIO_PASSWORD not set}", "region": "eu-west-1"}'
 
 services:
   php-fpm:
@@ -141,7 +141,7 @@ services:
     image: minio/mc:latest
     restart: 'no'
     environment:
-      MC_HOST_minio: http://minio:${MINIO_PASSWORD}@minio:9000
+      MC_HOST_minio: http://minio:${MINIO_PASSWORD:?MINIO_PASSWORD not set}@minio:9000
     entrypoint:
       - sh
       - -c
