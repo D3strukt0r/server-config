@@ -81,7 +81,8 @@ services:
       file: ../../common/snippets.yml
       service: common-service
     image: glitchtip/glitchtip
-    command: "./manage.py migrate"
+    command: ./manage.py migrate
+    restart: 'no'
     deploy:
       resources:
         limits:

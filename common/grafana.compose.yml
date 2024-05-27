@@ -7,7 +7,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${MEMORY_LIMIT:-100M}
+          memory: ${MEMORY_LIMIT:-140M}
     healthcheck:
       test: curl --fail http://localhost:3000 || exit 1
     # If you are running as root then set it to 0 else find the right id with
