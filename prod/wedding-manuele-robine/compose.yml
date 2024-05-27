@@ -91,6 +91,7 @@ services:
       file: ../../common/snippets.yml
       service: common-service
     image: minio/mc:latest
+    restart: 'no'
     environment:
       MC_HOST_minio: http://minio:${MINIO_PASSWORD}@minio:9000
     entrypoint:

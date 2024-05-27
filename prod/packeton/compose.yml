@@ -5,6 +5,8 @@ include:
     env_file: .phpmyadmin.env
   - path: ../../common/redis.compose.yml
     env_file: .redis.env
+  - path: ../../common/minio.compose.yml
+    env_file: .minio.env
 
 # https://github.com/vtsykun/packeton/blob/master/docker-compose-split.yml
 # https://docs.packeton.org/installation-docker.html
@@ -17,8 +19,13 @@ x-volumes: &default-volume
 
 x-environment: &default-environment
   REDIS_URL: redis://redis
-  DATABASE_URL: mysql://db:${DB_PASSWORD:?DB_PASSWORD not set}@db:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
+  DATABASE_URL: mysql://db:${DB_PASSWORD:?DB_PASSWORD not set}@mariadb:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
   SKIP_INIT: 1
+  STORAGE_SOURCE: s3
+  STORAGE_AWS_BUCKET: default
+  STORAGE_AWS_PREFIX: packeton
+  STORAGE_AWS_ARTIFACT_PREFIX: artifact
+  STORAGE_AWS_ARGS: '{"endpoint": "http://minio:9000", "accessKeyId": "minio", "accessKeySecret": "${MINIO_PASSWORD}", "region": "eu"}'
 
 services:
   php-fpm:
@@ -43,8 +50,6 @@ services:
     depends_on:
       - mariadb
       - redis
-    links:
-      - mariadb:db
     logging:
       driver: fluentd
       options:
@@ -129,6 +134,24 @@ services:
       driver: fluentd
       options:
         tag: ${COMPOSE_PROJECT_NAME}.prod.cron
+
+  # https://stackoverflow.com/questions/76401435/why-i-cant-get-access-to-minio-console-from-docker-container
+  minio-setup:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
+    image: minio/mc:latest
+    restart: 'no'
+    environment:
+      MC_HOST_minio: http://minio:${MINIO_PASSWORD}@minio:9000
+    entrypoint:
+      - sh
+      - -c
+      - |
+        until mc ls minio > /dev/null 2>&1; do
+          sleep 0.5
+        done
+        mc mb minio/default
 
 networks:
   traefik_proxy:

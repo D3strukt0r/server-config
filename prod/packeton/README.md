@@ -7,7 +7,7 @@ https://docs.packeton.org/installation-docker.html
 Create the admin user
 
 ```shell
-docker compose exec php-fpm bin/console packagist:user:manager admin --password=<password> --admin
+docker compose exec php-fpm bin/console packagist:user:manager admin --admin --password=<password>
 ```
 
 ## Setup Projects

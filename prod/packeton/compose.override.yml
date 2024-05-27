@@ -6,3 +6,7 @@ services:
   redis:
     volumes:
       - ./redis:/data
+  minio:
+    volumes:
+      - ./minio:/data
+

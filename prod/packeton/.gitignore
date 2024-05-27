@@ -2,3 +2,4 @@ data
 database
 redis
 var
+minio
