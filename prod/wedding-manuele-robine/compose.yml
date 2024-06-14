@@ -11,7 +11,7 @@ services:
     extends:
       file: ../../common/snippets.yml
       service: common-service
-    image: d3strukt0r/wedding-manager:pwa-develop
+    image: d3strukt0r/wedding-manuele-robine:pwa-develop
     deploy:
       resources:
         limits:
@@ -43,7 +43,7 @@ services:
     extends:
       file: ../../common/snippets.yml
       service: common-service
-    image: d3strukt0r/wedding-manager:api-develop
+    image: d3strukt0r/wedding-manuele-robine:api-develop
     deploy:
       resources:
         limits:
