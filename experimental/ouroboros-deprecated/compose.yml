@@ -1,0 +1,16 @@
+# Auto Update containers when new version is available
+services:
+  ouroboros:
+    image: pyouroboros/ouroboros
+    #dns:
+    #  - 1.1.1.1
+    #  - 1.0.0.1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - CLEANUP=true
+      - INTERVAL=300
+      - LOG_LEVEL=info
+      - SELF_UPDATE=true
+      - IGNORE=mongo influxdb postgres mariadb
+      #- TZ=Europe/Zurich

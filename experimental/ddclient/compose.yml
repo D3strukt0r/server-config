@@ -1,0 +1,11 @@
+# Update dynamic IP address on Cloudflare
+services:
+  ddclient:
+    image: linuxserver/ddclient
+    #dns:
+    #  - 1.1.1.1
+    #  - 1.0.0.1
+    volumes:
+      - ./ddclient.conf:/config/ddclient.conf:ro
+    #environment:
+    #  - TZ=Europe/Zurich

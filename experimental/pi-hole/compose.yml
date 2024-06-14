@@ -1,1 +1,45 @@
 # https://github.com/pi-hole/docker-pi-hole
+
+# Manage local blocked domain list
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+services:
+  pihole:
+    image: pihole/pihole
+    networks:
+      - traefik_proxy
+    volumes:
+      - ./pihole/:/etc/pihole/
+      - ./dnsmasq.d/:/etc/dnsmasq.d/
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      - 67:67/udp
+    dns:
+      - 127.0.0.1
+    environment:
+      #TZ: "Europe/Zurich"
+      WEBPASSWORD: ${PI_HOLE_PASSWORD}
+      DNS1: 1.1.1.1
+      DNS2: 1.0.0.1
+      VIRTUAL_HOST: pihole.d3strukt0r.dev
+      # DNSSEC: "true"
+      # IPv6: "true"
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.services.pihole.loadbalancer.server.port=80
+
+      - traefik.http.routers.pihole0.entrypoints=http
+      - traefik.http.routers.pihole0.rule=Host(`pihole.d3strukt0r.dev`)
+      - traefik.http.routers.pihole0.middlewares=to_https
+
+      - traefik.http.routers.pihole.entrypoints=https
+      - traefik.http.routers.pihole.rule=Host(`pihole.d3strukt0r.dev`)
+      - traefik.http.routers.pihole.tls=true
+      - traefik.http.routers.pihole.tls.certresolver=le
+      - traefik.http.routers.pihole.middlewares=pihole-prefix
+      - traefik.http.middlewares.pihole-prefix.addprefix.prefix=/admin
+
+networks:
+  traefik_proxy:
+    external: true

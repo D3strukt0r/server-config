@@ -58,6 +58,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
       - ./acme.json:/acme.json
+      # - ./acme-staging.json:/acme.json
     environment:
       CF_API_EMAIL: ${CLOUDFLARE_EMAIL:?CLOUDFLARE_EMAIL not set}
       CF_API_KEY: ${CLOUDFLARE_API_KEY:?CLOUDFLARE_API_KEY not set}
@@ -80,6 +81,16 @@ services:
       # To create user:password pair, it's possible to use this command:
       # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
       - traefik.http.middlewares.traefik_auth.basicauth.users=${TRAEFIK_USERS:?TRAEFIK_USERS not set}
+
+      # Standard middleware for other containers to use
+      # HTTP to HTTPS redirect
+      #- traefik.http.middlewares.to_https.redirectscheme.scheme=websecure
+      #- traefik.http.middlewares.to_https_perm.redirectscheme.scheme=websecure
+      #- traefik.http.middlewares.to_https_perm.redirectscheme.permanent=true
+      # ex. how to use middleware
+      #- traefik.http.routers.service0.entrypoints=http
+      #- traefik.http.routers.service0.rule=Host(`service.d3strukt0r.dev`)
+      #- traefik.http.routers.service0.middlewares=to_https
 
 networks:
   #proxy:
