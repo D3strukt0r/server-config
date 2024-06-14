@@ -1,1 +1,11 @@
+certs
+data
+database
+dav
+dkim
+filter
+mail
+overrides
+redis
+webmail
 mailu.env
