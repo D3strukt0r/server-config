@@ -1,0 +1,110 @@
+version: "3.4"
+
+services:
+  db:
+    image: mariadb
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--password=${DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: always
+    networks:
+      - internal
+    volumes:
+      - ./database:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - internal
+      - traefik_proxy
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    environment:
+      UPLOAD_LIMIT: 100M
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.phpmyadmin_arepazo0.entrypoints=http
+      - traefik.http.routers.phpmyadmin_arepazo0.rule=Host(`${PHPMYADMIN_URL}`)
+      - traefik.http.routers.phpmyadmin_arepazo0.middlewares=to_https
+
+      - traefik.http.routers.phpmyadmin_arepazo.entrypoints=https
+      - traefik.http.routers.phpmyadmin_arepazo.rule=Host(`${PHPMYADMIN_URL}`)
+      - traefik.http.routers.phpmyadmin_arepazo.tls=true
+      - traefik.http.routers.phpmyadmin_arepazo.tls.certresolver=le
+
+  php:
+    build:
+      context: .
+      target: php
+    healthcheck:
+      start_period: 50s
+    restart: always
+    networks:
+      - internal
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    depends_on:
+      - db
+    volumes:
+      - ./uploads:/app/wp-content/uploads
+    environment:
+      DB_USER: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_DATABASE}
+      DB_TABLE_PREFIX: ve_
+      WP_AUTH_KEY: ${WP_AUTH_KEY}
+      WP_SECURE_AUTH_KEY: ${WP_SECURE_AUTH_KEY}
+      WP_LOGGED_IN_KEY: ${WP_LOGGED_IN_KEY}
+      WP_NONCE_KEY: ${WP_NONCE_KEY}
+      WP_AUTH_SALT: ${WP_AUTH_SALT}
+      WP_SECURE_AUTH_SALT: ${WP_SECURE_AUTH_SALT}
+      WP_LOGGED_IN_SALT: ${WP_LOGGED_IN_SALT}
+      WP_NONCE_SALT: ${WP_NONCE_SALT}
+
+  web:
+    build:
+      context: .
+      target: nginx
+    healthcheck:
+      start_period: 50s
+    restart: always
+    networks:
+      - internal
+      - traefik_proxy
+    depends_on:
+      - php
+    volumes:
+      - ./uploads:/app/wp-content/uploads:ro
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.arepazo0.entrypoints=http
+      - traefik.http.routers.arepazo0.rule=Host(`arepazo.ch`) || Host(`www.arepazo.ch`)
+      - traefik.http.routers.arepazo0.middlewares=to_https
+
+      - traefik.http.routers.arepazo.entrypoints=https
+      - traefik.http.routers.arepazo.rule=Host(`arepazo.ch`) || Host(`www.arepazo.ch`)
+      - traefik.http.routers.arepazo.tls=true
+      - traefik.http.routers.arepazo.tls.certresolver=le
+
+networks:
+  internal:
+    external: false
+  traefik_proxy:
+    external: true

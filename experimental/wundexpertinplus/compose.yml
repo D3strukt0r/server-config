@@ -1,0 +1,117 @@
+version: "3.4"
+
+services:
+  db:
+    image: mariadb
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      # https://github.com/docker-library/healthcheck/blob/master/mysql/docker-healthcheck
+      test: mysqladmin -u${DB_USERNAME:-root} --password=${DB_ROOT_PASSWORD} --silent ping >/dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: always
+    networks:
+      - internal
+    volumes:
+      - ./database:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - internal
+      - traefik_proxy
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    environment:
+      UPLOAD_LIMIT: 100M
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.phpmyadmin_wundexpertinplus0.entrypoints=http
+      - traefik.http.routers.phpmyadmin_wundexpertinplus0.rule=Host(`${PHPMYADMIN_URL}`)
+      - traefik.http.routers.phpmyadmin_wundexpertinplus0.middlewares=to_https
+
+      - traefik.http.routers.phpmyadmin_wundexpertinplus.entrypoints=https
+      - traefik.http.routers.phpmyadmin_wundexpertinplus.rule=Host(`${PHPMYADMIN_URL}`)
+      - traefik.http.routers.phpmyadmin_wundexpertinplus.tls=true
+      - traefik.http.routers.phpmyadmin_wundexpertinplus.tls.certresolver=le
+
+  php:
+    image: d3strukt0r/wordpress-php
+    healthcheck:
+      start_period: 30s
+    restart: always
+    networks:
+      - internal
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    depends_on:
+      - db
+    volumes:
+      - ./wp-content:/app/wp-content
+    environment:
+      DB_USER: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_DATABASE}
+      WP_AUTH_KEY: ${WP_AUTH_KEY}
+      WP_SECURE_AUTH_KEY: ${WP_SECURE_AUTH_KEY}
+      WP_LOGGED_IN_KEY: ${WP_LOGGED_IN_KEY}
+      WP_NONCE_KEY: ${WP_NONCE_KEY}
+      WP_AUTH_SALT: ${WP_AUTH_SALT}
+      WP_SECURE_AUTH_SALT: ${WP_SECURE_AUTH_SALT}
+      WP_LOGGED_IN_SALT: ${WP_LOGGED_IN_SALT}
+      WP_NONCE_SALT: ${WP_NONCE_SALT}
+
+  web:
+    image: d3strukt0r/wordpress-nginx
+    healthcheck:
+      start_period: 30s
+    restart: always
+    networks:
+      - internal
+      - traefik_proxy
+    depends_on:
+      - php
+    volumes:
+      - ./wp-content:/app/wp-content:ro
+    labels:
+      - traefik.enable=true
+
+      # Redirect to HTTPS
+      - traefik.http.routers.wundexpertinplus0.entrypoints=http
+      - traefik.http.routers.wundexpertinplus0.rule=Host(`wundexpertinplus.com`, `www.wundexpertinplus.com`)
+      - traefik.http.routers.wundexpertinplus0.middlewares=to_https
+
+      # Redirect to main domain
+      - traefik.http.routers.wundexpertinplus1.entrypoints=https
+      - traefik.http.routers.wundexpertinplus1.rule=Host(`wundexpertinplus.com`)
+      - traefik.http.routers.wundexpertinplus1.tls=true
+      - traefik.http.routers.wundexpertinplus1.tls.certresolver=le
+      - traefik.http.routers.wundexpertinplus1.middlewares=redirectToWundexpertinplus
+      - traefik.http.middlewares.redirectToWundexpertinplus.redirectregex.regex=^https:\/\/([^\/]*)\/(.*)
+      - traefik.http.middlewares.redirectToWundexpertinplus.redirectregex.replacement=https://www.wundexpertinplus.com/$${2}
+
+      # Main site
+      - traefik.http.routers.wundexpertinplus.entrypoints=https
+      - traefik.http.routers.wundexpertinplus.rule=Host(`www.wundexpertinplus.com`)
+      - traefik.http.routers.wundexpertinplus.tls=true
+      - traefik.http.routers.wundexpertinplus.tls.certresolver=le
+
+networks:
+  internal:
+    external: false
+  traefik_proxy:
+    external: true
