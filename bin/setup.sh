@@ -10,7 +10,7 @@ set -e -u -o pipefail
 # Default values
 : "${SKIP_UPDATE:=false}"
 : "${VOLUME_DIR:=/mnt/volume_fra1_01}"
-: "${SWAP_SIZE:=1G}"
+: "${SWAP_SIZE:=2G}"
 
 # Custom echo function to output '*blue*[INFO]*reset* message'
 function echo_info() {
