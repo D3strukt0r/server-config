@@ -1,110 +1,85 @@
-version: "3.4"
+include:
+  - path: ../../common/mariadb.compose.yml
+    env_file: .mariadb.env
+  - path: ../../common/phpmyadmin.compose.yml
+    env_file: .phpmyadmin.env
 
 services:
-  db:
-    image: mariadb
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
+  web-phpfpm:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
+    image: d3strukt0r/arepazo:phpfpm-develop
+    init: false
+    deploy:
+      resources:
+        limits:
+          memory: 160M
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "--password=${DB_DATABASE}"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    restart: always
-    networks:
-      - internal
-    volumes:
-      - ./database:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_DATABASE}
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    restart: always
+      # TODO: Figure out why i'm getting
+      # web-phpfpm-1  | NOTICE: Access to the script '/status' has been denied (see security.limit_extensions)
+      # web-phpfpm-1  | 127.0.0.1 -  21/Jun/2024:11:52:35 +0000 "GET /status" 403
+      #test: php-fpm-healthcheck || exit 1
+      start_period: 20s
     depends_on:
-      - db
-    networks:
-      - internal
-      - traefik_proxy
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-    environment:
-      UPLOAD_LIMIT: 100M
-    labels:
-      - traefik.enable=true
-
-      - traefik.http.routers.phpmyadmin_arepazo0.entrypoints=http
-      - traefik.http.routers.phpmyadmin_arepazo0.rule=Host(`${PHPMYADMIN_URL}`)
-      - traefik.http.routers.phpmyadmin_arepazo0.middlewares=to_https
-
-      - traefik.http.routers.phpmyadmin_arepazo.entrypoints=https
-      - traefik.http.routers.phpmyadmin_arepazo.rule=Host(`${PHPMYADMIN_URL}`)
-      - traefik.http.routers.phpmyadmin_arepazo.tls=true
-      - traefik.http.routers.phpmyadmin_arepazo.tls.certresolver=le
-
-  php:
-    build:
-      context: .
-      target: php
-    healthcheck:
-      start_period: 50s
-    restart: always
-    networks:
-      - internal
-    dns:
-      - 1.1.1.1
-      - 1.0.0.1
-    depends_on:
-      - db
+      - mariadb
     volumes:
-      - ./uploads:/app/wp-content/uploads
+      - ./uploads:/usr/local/src/app/wp-content/uploads
     environment:
-      DB_USER: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_DATABASE}
-      DB_TABLE_PREFIX: ve_
-      WP_AUTH_KEY: ${WP_AUTH_KEY}
-      WP_SECURE_AUTH_KEY: ${WP_SECURE_AUTH_KEY}
-      WP_LOGGED_IN_KEY: ${WP_LOGGED_IN_KEY}
-      WP_NONCE_KEY: ${WP_NONCE_KEY}
-      WP_AUTH_SALT: ${WP_AUTH_SALT}
-      WP_SECURE_AUTH_SALT: ${WP_SECURE_AUTH_SALT}
-      WP_LOGGED_IN_SALT: ${WP_LOGGED_IN_SALT}
-      WP_NONCE_SALT: ${WP_NONCE_SALT}
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_USER: db
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD:?WORDPRESS_DB_PASSWORD not set}
+      WORDPRESS_DB_NAME: db
 
-  web:
-    build:
-      context: .
-      target: nginx
+      WORDPRESS_AUTH_KEY: ${WORDPRESS_AUTH_KEY:?WORDPRESS_AUTH_KEY not set}
+      WORDPRESS_SECURE_AUTH_KEY: ${WORDPRESS_SECURE_AUTH_KEY:?WORDPRESS_SECURE_AUTH_KEY not set}
+      WORDPRESS_LOGGED_IN_KEY: ${WORDPRESS_LOGGED_IN_KEY:?WORDPRESS_LOGGED_IN_KEY not set}
+      WORDPRESS_NONCE_KEY: ${WORDPRESS_NONCE_KEY:?WORDPRESS_NONCE_KEY not set}
+      WORDPRESS_AUTH_SALT: ${WORDPRESS_AUTH_SALT:?WORDPRESS_AUTH_SALT not set}
+      WORDPRESS_SECURE_AUTH_SALT: ${WORDPRESS_SECURE_AUTH_SALT:?WORDPRESS_SECURE_AUTH_SALT not set}
+      WORDPRESS_LOGGED_IN_SALT: ${WORDPRESS_LOGGED_IN_SALT:?WORDPRESS_LOGGED_IN_SALT not set}
+      WORDPRESS_NONCE_SALT: ${WORDPRESS_NONCE_SALT:?WORDPRESS_NONCE_SALT not set}
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.web-phpfpm
+
+  web-nginx:
+    extends:
+      file: ../../common/snippets.yml
+      service: common-service
+    image: d3strukt0r/arepazo:nginx-develop
+    init: false
+    deploy:
+      resources:
+        limits:
+          memory: 100M
     healthcheck:
-      start_period: 50s
-    restart: always
+      # TODO: Change check, get 302 from fpm
+      # web-phpfpm-1  | 192.168.208.5 -  21/Jun/2024:12:25:16 +0000 "GET /index.php" 302
+      # web-nginx-1   | 127.0.0.1 - - [21/Jun/2024:12:25:16 +0000] "GET / HTTP/1.1" 302 5 "-" "curl/7.88.1" "-" "-"
+      #test: curl --fail http://localhost:8080 || exit 1
+      start_period: 30s
     networks:
-      - internal
+      - default
       - traefik_proxy
     depends_on:
-      - php
+      - web-phpfpm
     volumes:
-      - ./uploads:/app/wp-content/uploads:ro
+      - ./uploads:/usr/local/src/app/wp-content/uploads:ro
+    environment:
+      UPSTREAM_SERVER: web-phpfpm:9000
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.web-nginx
     labels:
       - traefik.enable=true
-
-      - traefik.http.routers.arepazo0.entrypoints=http
-      - traefik.http.routers.arepazo0.rule=Host(`arepazo.ch`) || Host(`www.arepazo.ch`)
-      - traefik.http.routers.arepazo0.middlewares=to_https
-
-      - traefik.http.routers.arepazo.entrypoints=https
-      - traefik.http.routers.arepazo.rule=Host(`arepazo.ch`) || Host(`www.arepazo.ch`)
-      - traefik.http.routers.arepazo.tls=true
-      - traefik.http.routers.arepazo.tls.certresolver=le
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`arepazo.ch`) || Host(`www.arepazo.ch`) || Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
 
 networks:
-  internal:
-    external: false
   traefik_proxy:
     external: true
