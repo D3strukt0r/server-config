@@ -8,6 +8,7 @@ services:
       - --character-set-server=${CHARACTER_SET:-utf8mb4}
       - --collation-server=${COLLATION:-utf8mb4_unicode_ci}
     healthcheck:
+      # https://github.com/docker-library/healthcheck/blob/master/mysql/docker-healthcheck
       test: mariadb-admin ping --user=${MAIN_USER:-db} --password=${MAIN_PASSWORD:?MAIN_PASSWORD not set} || exit 1
     deploy:
       resources:

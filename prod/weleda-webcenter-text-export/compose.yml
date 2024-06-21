@@ -4,12 +4,13 @@ services:
       file: ../../common/snippets.yml
       service: common-service
     image: d3strukt0r/weleda-webcenter-text-export
+    init: false
     deploy:
       resources:
         limits:
           memory: 160M
     healthcheck:
-      test: curl --fail http://localhost || exit 1
+      test: curl --fail http://localhost:8080 || exit 1
     networks:
       - default
       - traefik_proxy
