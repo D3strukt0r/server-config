@@ -14,7 +14,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 160M
+          memory: 280M
     healthcheck:
       # TODO: Figure out why i'm getting
       # web-phpfpm-1  | NOTICE: Access to the script '/status' has been denied (see security.limit_extensions)
@@ -53,7 +53,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 100M
+          memory: 160M
     healthcheck:
       # TODO: Change check, get 302 from fpm
       # web-phpfpm-1  | 192.168.208.5 -  21/Jun/2024:12:25:16 +0000 "GET /index.php" 302
