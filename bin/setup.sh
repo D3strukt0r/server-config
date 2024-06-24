@@ -129,6 +129,17 @@ install_package apache2-utils # for htpasswd command to add users to .htpasswd f
 install_package unzip # Was needed for setting up bitwarden first time
 install_package htop # Better top
 
+# Install Tofu (check with which)
+if ! which tofu &> /dev/null; then
+    echo_info 'Installing Tofu...'
+    curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+    chmod +x install-opentofu.sh
+    ./install-opentofu.sh --install-method deb
+    rm install-opentofu.sh
+else
+    echo_skip 'Tofu is already installed.'
+fi
+
 # Clone from GitHub (D3strukt0r/server-config) to $VOLUME_DIR/server
 if [[ -f ~/.ssh/id_ed25519 ]] && [[ -f ~/.ssh/id_ed25519.pub ]]; then
     if [[ ! -d "$VOLUME_DIR/server" ]]; then
@@ -366,7 +377,7 @@ fi
 CTOP_SHIM_CONTENT=$(cat <<"EOF"
 #!/bin/sh
 set -e -u
-docker run --rm -ti \
+docker run --rm --interactive --tty \
   --name=ctop \
   --volume /var/run/docker.sock:/var/run/docker.sock:ro \
   quay.io/vektorlab/ctop:latest
@@ -386,7 +397,7 @@ HADOLINT_SHIM_CONTENT=$(cat <<"EOF"
 set -e -u
 dockerfile="$1"
 shift
-docker run --rm -i hadolint/hadolint hadolint "$@" - < "$dockerfile"
+docker run --rm --interactive hadolint/hadolint hadolint "$@" - < "$dockerfile"
 EOF
 )
 if [[ ! -f /usr/local/bin/hadolint ]] || [[ $(cat /usr/local/bin/hadolint) != "$HADOLINT_SHIM_CONTENT" ]]; then
