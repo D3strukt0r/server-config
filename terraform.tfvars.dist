@@ -1,3 +1,4 @@
 do_token = "dop_v1_x"
+pvt_key = "~/.ssh/id_ed25519"
 do_monitoring_email = "x@x.x"
 do_monitoring_slack_webhook = "https://hooks.slack.com/services/x/x/x"

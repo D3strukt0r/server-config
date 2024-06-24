@@ -17,20 +17,18 @@ terraform {
 # https://cloud.digitalocean.com/account/api/tokens/new?&i=cd47c3
 # with "Full Access" scope
 # TODO: Figure out what to set in "Custom Scopes" instead
-variable "do_token" {
-  type = string
-  sensitive = true
-}
-variable "do_monitoring_email" {
-  type = string
-}
-variable "do_monitoring_slack_webhook" {
-  type = string
-  sensitive = true
-}
+variable "do_token" {}
+variable "pvt_key" {}
+variable "do_monitoring_email" {}
+variable "do_monitoring_slack_webhook" {}
 
 provider "digitalocean" {
   token = var.do_token
+}
+# doctl compute ssh-key list
+# tofu import digitalocean_ssh_key.d3strukt0r 39443066
+data "digitalocean_ssh_key" "d3strukt0r" {
+  name = "D3strukt0r"
 }
 # doctl projects list
 # tofu import digitalocean_project.myproject 608255c8-7f7f-407d-bf53-ef749ce89c14
@@ -57,6 +55,26 @@ resource "digitalocean_droplet" "main" {
   monitoring = true
   volume_ids = [digitalocean_volume.main.id]
   vpc_uuid = digitalocean_vpc.main.id
+  #ssh_keys = [
+  #  data.digitalocean_ssh_key.d3strukt0r.id
+  #]
+
+  #connection {
+  #  host = self.ipv4_address
+  #  user = "root"
+  #  type = "ssh"
+  #  private_key = file(var.pvt_key)
+  #  timeout = "2m"
+  #}
+
+  #provisioner "remote-exec" {
+  #  inline = [
+  #    "export PATH=$PATH:/usr/bin",
+  #    # install nginx
+  #    "sudo apt update",
+  #    "sudo apt install -y nginx"
+  #  ]
+  #}
 }
 # doctl compute volume list
 # tofu import digitalocean_volume.main b28e1427-6da5-11ee-b7ea-0a58ac14d86d
