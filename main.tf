@@ -14,6 +14,9 @@ terraform {
 
 # Set the variable value in *.tfvars file
 # or using -var="do_token=..." CLI option
+# https://cloud.digitalocean.com/account/api/tokens/new?&i=cd47c3
+# with "Full Access" scope
+# TODO: Figure out what to set in "Custom Scopes" instead
 variable "do_token" {
   type = string
   sensitive = true
@@ -23,7 +26,7 @@ variable "do_monitoring_email" {
 }
 variable "do_monitoring_slack_webhook" {
   type = string
-  sensitive = false # TODO: sensitive = true
+  sensitive = true
 }
 
 provider "digitalocean" {
@@ -201,4 +204,11 @@ resource "digitalocean_monitor_alert" "memory_alert" {
   enabled = true
   #entities = [digitalocean_droplet.main.id] # all droplets
   description = "Memory Utilization Percent is running high"
+}
+# doctl monitoring uptime list
+# tofu import digitalocean_uptime_check.ping 68300e8f-39a4-4ea8-89a7-baa1ee3b5ef5
+resource "digitalocean_uptime_check" "ping" {
+  name    = "Check Ping Container"
+  target  = "https://ping.d3strukt0r.dev/"
+  regions = ["eu_west", "se_asia", "us_east", "us_west"]
 }
