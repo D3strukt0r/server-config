@@ -17,10 +17,41 @@ terraform {
 # https://cloud.digitalocean.com/account/api/tokens/new?&i=cd47c3
 # with "Full Access" scope
 # TODO: Figure out what to set in "Custom Scopes" instead
-variable "do_token" {}
-variable "pvt_key" {}
-variable "do_monitoring_email" {}
-variable "do_monitoring_slack_webhook" {}
+variable "do_token" {
+  type = string
+  description = "DigitalOcean API token with Full Access scope"
+  sensitive = true
+  validation {
+    condition = can(regex("^dop_v1_[a-f0-9]{64}$", var.do_token))
+    error_message = "The do_token must be a valid DigitalOcean API token (`dop_v1_x`) with Full Access scope."
+  }
+}
+variable "pvt_key" {
+  type = string
+  description = "Path to the private key file"
+  #sensitive = true
+  validation {
+    condition = can(file(var.pvt_key))
+    error_message = "The pvt_key must be a valid path to the private key file."
+  }
+}
+variable "do_monitoring_email" {
+  type = string
+  description = "Email address to receive monitoring alerts"
+  validation {
+    condition = can(regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", var.do_monitoring_email))
+    error_message = "The do_monitoring_email must be a valid email address."
+  }
+}
+variable "do_monitoring_slack_webhook" {
+  type = string
+  description = "Slack webhook URL to receive monitoring alerts"
+  #sensitive = true
+  validation {
+    condition = can(regex("^https://hooks.slack.com/services/[A-Z0-9]+/[A-Z0-9]+/[a-zA-Z0-9]+$", var.do_monitoring_slack_webhook))
+    error_message = "The do_monitoring_slack_webhook must be a valid Slack webhook URL (https://hooks.slack.com/services/x/x/x)."
+  }
+}
 
 provider "digitalocean" {
   token = var.do_token
