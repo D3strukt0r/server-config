@@ -101,6 +101,22 @@ function ensure_in_group() {
         echo_skip "$1 is already in $2 group."
     fi
 }
+# Usage: binary_installed_or_linked <binary> <link-to>
+function binary_installed_or_linked() {
+    local existing_path
+    existing_path=$(which "$1" || true)
+    local link_path
+    link_path="/usr/local/bin/$1"
+
+    if [[ "$existing_path" != "$link_path" ]] && [[ "$existing_path" != '' ]]; then
+        echo_skip "$1 is already installed globally, in $existing_path."
+    elif [[ "$existing_path" == '' ]] || [[ ! -L "$link_path" ]]; then
+        echo_info "Linking $1 binary..."
+        ln --symbolic --force "$2" "$link_path"
+    else
+        echo_skip "$1 is already linked."
+    fi
+}
 
 ### BEGIN SETUP ###
 
@@ -375,37 +391,16 @@ fi
 
 # Link ctop.sh to /usr/local/bin/ctop (https://github.com/bcicen/ctop)
 # Check first with which if already installed (but not in /usr/local/bin)
-CTOP_PATH=$(which ctop || true)
-if [[ "$CTOP_PATH" != '/usr/local/bin/ctop' ]] && [[ "$CTOP_PATH" != '' ]]; then
-  echo_skip "ctop is already installed globally, in $CTOP_PATH."
-elif [[ "$CTOP_PATH" == '' ]] || [[ ! -L /usr/local/bin/ctop ]]; then
-  echo_info 'Linking ctop binary...'
-  ln --symbolic --force "$SCRIPT_DIR/ctop.sh" /usr/local/bin/ctop
-else
-  echo_skip 'ctop is already linked.'
-fi
+binary_installed_or_linked ctop "$SCRIPT_DIR/ctop.sh"
 
 # Hadolint script (https://github.com/hadolint/hadolint)
-HADOLINT_PATH=$(which hadolint || true)
-if [[ "$HADOLINT_PATH" != '/usr/local/bin/hadolint' ]] && [[ "$HADOLINT_PATH" != '' ]]; then
-  echo_skip "hadolint is already installed globally, in $HADOLINT_PATH."
-elif [[ "$HADOLINT_PATH" == '' ]] || [[ ! -L /usr/local/bin/hadolint ]]; then
-  echo_info 'Linking hadolint binary...'
-  ln --symbolic --force "$SCRIPT_DIR/hadolint.sh" /usr/local/bin/hadolint
-else
-  echo_skip 'hadolint is already linked.'
-fi
+binary_installed_or_linked hadolint "$SCRIPT_DIR/hadolint.sh"
 
 # OpenTofu script (https://opentofu.org/)
-OPENTOFU_PATH=$(which tofu || true)
-if [[ "$OPENTOFU_PATH" != '/usr/local/bin/tofu' ]] && [[ "$OPENTOFU_PATH" != '' ]]; then
-  echo_skip "OpenTofu is already installed globally, in $OPENTOFU_PATH."
-elif [[ "$OPENTOFU_PATH" == '' ]] || [[ ! -L /usr/local/bin/tofu ]]; then
-  echo_info 'Linking OpenTofu binary...'
-  ln --symbolic --force "$SCRIPT_DIR/opentofu.sh" /usr/local/bin/tofu
-else
-  echo_skip 'OpenTofu is already linked.'
-fi
+binary_installed_or_linked tofu "$SCRIPT_DIR/opentofu.sh"
+
+# DigitalOcean doctl script (https://opentofu.org/)
+binary_installed_or_linked doctl "$SCRIPT_DIR/doctl.sh"
 
 # Login to Docker Hub
 if [[ $(docker system info | grep 'Username') == '' ]]; then
