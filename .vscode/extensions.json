@@ -11,6 +11,8 @@
         "tetradresearch.vscode-h2o",
         "foxundermoon.shell-format",
         "timonwong.shellcheck",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "hashicorp.hcl",
+        "hashicorp.terraform"
     ]
 }
