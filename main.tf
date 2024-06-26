@@ -261,3 +261,10 @@ resource "digitalocean_uptime_check" "ping" {
   target  = "https://ping.d3strukt0r.dev/"
   regions = ["eu_west", "se_asia", "us_east", "us_west"]
 }
+
+#output "droplet_ip_addresses" {
+#  value = {
+#    for droplet in digitalocean_droplet.main:
+#    droplet.name => droplet.ipv4_address
+#  }
+#}
