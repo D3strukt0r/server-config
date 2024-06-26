@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e -u
+
 docker run --rm --interactive --tty \
   --name=opentofu \
   --workdir=/srv/workspace \
