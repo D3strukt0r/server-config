@@ -108,6 +108,7 @@ function binary_installed_or_linked() {
     local link_path
     link_path="/usr/local/bin/$1"
 
+    # Check first with which if already installed (but not in /usr/local/bin)
     if [[ "$existing_path" != "$link_path" ]] && [[ "$existing_path" != '' ]]; then
         echo_skip "$1 is already installed globally, in $existing_path."
     elif [[ "$existing_path" == '' ]] || [[ ! -L "$link_path" ]]; then
@@ -390,7 +391,6 @@ else
 fi
 
 # Link ctop.sh to /usr/local/bin/ctop (https://github.com/bcicen/ctop)
-# Check first with which if already installed (but not in /usr/local/bin)
 binary_installed_or_linked ctop "$SCRIPT_DIR/ctop.sh"
 
 # Hadolint script (https://github.com/hadolint/hadolint)
