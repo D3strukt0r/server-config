@@ -373,39 +373,38 @@ else
   echo_skip 'docker-prune.sh is already in crontab.'
 fi
 
-# Link ctop to /usr/local/bin/ctop (https://github.com/bcicen/ctop)
-CTOP_SHIM_CONTENT=$(cat <<"EOF"
-#!/bin/sh
-set -e -u
-docker run --rm --interactive --tty \
-  --name=ctop \
-  --volume /var/run/docker.sock:/var/run/docker.sock:ro \
-  quay.io/vektorlab/ctop:latest
-EOF
-)
-if [[ ! -f /usr/local/bin/ctop ]] || [[ $(cat /usr/local/bin/ctop) != "$CTOP_SHIM_CONTENT" ]]; then
-  echo_info 'Creating ctop shim...'
-  echo "$CTOP_SHIM_CONTENT" | tee /usr/local/bin/ctop >/dev/null
-  chmod +x /usr/local/bin/ctop
+# Link ctop.sh to /usr/local/bin/ctop (https://github.com/bcicen/ctop)
+# Check first with which if already installed (but not in /usr/local/bin)
+CTOP_PATH=$(which ctop || true)
+if [[ "$CTOP_PATH" != '/usr/local/bin/ctop' ]] && [[ "$CTOP_PATH" != '' ]]; then
+  echo_skip "ctop is already installed globally, in $CTOP_PATH."
+elif [[ "$CTOP_PATH" == '' ]] || [[ ! -L /usr/local/bin/ctop ]]; then
+  echo_info 'Linking ctop binary...'
+  ln --symbolic --force "$SCRIPT_DIR/ctop.sh" /usr/local/bin/ctop
 else
-  echo_skip 'ctop shim is already created.'
+  echo_skip 'ctop is already linked.'
 fi
 
 # Hadolint script (https://github.com/hadolint/hadolint)
-HADOLINT_SHIM_CONTENT=$(cat <<"EOF"
-#!/bin/sh
-set -e -u
-dockerfile="$1"
-shift
-docker run --rm --interactive hadolint/hadolint hadolint "$@" - < "$dockerfile"
-EOF
-)
-if [[ ! -f /usr/local/bin/hadolint ]] || [[ $(cat /usr/local/bin/hadolint) != "$HADOLINT_SHIM_CONTENT" ]]; then
-  echo_info 'Creating hadolint shim...'
-  echo "$HADOLINT_SHIM_CONTENT" | tee /usr/local/bin/hadolint >/dev/null
-  chmod +x /usr/local/bin/hadolint
+HADOLINT_PATH=$(which hadolint || true)
+if [[ "$HADOLINT_PATH" != '/usr/local/bin/hadolint' ]] && [[ "$HADOLINT_PATH" != '' ]]; then
+  echo_skip "hadolint is already installed globally, in $HADOLINT_PATH."
+elif [[ "$HADOLINT_PATH" == '' ]] || [[ ! -L /usr/local/bin/hadolint ]]; then
+  echo_info 'Linking hadolint binary...'
+  ln --symbolic --force "$SCRIPT_DIR/hadolint.sh" /usr/local/bin/hadolint
 else
-  echo_skip 'hadolint shim is already created.'
+  echo_skip 'hadolint is already linked.'
+fi
+
+# OpenTofu script (https://opentofu.org/)
+OPENTOFU_PATH=$(which tofu || true)
+if [[ "$OPENTOFU_PATH" != '/usr/local/bin/tofu' ]] && [[ "$OPENTOFU_PATH" != '' ]]; then
+  echo_skip "OpenTofu is already installed globally, in $OPENTOFU_PATH."
+elif [[ "$OPENTOFU_PATH" == '' ]] || [[ ! -L /usr/local/bin/tofu ]]; then
+  echo_info 'Linking OpenTofu binary...'
+  ln --symbolic --force "$SCRIPT_DIR/opentofu.sh" /usr/local/bin/tofu
+else
+  echo_skip 'OpenTofu is already linked.'
 fi
 
 # Login to Docker Hub
@@ -446,13 +445,23 @@ SERVICE_DEFAULTS_CONTENT=$(cat <<"EOF"
 #
 
 # To manage different subsets of services on different machines
-SERVER_ENVIRONMENT="digitalocean"
+SERVER_ENVIRONMENT="$SERVER_ENVIRONMENT"
 
 # Where is this repo on the system
 REPO_DIR="$REPO_DIR"
 EOF
 )
-SERVICE_DEFAULTS_CONTENT="${SERVICE_DEFAULTS_CONTENT/\$REPO_DIR/$(dirname "$SCRIPT_DIR")}"
+SERVER_ENVIRONMENT_USER=${SERVER_ENVIRONMENT:-}
+REPO_DIR_USER=${REPO_DIR:-}
+if [[ -f /etc/default/docker-services ]]; then
+    . /etc/default/docker-services
+fi
+# First take whatever the user gives, than what is already in the file, if exists
+# and lastly use the fallback values
+SERVER_ENVIRONMENT=${SERVER_ENVIRONMENT_USER:-${SERVER_ENVIRONMENT:-digitalocean}}
+REPO_DIR=${REPO_DIR_USER:-${REPO_DIR:-$(dirname "$SCRIPT_DIR")}}
+SERVICE_DEFAULTS_CONTENT="${SERVICE_DEFAULTS_CONTENT/\$REPO_DIR/$REPO_DIR}"
+SERVICE_DEFAULTS_CONTENT="${SERVICE_DEFAULTS_CONTENT/\$SERVER_ENVIRONMENT/$SERVER_ENVIRONMENT}"
 if [[ ! -f /etc/default/docker-services ]] || [[ $(cat /etc/default/docker-services) != "$SERVICE_DEFAULTS_CONTENT" ]]; then
   echo_info 'Setting up docker-services defaults...'
   echo "$SERVICE_DEFAULTS_CONTENT" | tee /etc/default/docker-services >/dev/null
