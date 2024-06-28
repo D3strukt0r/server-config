@@ -1,0 +1,99 @@
+include:
+  - path: ../../../common/prometheus.compose.yml
+  - path: ../../../common/grafana.compose.yml
+
+services:
+  traefik:
+    extends:
+      file: ../../../common/snippets.yml
+      service: common-service
+    image: traefik:3.0
+    command:
+      # Tell Traefik to listen to docker
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.network=traefik_proxy
+      # Add HTTP and HTTPS (with Let's Encrypt) entrypoint
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http3
+      - --certificatesresolvers.le.acme.email=${ACME_EMAIL:?ACME_EMAIL not set}
+      - --certificatesresolvers.le.acme.storage=acme.json
+      # - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.le.acme.dnschallenge=true
+      - --certificatesresolvers.le.acme.dnschallenge.provider=cloudflare
+      # Enable Traefik dashboard
+      - --api.dashboard=true
+      # Give more logs
+      - --log.level=INFO
+      - --log.format=json
+      # Enable ping
+      - --ping=true
+      # Enable Access log
+      - --accesslog=true
+      # Enable Metrics
+      # https://medium.com/@ugenef/application-monitoring-with-traefik-prometheus-grafana-and-docker-compose-for-beginners-2fe25d1b60a8
+      # https://github.com/ugenef/simple-infrastructure/tree/main/compose
+      - --metrics.prometheus=true
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8080/ping || exit 1
+      #test: traefik healthcheck
+    networks:
+      - default
+      #- proxy
+      - traefik_proxy
+    ports:
+      - '80:80' # HTTP
+      - '443:443' # HTTPS
+      - '443:443/udp' # HTTP/3
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./acme.json:/acme.json
+      # - ./acme-staging.json:/acme.json
+    environment:
+      CF_API_EMAIL: ${CLOUDFLARE_EMAIL:?CLOUDFLARE_EMAIL not set}
+      CF_API_KEY: ${CLOUDFLARE_API_KEY:?CLOUDFLARE_API_KEY not set}
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.middlewares=traefik_auth
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.service=api@internal
+
+      # Declaring the user list
+      #
+      # Note: all dollar signs in the hash need to be doubled for escaping.
+      # To create user:password pair, it's possible to use this command:
+      # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
+      - traefik.http.middlewares.traefik_auth.basicauth.users=${TRAEFIK_USERS:?TRAEFIK_USERS not set}
+
+      # Standard middleware for other containers to use
+      # HTTP to HTTPS redirect
+      #- traefik.http.middlewares.to_https.redirectscheme.scheme=websecure
+      #- traefik.http.middlewares.to_https_perm.redirectscheme.scheme=websecure
+      #- traefik.http.middlewares.to_https_perm.redirectscheme.permanent=true
+      # ex. how to use middleware
+      #- traefik.http.routers.service0.entrypoints=http
+      #- traefik.http.routers.service0.rule=Host(`service.d3strukt0r.dev`)
+      #- traefik.http.routers.service0.middlewares=to_https
+
+networks:
+  #proxy:
+  #  driver: bridge
+  traefik_proxy:
+    external: true

@@ -390,17 +390,13 @@ else
   echo_skip 'docker-prune.sh is already in crontab.'
 fi
 
-# Link ctop.sh to /usr/local/bin/ctop (https://github.com/bcicen/ctop)
-binary_installed_or_linked ctop "$SCRIPT_DIR/ctop.sh"
-
-# Hadolint script (https://github.com/hadolint/hadolint)
-binary_installed_or_linked hadolint "$SCRIPT_DIR/hadolint.sh"
-
-# OpenTofu script (https://opentofu.org/)
-binary_installed_or_linked tofu "$SCRIPT_DIR/opentofu.sh"
-
-# DigitalOcean doctl script (https://opentofu.org/)
-binary_installed_or_linked doctl "$SCRIPT_DIR/doctl.sh"
+# Link custom scripts
+binary_installed_or_linked ctop "$SCRIPT_DIR/ctop.sh" # https://github.com/bcicen/ctop
+binary_installed_or_linked hadolint "$SCRIPT_DIR/hadolint.sh" # https://github.com/hadolint/hadolint
+binary_installed_or_linked tofu "$SCRIPT_DIR/opentofu.sh" # https://opentofu.org/
+binary_installed_or_linked doctl "$SCRIPT_DIR/doctl.sh" # https://github.com/digitalocean/doctl
+binary_installed_or_linked docker-services-start "$SCRIPT_DIR/docker-services-start.sh"
+binary_installed_or_linked docker-services-stop "$SCRIPT_DIR/docker-services-stop.sh"
 
 # Login to Docker Hub
 if [[ $(docker system info | grep 'Username') == '' ]]; then
