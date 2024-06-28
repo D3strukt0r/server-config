@@ -16,15 +16,22 @@ mongosh
 ```mongo
 use admin
 
-db.auth("adminUser", "adminPassword")
+db.auth("root", "<current-password:.mongo.env:ROOT_PASSWORD>")
 
 use fluentd
 
 db.createUser({
-  user: "dbUser",
-  pwd: "dbPassword",
+  user: "fluentd",
+  pwd: "<new-password:.env:DATABASE_PASSWORD>",
   roles: [
     { role: "readWrite", db: "fluentd" }
   ]
 })
+```
+
+## Helper functions
+
+```mongo
+use admin
+db.system.users.find()
 ```

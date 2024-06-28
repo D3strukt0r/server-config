@@ -27,6 +27,9 @@ services:
       - ./logs:/fluentd/log
     ports:
       - '24224:24224'
+    depends_on:
+      mongo:
+        condition: service_healthy
     environment:
       DATABASE_URL: mongodb://${DATABASE_USER:?DATABASE_USER not set}:${DATABASE_PASSWORD:?DATABASE_PASSWORD not set}@mongo:27017/fluentd
 
