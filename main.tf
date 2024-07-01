@@ -31,7 +31,7 @@ variable "pvt_key" {
   description = "Path to the private key file"
   #sensitive = true
   validation {
-    condition = can(file(var.pvt_key))
+    condition = fileexists(var.pvt_key)
     error_message = "The pvt_key must be a valid path to the private key file."
   }
 }

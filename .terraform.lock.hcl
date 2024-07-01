@@ -7,6 +7,8 @@ provider "registry.opentofu.org/digitalocean/digitalocean" {
   hashes = [
     "h1:8qu+Bu1eOKXx9eNta1v0uC01RKekmeFusWF/ONZ2aHI=",
     "h1:ci1lDN5Jz3QTvNjuKxdGngXs1xxPba0eDv/2rTVqw60=",
+    "h1:hgTOf30OwS0LIWcuk2WJO7piue46Nx/YiD/09vPySwo=",
+    "h1:qsKPe21kR1Bb/uqWSwO+ONAOHSJ0jOn4KhyplRaCfr4=",
     "zh:00380bd275cdb15645d03880a5c219a6826a9edba43099f5c09475465f87eb5f",
     "zh:1e40f4aa51ba898cf64b1f296450b2ae85e77af6e2706536242093550aa605b0",
     "zh:3f5f0c9f8c0cad64a757e38c1098633904786db998ab772e44f5f981b1acc06f",
