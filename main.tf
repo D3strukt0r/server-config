@@ -56,13 +56,21 @@ variable "do_monitoring_slack_webhook" {
 provider "digitalocean" {
   token = var.do_token
 }
-# doctl compute ssh-key list
-# tofu import digitalocean_ssh_key.d3strukt0r 39443066
+#import {
+#  # doctl compute ssh-key list
+#  # tofu import digitalocean_ssh_key.d3strukt0r 39443066
+#  to = digitalocean_ssh_key.d3strukt0r
+#  id = "39443066"
+#}
 data "digitalocean_ssh_key" "d3strukt0r" {
   name = "D3strukt0r"
 }
-# doctl projects list
-# tofu import digitalocean_project.myproject 608255c8-7f7f-407d-bf53-ef749ce89c14
+import {
+  # doctl projects list
+  # tofu import digitalocean_project.myproject 608255c8-7f7f-407d-bf53-ef749ce89c14
+  to = digitalocean_project.myproject
+  id = "608255c8-7f7f-407d-bf53-ef749ce89c14"
+}
 resource "digitalocean_project" "myproject" {
   name = "Project D3strukt0r"
   description = "All my projects"
@@ -74,8 +82,12 @@ resource "digitalocean_project" "myproject" {
     digitalocean_volume.main.urn,
   ]
 }
-# doctl compute droplet list
-# tofu import digitalocean_droplet.main 375424082
+import {
+  # doctl compute droplet list
+  # tofu import digitalocean_droplet.main 375424082
+  to = digitalocean_droplet.main
+  id = "375424082"
+}
 resource "digitalocean_droplet" "main" {
   image = "ubuntu-22-04-x64"
   name = "prod-de"
@@ -86,6 +98,11 @@ resource "digitalocean_droplet" "main" {
   monitoring = true
   volume_ids = [digitalocean_volume.main.id]
   vpc_uuid = digitalocean_vpc.main.id
+
+  lifecycle {
+    prevent_destroy = true
+  }
+
   #ssh_keys = [
   #  data.digitalocean_ssh_key.d3strukt0r.id
   #]
@@ -107,19 +124,41 @@ resource "digitalocean_droplet" "main" {
   #  ]
   #}
 }
-# doctl compute volume list
-# tofu import digitalocean_volume.main b28e1427-6da5-11ee-b7ea-0a58ac14d86d
+import {
+  # doctl compute volume list
+  # tofu import digitalocean_volume.main b28e1427-6da5-11ee-b7ea-0a58ac14d86d
+  to = digitalocean_volume.main
+  id = "b28e1427-6da5-11ee-b7ea-0a58ac14d86d"
+}
 resource "digitalocean_volume" "main" {
   region = "fra1"
   name = "volume-fra1-01"
   size = 100
   #initial_filesystem_type = "ext4"
   #description = "an example volume"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
-# doctl compute firewall list
-# tofu import digitalocean_firewall.ssh 2f8c32b2-b051-4517-9775-c1f12fbe1da0
-# tofu import digitalocean_firewall.email 3954180e-0234-459f-9b4d-68bedf537ca4
-# tofu import digitalocean_firewall.web 566a8788-74ea-48fd-8ab8-3cb80e999e41
+import {
+  # doctl compute firewall list
+  # tofu import digitalocean_firewall.ssh 2f8c32b2-b051-4517-9775-c1f12fbe1da0
+  to = digitalocean_firewall.ssh
+  id = "2f8c32b2-b051-4517-9775-c1f12fbe1da0"
+}
+import {
+  # doctl compute firewall list
+  # tofu import digitalocean_firewall.email 3954180e-0234-459f-9b4d-68bedf537ca4
+  to = digitalocean_firewall.email
+  id = "3954180e-0234-459f-9b4d-68bedf537ca4"
+}
+import {
+  # doctl compute firewall list
+  # tofu import digitalocean_firewall.web 566a8788-74ea-48fd-8ab8-3cb80e999e41
+  to = digitalocean_firewall.web
+  id = "566a8788-74ea-48fd-8ab8-3cb80e999e41"
+}
 resource "digitalocean_firewall" "email" {
   name = "Email"
   droplet_ids = [digitalocean_droplet.main.id]
@@ -212,16 +251,29 @@ resource "digitalocean_firewall" "web" {
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 }
-# doctl vpcs list
-# tofu import digitalocean_vpc.main 699e0b9a-7589-41ec-8420-03a4c1f65330
+import {
+  # doctl vpcs list
+  # tofu import digitalocean_vpc.main 699e0b9a-7589-41ec-8420-03a4c1f65330
+  to = digitalocean_vpc.main
+  id = "699e0b9a-7589-41ec-8420-03a4c1f65330"
+}
 resource "digitalocean_vpc" "main" {
   name     = "default-fra1"
   region   = "fra1"
   ip_range = "10.114.0.0/20"
 }
-# doctl monitoring alert list
-# tofu import digitalocean_monitor_alert.storage_alert bb96aa22-1e9b-4911-b2a8-c8cb0d02b91c
-# tofu import digitalocean_monitor_alert.memory_alert 9271a11b-3b1a-4b6b-9b4d-f3c804e0d3c6
+import {
+  # doctl monitoring alert list
+  # tofu import digitalocean_monitor_alert.storage_alert bb96aa22-1e9b-4911-b2a8-c8cb0d02b91c
+  to = digitalocean_monitor_alert.storage_alert
+  id = "bb96aa22-1e9b-4911-b2a8-c8cb0d02b91c"
+}
+import {
+  # doctl monitoring alert list
+  # tofu import digitalocean_monitor_alert.memory_alert 9271a11b-3b1a-4b6b-9b4d-f3c804e0d3c6
+  to = digitalocean_monitor_alert.memory_alert
+  id = "9271a11b-3b1a-4b6b-9b4d-f3c804e0d3c6"
+}
 resource "digitalocean_monitor_alert" "storage_alert" {
   alerts {
     email = [var.do_monitoring_email]
@@ -254,8 +306,12 @@ resource "digitalocean_monitor_alert" "memory_alert" {
   #entities = [digitalocean_droplet.main.id] # all droplets
   description = "Memory Utilization Percent is running high"
 }
-# doctl monitoring uptime list
-# tofu import digitalocean_uptime_check.ping 68300e8f-39a4-4ea8-89a7-baa1ee3b5ef5
+import {
+  # doctl monitoring uptime list
+  # tofu import digitalocean_uptime_check.ping 68300e8f-39a4-4ea8-89a7-baa1ee3b5ef5
+  to = digitalocean_uptime_check.ping
+  id = "68300e8f-39a4-4ea8-89a7-baa1ee3b5ef5"
+}
 resource "digitalocean_uptime_check" "ping" {
   name    = "Check Ping Container"
   target  = "https://ping.d3strukt0r.dev/"

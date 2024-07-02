@@ -126,6 +126,17 @@ done
 (cd fluentd && docker compose down)
 ```
 
+#### Using OpenTofu
+
+When adding providers, add them for all platforms
+
+```shell
+tofu providers lock \
+  -platform=linux_arm64 \
+  -platform=linux_amd64 \
+  -platform=darwin_amd64 \
+  -platform=windows_amd64
+```
 
 ## Built With
 
