@@ -55,19 +55,6 @@ resource "cloudflare_record" "d3st-dev-dkim2" {
 }
 
 import {
-  to = cloudflare_record.d3st-dev-mx2
-  id = "${local.cloudflare_zone_id_d3st_dev}/8a2a3d6ef3e478af5af458fcbc54a8c4"
-}
-resource "cloudflare_record" "d3st-dev-mx2" {
-  zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "d3st.dev"
-  value = "mail2.anonaddy.me"
-  type = "MX"
-  comment = "AnonAddy"
-  priority = 20
-}
-
-import {
   to = cloudflare_record.d3st-dev-mx1
   id = "${local.cloudflare_zone_id_d3st_dev}/06a2ba8b1b0b68a32b14999e670d7d21"
 }
@@ -81,15 +68,16 @@ resource "cloudflare_record" "d3st-dev-mx1" {
 }
 
 import {
-  to = cloudflare_record.d3st-dev-box-verify
-  id = "${local.cloudflare_zone_id_d3st_dev}/e361a2a1d4f244fc129d582eb66d0480"
+  to = cloudflare_record.d3st-dev-mx2
+  id = "${local.cloudflare_zone_id_d3st_dev}/8a2a3d6ef3e478af5af458fcbc54a8c4"
 }
-resource "cloudflare_record" "d3st-dev-box-verify" {
+resource "cloudflare_record" "d3st-dev-mx2" {
   zone_id = local.cloudflare_zone_id_d3st_dev
   name = "d3st.dev"
-  value = "box-domain-verification=3470b4078aa49daffbd25ad6dfa6088cf90b2740804c2b514915b619a848c1b0"
-  type = "TXT"
-  comment = "box.com Verify"
+  value = "mail2.anonaddy.me"
+  type = "MX"
+  comment = "AnonAddy"
+  priority = 20
 }
 
 import {
@@ -105,6 +93,18 @@ resource "cloudflare_record" "d3st-dev-spf" {
 }
 
 import {
+  to = cloudflare_record.d3st-dev-dmarc
+  id = "${local.cloudflare_zone_id_d3st_dev}/20987934db6bece1be6ab30e683a0a0d"
+}
+resource "cloudflare_record" "d3st-dev-dmarc" {
+  zone_id = local.cloudflare_zone_id_d3st_dev
+  name = "_dmarc"
+  value = "v=DMARC1; p=quarantine; adkim=s"
+  type = "TXT"
+  comment = "AnonAddy DMARC"
+}
+
+import {
   to = cloudflare_record.d3st-dev-anonaddy-verify
   id = "${local.cloudflare_zone_id_d3st_dev}/9ba77f4c92b60be3b2339c2b3bead106"
 }
@@ -117,13 +117,13 @@ resource "cloudflare_record" "d3st-dev-anonaddy-verify" {
 }
 
 import {
-  to = cloudflare_record.d3st-dev-dmarc
-  id = "${local.cloudflare_zone_id_d3st_dev}/20987934db6bece1be6ab30e683a0a0d"
+  to = cloudflare_record.d3st-dev-box-verify
+  id = "${local.cloudflare_zone_id_d3st_dev}/e361a2a1d4f244fc129d582eb66d0480"
 }
-resource "cloudflare_record" "d3st-dev-dmarc" {
+resource "cloudflare_record" "d3st-dev-box-verify" {
   zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "_dmarc"
-  value = "v=DMARC1; p=quarantine; adkim=s"
+  name = "d3st.dev"
+  value = "box-domain-verification=3470b4078aa49daffbd25ad6dfa6088cf90b2740804c2b514915b619a848c1b0"
   type = "TXT"
-  comment = "AnonAddy DMARC"
+  comment = "box.com Verify"
 }
