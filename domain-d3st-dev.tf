@@ -29,30 +29,6 @@ resource "cloudflare_record" "d3st-dev-root" {
 }
 
 import {
-  to = cloudflare_record.d3st-dev-dkim
-  id = "${local.cloudflare_zone_id_d3st_dev}/becdd07bd6410d812fbabb710eace7f3"
-}
-resource "cloudflare_record" "d3st-dev-dkim" {
-  zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "dk1._domainkey"
-  value = "dk1._domainkey.anonaddy.me"
-  type = "CNAME"
-  comment = "AnonAddy (Proxy not supported!)"
-}
-
-import {
-  to = cloudflare_record.d3st-dev-dkim2
-  id = "${local.cloudflare_zone_id_d3st_dev}/9474c644bfe79407b7c68642ed0d109e"
-}
-resource "cloudflare_record" "d3st-dev-dkim2" {
-  zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "dk2._domainkey"
-  value = "dk2._domainkey.anonaddy.me"
-  type = "CNAME"
-  comment = "AnonAddy (Proxy not supported!)"
-}
-
-import {
   to = cloudflare_record.d3st-dev-mx1
   id = "${local.cloudflare_zone_id_d3st_dev}/06a2ba8b1b0b68a32b14999e670d7d21"
 }
@@ -76,6 +52,30 @@ resource "cloudflare_record" "d3st-dev-mx2" {
   type = "MX"
   comment = "AnonAddy"
   priority = 20
+}
+
+import {
+  to = cloudflare_record.d3st-dev-dkim
+  id = "${local.cloudflare_zone_id_d3st_dev}/becdd07bd6410d812fbabb710eace7f3"
+}
+resource "cloudflare_record" "d3st-dev-dkim" {
+  zone_id = local.cloudflare_zone_id_d3st_dev
+  name = "dk1._domainkey"
+  value = "dk1._domainkey.anonaddy.me"
+  type = "CNAME"
+  comment = "AnonAddy (Proxy not supported!)"
+}
+
+import {
+  to = cloudflare_record.d3st-dev-dkim2
+  id = "${local.cloudflare_zone_id_d3st_dev}/9474c644bfe79407b7c68642ed0d109e"
+}
+resource "cloudflare_record" "d3st-dev-dkim2" {
+  zone_id = local.cloudflare_zone_id_d3st_dev
+  name = "dk2._domainkey"
+  value = "dk2._domainkey.anonaddy.me"
+  type = "CNAME"
+  comment = "AnonAddy (Proxy not supported!)"
 }
 
 import {
