@@ -5,3 +5,5 @@ do_monitoring_email = "x@x.x"
 do_monitoring_slack_webhook = "https://hooks.slack.com/services/x/x/x"
 # https://dash.cloudflare.com/profile/api-tokens
 cloudflare_api_token = ""
+# https://ap.www.namecheap.com/settings/tools/apiaccess/
+namecheap_api_key = ""

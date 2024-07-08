@@ -128,6 +128,16 @@ variable "cloudflare_api_token" {
     error_message = "The cloudflare_api_token must be a valid Cloudflare API token."
   }
 }
+# https://ap.www.namecheap.com/settings/tools/apiaccess/
+variable "namecheap_api_key" {
+  type = string
+  description = "Namecheap API key"
+  sensitive = true
+  validation {
+    condition = can(regex("^[a-f0-9]{32}$", var.namecheap_api_key))
+    error_message = "The namecheap_api_key must be a valid Namecheap API key."
+  }
+}
 
 provider "digitalocean" {
   token = var.do_token
@@ -135,6 +145,12 @@ provider "digitalocean" {
 provider "cloudflare" {
   api_token = var.cloudflare_api_token
 }
+provider "namecheap" {
+  user_name = "D3strukt0r2"
+  api_user = "D3strukt0r2"
+  api_key = var.namecheap_api_key
+}
+
 #import {
 #  to = digitalocean_ssh_key.d3strukt0r
 #  id = "39443066"
@@ -213,16 +229,8 @@ resource "digitalocean_volume" "main" {
   }
 }
 import {
-  to = digitalocean_firewall.ssh
-  id = "2f8c32b2-b051-4517-9775-c1f12fbe1da0"
-}
-import {
   to = digitalocean_firewall.email
   id = "3954180e-0234-459f-9b4d-68bedf537ca4"
-}
-import {
-  to = digitalocean_firewall.web
-  id = "566a8788-74ea-48fd-8ab8-3cb80e999e41"
 }
 resource "digitalocean_firewall" "email" {
   name = "Email"
@@ -275,6 +283,10 @@ resource "digitalocean_firewall" "email" {
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 }
+import {
+  to = digitalocean_firewall.ssh
+  id = "2f8c32b2-b051-4517-9775-c1f12fbe1da0"
+}
 resource "digitalocean_firewall" "ssh" {
   name = "SSH"
   droplet_ids = [digitalocean_droplet.main.id]
@@ -284,6 +296,10 @@ resource "digitalocean_firewall" "ssh" {
     port_range = "22"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
+}
+import {
+  to = digitalocean_firewall.web
+  id = "566a8788-74ea-48fd-8ab8-3cb80e999e41"
 }
 resource "digitalocean_firewall" "web" {
   name = "Web"

@@ -4,6 +4,18 @@ locals {
   cloudflare_zone_id_manuele_vaccari_ch = "cbeaf02654d2fa5b4978572f4d4595d0"
 }
 
+#import {
+#  to = namecheap_domain_records.manuele-vaccari-ch
+#  id = "manuele-vaccari.ch"
+#}
+#resource "namecheap_domain_records" "manuele-vaccari-ch" {
+#  domain = "manuele-vaccari.ch"
+#  nameservers = [
+#    "brenda.ns.cloudflare.com",
+#    "wesley.ns.cloudflare.com",
+#  ]
+#}
+
 import {
   to = cloudflare_record.manuele-vaccari-ch-wildcard
   id = "${local.cloudflare_zone_id_manuele_vaccari_ch}/88d146360e96917f6c4d6cfcb0855253"
