@@ -129,6 +129,8 @@ variable "cloudflare_api_token" {
   }
 }
 # https://ap.www.namecheap.com/settings/tools/apiaccess/
+# Also add the IP address of the machine running Terraform to the whitelist
+# https://ap.www.namecheap.com/settings/tools/apiaccess/whitelisted-ips
 variable "namecheap_api_key" {
   type = string
   description = "Namecheap API key"
