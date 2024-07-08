@@ -37,7 +37,6 @@ resource "cloudflare_record" "d3st-dev-dkim" {
   name = "dk1._domainkey"
   value = "dk1._domainkey.anonaddy.me"
   type = "CNAME"
-  proxied = false
   comment = "AnonAddy (Proxy not supported!)"
 }
 
@@ -50,7 +49,6 @@ resource "cloudflare_record" "d3st-dev-dkim2" {
   name = "dk2._domainkey"
   value = "dk2._domainkey.anonaddy.me"
   type = "CNAME"
-  proxied = false
   comment = "AnonAddy (Proxy not supported!)"
 }
 
