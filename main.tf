@@ -9,7 +9,72 @@ terraform {
       source  = "digitalocean/digitalocean"
       version = "~> 2.0"
     }
+    cloudflare = {
+      source = "cloudflare/cloudflare"
+      version = "~> 4.36"
+    }
+    namecheap = {
+      source = "namecheap/namecheap"
+      version = "~> 2.0"
+    }
   }
+
+  #backend "http" {
+  #  address = "https://opentofu-state.d3strukt0r.dev"
+  #  lock_address = "https://opentofu-state.d3strukt0r.dev"
+  #  unlock_address = "https://opentofu-state.d3strukt0r.dev"
+  #  username = "admin"
+  #  password = "" # or use TF_HTTP_PASSWORD
+  #}
+
+  # https://ruben-rodriguez.github.io/posts/minio-s3-terraform-backend/
+  #backend "s3" {
+  #  bucket = "default" # Name of the S3 bucket
+  #  endpoints = {
+  #    s3 = "https://minio-opentofu-state.d3strukt0r.dev" # Minio endpoint
+  #  }
+  #  key = "terraform.tfstate" # Name of the tfstate file
+
+  #  access_key="xxxxxxxxxxxx" # Access and secret keys
+  #  secret_key="xxxxxxxxxxxxxxxxxxxxxx"
+
+  #  region = "main" # Region validation will be skipped
+  #  skip_credentials_validation = true # Skip AWS related checks and validations
+  #  skip_requesting_account_id = true
+  #  skip_metadata_api_check = true
+  #  skip_region_validation = true
+  #  use_path_style = true # Enable path-style S3 URLs (https://<HOST>/<BUCKET>
+  #  # https://developer.hashicorp.com/terraform/language/settings/backends/s3#use_path_style
+  #  # https://opentofu.org/docs/language/settings/backends/s3/#s3-state-storage
+  #}
+
+  #encryption {
+  #  #method "unencrypted" "migrate" {}
+  #  key_provider "pbkdf2" "mykey" {
+  #    passphrase = "changeme!"
+  #  }
+  #  key_provider "openbao" "my_bao" {
+  #    key_name = "test-key"
+  #    token = "token-from-bao"
+  #    address = "https://openbao.d3strukt0r.dev"
+  #  }
+  #  method "aes_gcm" "new_method" {
+  #    keys = key_provider.pbkdf2.mykey
+  #    #keys = key_provider.openbao.my_bao
+  #  }
+  #  state {
+  #    #method = method.unencrypted.migrate
+  #    method = method.aes_gcm.new_method
+  #    # Run "tofu apply"
+  #    # then uncomment:
+  #    #enforced = true
+  #  }
+  #  remote_state_data_sources {
+  #    default {
+  #      method = method.aes_gcm.new_method
+  #    }
+  #  }
+  #}
 }
 
 # Set the variable value in *.tfvars file
@@ -52,13 +117,25 @@ variable "do_monitoring_slack_webhook" {
     error_message = "The do_monitoring_slack_webhook must be a valid Slack webhook URL (https://hooks.slack.com/services/x/x/x)."
   }
 }
+# https://dash.cloudflare.com/profile/api-tokens
+# Create Custom Token with "Zone.DNS:Edit" permissions
+variable "cloudflare_api_token" {
+  type = string
+  description = "Cloudflare API token"
+  sensitive = true
+  validation {
+    condition = can(regex("^[a-zA-Z0-9_]{40}$", var.cloudflare_api_token))
+    error_message = "The cloudflare_api_token must be a valid Cloudflare API token."
+  }
+}
 
 provider "digitalocean" {
   token = var.do_token
 }
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+}
 #import {
-#  # doctl compute ssh-key list
-#  # tofu import digitalocean_ssh_key.d3strukt0r 39443066
 #  to = digitalocean_ssh_key.d3strukt0r
 #  id = "39443066"
 #}
@@ -66,8 +143,6 @@ data "digitalocean_ssh_key" "d3strukt0r" {
   name = "D3strukt0r"
 }
 import {
-  # doctl projects list
-  # tofu import digitalocean_project.myproject 608255c8-7f7f-407d-bf53-ef749ce89c14
   to = digitalocean_project.myproject
   id = "608255c8-7f7f-407d-bf53-ef749ce89c14"
 }
@@ -83,8 +158,6 @@ resource "digitalocean_project" "myproject" {
   ]
 }
 import {
-  # doctl compute droplet list
-  # tofu import digitalocean_droplet.main 375424082
   to = digitalocean_droplet.main
   id = "375424082"
 }
@@ -125,8 +198,6 @@ resource "digitalocean_droplet" "main" {
   #}
 }
 import {
-  # doctl compute volume list
-  # tofu import digitalocean_volume.main b28e1427-6da5-11ee-b7ea-0a58ac14d86d
   to = digitalocean_volume.main
   id = "b28e1427-6da5-11ee-b7ea-0a58ac14d86d"
 }
@@ -142,20 +213,14 @@ resource "digitalocean_volume" "main" {
   }
 }
 import {
-  # doctl compute firewall list
-  # tofu import digitalocean_firewall.ssh 2f8c32b2-b051-4517-9775-c1f12fbe1da0
   to = digitalocean_firewall.ssh
   id = "2f8c32b2-b051-4517-9775-c1f12fbe1da0"
 }
 import {
-  # doctl compute firewall list
-  # tofu import digitalocean_firewall.email 3954180e-0234-459f-9b4d-68bedf537ca4
   to = digitalocean_firewall.email
   id = "3954180e-0234-459f-9b4d-68bedf537ca4"
 }
 import {
-  # doctl compute firewall list
-  # tofu import digitalocean_firewall.web 566a8788-74ea-48fd-8ab8-3cb80e999e41
   to = digitalocean_firewall.web
   id = "566a8788-74ea-48fd-8ab8-3cb80e999e41"
 }
@@ -252,8 +317,6 @@ resource "digitalocean_firewall" "web" {
   }
 }
 import {
-  # doctl vpcs list
-  # tofu import digitalocean_vpc.main 699e0b9a-7589-41ec-8420-03a4c1f65330
   to = digitalocean_vpc.main
   id = "699e0b9a-7589-41ec-8420-03a4c1f65330"
 }
@@ -263,14 +326,10 @@ resource "digitalocean_vpc" "main" {
   ip_range = "10.114.0.0/20"
 }
 import {
-  # doctl monitoring alert list
-  # tofu import digitalocean_monitor_alert.storage_alert bb96aa22-1e9b-4911-b2a8-c8cb0d02b91c
   to = digitalocean_monitor_alert.storage_alert
   id = "bb96aa22-1e9b-4911-b2a8-c8cb0d02b91c"
 }
 import {
-  # doctl monitoring alert list
-  # tofu import digitalocean_monitor_alert.memory_alert 9271a11b-3b1a-4b6b-9b4d-f3c804e0d3c6
   to = digitalocean_monitor_alert.memory_alert
   id = "9271a11b-3b1a-4b6b-9b4d-f3c804e0d3c6"
 }
@@ -307,8 +366,6 @@ resource "digitalocean_monitor_alert" "memory_alert" {
   description = "Memory Utilization Percent is running high"
 }
 import {
-  # doctl monitoring uptime list
-  # tofu import digitalocean_uptime_check.ping 68300e8f-39a4-4ea8-89a7-baa1ee3b5ef5
   to = digitalocean_uptime_check.ping
   id = "68300e8f-39a4-4ea8-89a7-baa1ee3b5ef5"
 }
