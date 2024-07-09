@@ -22,9 +22,9 @@ import {
 }
 resource "cloudflare_record" "manuele-vaccari-ch-wildcard" {
   zone_id = local.cloudflare_zone_id_manuele_vaccari_ch
-  name = "*"
-  value = "manuele-vaccari.ch"
-  type = "CNAME"
+  name    = "*"
+  value   = "manuele-vaccari.ch"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -34,8 +34,8 @@ import {
 }
 resource "cloudflare_record" "manuele-vaccari-ch-root" {
   zone_id = local.cloudflare_zone_id_manuele_vaccari_ch
-  name = "manuele-vaccari.ch"
-  value = "prod.d3strukt0r.dev"
-  type = "CNAME"
+  name    = "manuele-vaccari.ch"
+  value   = "prod.d3strukt0r.dev"
+  type    = "CNAME"
   proxied = true
 }

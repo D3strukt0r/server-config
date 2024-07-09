@@ -10,9 +10,9 @@ import {
 }
 resource "cloudflare_record" "manuele-robine-wedding-wildcard" {
   zone_id = local.cloudflare_zone_id_manuele_robine_wedding
-  name = "*"
-  value = "manuele-robine.wedding"
-  type = "CNAME"
+  name    = "*"
+  value   = "manuele-robine.wedding"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -22,9 +22,9 @@ import {
 }
 resource "cloudflare_record" "manuele-robine-wedding-root" {
   zone_id = local.cloudflare_zone_id_manuele_robine_wedding
-  name = "manuele-robine.wedding"
-  value = "prod.d3strukt0r.dev"
-  type = "CNAME"
+  name    = "manuele-robine.wedding"
+  value   = "prod.d3strukt0r.dev"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -34,8 +34,8 @@ import {
 }
 resource "cloudflare_record" "manuele-robine-wedding-brave-verify" {
   zone_id = local.cloudflare_zone_id_manuele_robine_wedding
-  name = "manuele-robine.wedding"
-  value = "brave-ledger-verification=da7c817db9cea16e297a30e5b95940e4cd4a8f780c8272bbdfc50f73fd426bfd"
-  type = "TXT"
+  name    = "manuele-robine.wedding"
+  value   = "brave-ledger-verification=da7c817db9cea16e297a30e5b95940e4cd4a8f780c8272bbdfc50f73fd426bfd"
+  type    = "TXT"
   comment = "Brave Creators"
 }

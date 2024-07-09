@@ -10,9 +10,9 @@ import {
 }
 resource "cloudflare_record" "wundexpertinplus-com-root" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
-  name = "wundexpertinplus.com"
-  value = "prod.d3strukt0r.dev"
-  type = "CNAME"
+  name    = "wundexpertinplus.com"
+  value   = "prod.d3strukt0r.dev"
+  type    = "CNAME"
   proxied = true
   comment = "Alternative (Cyon): s096.cyon.net / prod.d3strukt0r.dev"
 }
@@ -23,9 +23,9 @@ import {
 }
 resource "cloudflare_record" "wundexpertinplus-com-www" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
-  name = "www"
-  value = "wundexpertinplus.com"
-  type = "CNAME"
+  name    = "www"
+  value   = "wundexpertinplus.com"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -35,9 +35,9 @@ import {
 }
 resource "cloudflare_record" "wundexpertinplus-com-maildiscovery" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
-  name = "autoconfig"
-  value = "maildiscovery.cyon.ch"
-  type = "CNAME"
+  name    = "autoconfig"
+  value   = "maildiscovery.cyon.ch"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -47,9 +47,9 @@ import {
 }
 resource "cloudflare_record" "wundexpertinplus-com-mail" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
-  name = "mail"
-  value = "wundexpertinplus.com"
-  type = "CNAME"
+  name    = "mail"
+  value   = "wundexpertinplus.com"
+  type    = "CNAME"
 }
 
 import {
@@ -57,11 +57,11 @@ import {
   id = "${local.cloudflare_zone_id_wundexpertinplus_com}/2183365185a25526f36218741e2e10ff"
 }
 resource "cloudflare_record" "wundexpertinplus-com-mx" {
-  zone_id = local.cloudflare_zone_id_wundexpertinplus_com
-  name = "wundexpertinplus.com"
-  value = "mail.wundexpertinplus.com"
-  type = "MX"
-  comment = "Cyon"
+  zone_id  = local.cloudflare_zone_id_wundexpertinplus_com
+  name     = "wundexpertinplus.com"
+  value    = "mail.wundexpertinplus.com"
+  type     = "MX"
+  comment  = "Cyon"
   priority = 10
 }
 
@@ -71,16 +71,16 @@ import {
 }
 resource "cloudflare_record" "wundexpertinplus-com-autodiscover" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
-  name = "_autodiscover._tcp"
-  type = "SRV"
+  name    = "_autodiscover._tcp"
+  type    = "SRV"
   data {
-    service = "_autodiscover"
-    proto = "_tcp"
-    name = "wundexpertinplus.com"
+    service  = "_autodiscover"
+    proto    = "_tcp"
+    name     = "wundexpertinplus.com"
     priority = 0
-    weight = 0
-    port = 443
-    target = "maildiscovery.cyon.ch"
+    weight   = 0
+    port     = 443
+    target   = "maildiscovery.cyon.ch"
   }
 }
 
@@ -90,9 +90,9 @@ import {
 }
 resource "cloudflare_record" "wundexpertinplus-com-dkim" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
-  name = "default._domainkey"
-  value = "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA08ULCdV3L1iSec5bdNLUikPWPyo0AQejFiZgEL6c6v7TgBhDhue5bGcWGEcfwRgVgvyrpYM/nmuBz0WhRvoQ1tbUZcbfHApi3m8wu79ivlI9xM2ar5C3NrqoIs9AvJaQgwjYFkm0mwL4CZqD+TwfAeL7uFSWv3QBZIDK0NLFS5egK4/Rojfytex+YxEhLKnRRcGpCzWOaT7MB7JwKu6gVYaKMV0ThePOYRpeqAhFh9EW8CbyeW+mx7YMY4cn7M+uTwVBbL6bnIdrTUizkdjTKlhk9LM4BIsQWoDRal7kpQar6wn0E18Xud4Fg2VOmFgq9wA7UOLH5RP6y9MvbWbWmQIDAQAB;"
-  type = "TXT"
+  name    = "default._domainkey"
+  value   = "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA08ULCdV3L1iSec5bdNLUikPWPyo0AQejFiZgEL6c6v7TgBhDhue5bGcWGEcfwRgVgvyrpYM/nmuBz0WhRvoQ1tbUZcbfHApi3m8wu79ivlI9xM2ar5C3NrqoIs9AvJaQgwjYFkm0mwL4CZqD+TwfAeL7uFSWv3QBZIDK0NLFS5egK4/Rojfytex+YxEhLKnRRcGpCzWOaT7MB7JwKu6gVYaKMV0ThePOYRpeqAhFh9EW8CbyeW+mx7YMY4cn7M+uTwVBbL6bnIdrTUizkdjTKlhk9LM4BIsQWoDRal7kpQar6wn0E18Xud4Fg2VOmFgq9wA7UOLH5RP6y9MvbWbWmQIDAQAB;"
+  type    = "TXT"
   comment = "Cyon (Proxy not supported!)"
 }
 
@@ -102,9 +102,9 @@ import {
 }
 resource "cloudflare_record" "wundexpertinplus-com-spf" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
-  name = "wundexpertinplus.com"
-  value = "v=spf1 include:spf.protection.cyon.net -all"
-  type = "TXT"
+  name    = "wundexpertinplus.com"
+  value   = "v=spf1 include:spf.protection.cyon.net -all"
+  type    = "TXT"
   comment = "Cyon SPF"
 }
 
@@ -114,8 +114,8 @@ import {
 }
 resource "cloudflare_record" "wundexpertinplus-com-dmarc" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
-  name = "_dmarc"
-  value = "v=DMARC1; p=none; rua=mailto:dmarc@wundexpertinplus.com; ruf=mailto:dmarc@wundexpertinplus.com; adkim=s; aspf=s; fo=1"
-  type = "TXT"
+  name    = "_dmarc"
+  value   = "v=DMARC1; p=none; rua=mailto:dmarc@wundexpertinplus.com; ruf=mailto:dmarc@wundexpertinplus.com; adkim=s; aspf=s; fo=1"
+  type    = "TXT"
   comment = "Cyon DMARC"
 }

@@ -10,9 +10,9 @@ import {
 }
 resource "cloudflare_record" "d3st-dev-wildcard" {
   zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "*"
-  value = "d3st.dev"
-  type = "CNAME"
+  name    = "*"
+  value   = "d3st.dev"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -22,9 +22,9 @@ import {
 }
 resource "cloudflare_record" "d3st-dev-root" {
   zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "d3st.dev"
-  value = "prod.d3strukt0r.dev"
-  type = "CNAME"
+  name    = "d3st.dev"
+  value   = "prod.d3strukt0r.dev"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -33,11 +33,11 @@ import {
   id = "${local.cloudflare_zone_id_d3st_dev}/06a2ba8b1b0b68a32b14999e670d7d21"
 }
 resource "cloudflare_record" "d3st-dev-mx1" {
-  zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "d3st.dev"
-  value = "mail.anonaddy.me"
-  type = "MX"
-  comment = "AnonAddy"
+  zone_id  = local.cloudflare_zone_id_d3st_dev
+  name     = "d3st.dev"
+  value    = "mail.anonaddy.me"
+  type     = "MX"
+  comment  = "AnonAddy"
   priority = 10
 }
 
@@ -46,11 +46,11 @@ import {
   id = "${local.cloudflare_zone_id_d3st_dev}/8a2a3d6ef3e478af5af458fcbc54a8c4"
 }
 resource "cloudflare_record" "d3st-dev-mx2" {
-  zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "d3st.dev"
-  value = "mail2.anonaddy.me"
-  type = "MX"
-  comment = "AnonAddy"
+  zone_id  = local.cloudflare_zone_id_d3st_dev
+  name     = "d3st.dev"
+  value    = "mail2.anonaddy.me"
+  type     = "MX"
+  comment  = "AnonAddy"
   priority = 20
 }
 
@@ -60,9 +60,9 @@ import {
 }
 resource "cloudflare_record" "d3st-dev-dkim" {
   zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "dk1._domainkey"
-  value = "dk1._domainkey.anonaddy.me"
-  type = "CNAME"
+  name    = "dk1._domainkey"
+  value   = "dk1._domainkey.anonaddy.me"
+  type    = "CNAME"
   comment = "AnonAddy (Proxy not supported!)"
 }
 
@@ -72,9 +72,9 @@ import {
 }
 resource "cloudflare_record" "d3st-dev-dkim2" {
   zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "dk2._domainkey"
-  value = "dk2._domainkey.anonaddy.me"
-  type = "CNAME"
+  name    = "dk2._domainkey"
+  value   = "dk2._domainkey.anonaddy.me"
+  type    = "CNAME"
   comment = "AnonAddy (Proxy not supported!)"
 }
 
@@ -84,9 +84,9 @@ import {
 }
 resource "cloudflare_record" "d3st-dev-spf" {
   zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "d3st.dev"
-  value = "v=spf1 include:spf.anonaddy.me -all"
-  type = "TXT"
+  name    = "d3st.dev"
+  value   = "v=spf1 include:spf.anonaddy.me -all"
+  type    = "TXT"
   comment = "AnonAddy SPF"
 }
 
@@ -96,9 +96,9 @@ import {
 }
 resource "cloudflare_record" "d3st-dev-dmarc" {
   zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "_dmarc"
-  value = "v=DMARC1; p=quarantine; adkim=s"
-  type = "TXT"
+  name    = "_dmarc"
+  value   = "v=DMARC1; p=quarantine; adkim=s"
+  type    = "TXT"
   comment = "AnonAddy DMARC"
 }
 
@@ -108,9 +108,9 @@ import {
 }
 resource "cloudflare_record" "d3st-dev-anonaddy-verify" {
   zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "d3st.dev"
-  value = "aa-verify=87b4e4ca1e1631bbd7c005871f9af76c91ac4c17"
-  type = "TXT"
+  name    = "d3st.dev"
+  value   = "aa-verify=87b4e4ca1e1631bbd7c005871f9af76c91ac4c17"
+  type    = "TXT"
   comment = "AnonAddy Verify"
 }
 
@@ -120,8 +120,8 @@ import {
 }
 resource "cloudflare_record" "d3st-dev-box-verify" {
   zone_id = local.cloudflare_zone_id_d3st_dev
-  name = "d3st.dev"
-  value = "box-domain-verification=3470b4078aa49daffbd25ad6dfa6088cf90b2740804c2b514915b619a848c1b0"
-  type = "TXT"
+  name    = "d3st.dev"
+  value   = "box-domain-verification=3470b4078aa49daffbd25ad6dfa6088cf90b2740804c2b514915b619a848c1b0"
+  type    = "TXT"
   comment = "box.com Verify"
 }

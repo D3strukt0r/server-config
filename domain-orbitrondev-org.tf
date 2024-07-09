@@ -10,9 +10,9 @@ import {
 }
 resource "cloudflare_record" "orbitrondev-org-wildcard" {
   zone_id = local.cloudflare_zone_id_orbitrondev_org
-  name = "*"
-  value = "orbitrondev.org"
-  type = "CNAME"
+  name    = "*"
+  value   = "orbitrondev.org"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -22,8 +22,8 @@ import {
 }
 resource "cloudflare_record" "orbitrondev-org-root" {
   zone_id = local.cloudflare_zone_id_orbitrondev_org
-  name = "orbitrondev.org"
-  value = "prod.d3strukt0r.dev"
-  type = "CNAME"
+  name    = "orbitrondev.org"
+  value   = "prod.d3strukt0r.dev"
+  type    = "CNAME"
   proxied = true
 }

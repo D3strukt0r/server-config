@@ -10,9 +10,9 @@ import {
 }
 resource "cloudflare_record" "eleunam-enibor-wedding-wildcard" {
   zone_id = local.cloudflare_zone_id_eleunam_enibor_wedding
-  name = "*"
-  value = "eleunam-enibor.wedding"
-  type = "CNAME"
+  name    = "*"
+  value   = "eleunam-enibor.wedding"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -22,8 +22,8 @@ import {
 }
 resource "cloudflare_record" "eleunam-enibor-wedding-root" {
   zone_id = local.cloudflare_zone_id_eleunam_enibor_wedding
-  name = "eleunam-enibor.wedding"
-  value = "prod.d3strukt0r.dev"
-  type = "CNAME"
+  name    = "eleunam-enibor.wedding"
+  value   = "prod.d3strukt0r.dev"
+  type    = "CNAME"
   proxied = true
 }

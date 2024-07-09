@@ -22,9 +22,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-me-wildcard" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name = "*"
-  value = "d3strukt0r.me"
-  type = "CNAME"
+  name    = "*"
+  value   = "d3strukt0r.me"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -34,9 +34,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-me-root" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name = "d3strukt0r.me"
-  value = "prod.d3strukt0r.dev"
-  type = "CNAME"
+  name    = "d3strukt0r.me"
+  value   = "prod.d3strukt0r.dev"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -45,11 +45,11 @@ import {
   id = "${local.cloudflare_zone_id_d3strukt0r_me}/a43020dfe2ab49a8906d8d17d90eeb42"
 }
 resource "cloudflare_record" "d3strukt0r-me-mx1" {
-  zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name = "d3strukt0r.me"
-  value = "mail.protonmail.ch"
-  type = "MX"
-  comment = "ProtonMail"
+  zone_id  = local.cloudflare_zone_id_d3strukt0r_me
+  name     = "d3strukt0r.me"
+  value    = "mail.protonmail.ch"
+  type     = "MX"
+  comment  = "ProtonMail"
   priority = 10
 }
 
@@ -58,11 +58,11 @@ import {
   id = "${local.cloudflare_zone_id_d3strukt0r_me}/c543fe35a64451bd09f3eafc9f6ddc8d"
 }
 resource "cloudflare_record" "d3strukt0r-me-mx2" {
-  zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name = "d3strukt0r.me"
-  value = "mailsec.protonmail.ch"
-  type = "MX"
-  comment = "ProtonMail"
+  zone_id  = local.cloudflare_zone_id_d3strukt0r_me
+  name     = "d3strukt0r.me"
+  value    = "mailsec.protonmail.ch"
+  type     = "MX"
+  comment  = "ProtonMail"
   priority = 20
 }
 
@@ -72,9 +72,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-me-dkim" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name = "protonmail._domainkey"
-  value = "protonmail.domainkey.dnkpp4rjxgne6fnd22kwhwduuptqsey7jz7hioquggk5hr4ocdnza.domains.proton.ch"
-  type = "CNAME"
+  name    = "protonmail._domainkey"
+  value   = "protonmail.domainkey.dnkpp4rjxgne6fnd22kwhwduuptqsey7jz7hioquggk5hr4ocdnza.domains.proton.ch"
+  type    = "CNAME"
   comment = "ProtonMail (Proxy not supported!)"
 }
 
@@ -84,9 +84,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-me-dkim2" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name = "protonmail2._domainkey"
-  value = "protonmail2.domainkey.dnkpp4rjxgne6fnd22kwhwduuptqsey7jz7hioquggk5hr4ocdnza.domains.proton.ch"
-  type = "CNAME"
+  name    = "protonmail2._domainkey"
+  value   = "protonmail2.domainkey.dnkpp4rjxgne6fnd22kwhwduuptqsey7jz7hioquggk5hr4ocdnza.domains.proton.ch"
+  type    = "CNAME"
   comment = "ProtonMail (Proxy not supported!)"
 }
 
@@ -96,9 +96,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-me-dkim3" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name = "protonmail3._domainkey"
-  value = "protonmail3.domainkey.dnkpp4rjxgne6fnd22kwhwduuptqsey7jz7hioquggk5hr4ocdnza.domains.proton.ch"
-  type = "CNAME"
+  name    = "protonmail3._domainkey"
+  value   = "protonmail3.domainkey.dnkpp4rjxgne6fnd22kwhwduuptqsey7jz7hioquggk5hr4ocdnza.domains.proton.ch"
+  type    = "CNAME"
   comment = "ProtonMail (Proxy not supported!)"
 }
 
@@ -108,9 +108,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-me-spf" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name = "d3strukt0r.me"
-  value = "v=spf1 include:_spf.protonmail.ch mx ~all"
-  type = "TXT"
+  name    = "d3strukt0r.me"
+  value   = "v=spf1 include:_spf.protonmail.ch mx ~all"
+  type    = "TXT"
   comment = "ProtonMail SPF"
 }
 
@@ -120,9 +120,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-me-dmarc" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name = "_dmarc"
-  value = "v=DMARC1; p=none"
-  type = "TXT"
+  name    = "_dmarc"
+  value   = "v=DMARC1; p=none"
+  type    = "TXT"
   comment = "ProtonMail DMARC"
 }
 
@@ -132,8 +132,8 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-me-protonmail-verify" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name = "d3strukt0r.me"
-  value = "protonmail-verification=5a33bc1e9b0ec499fa297b4f067069d0da2fc0d1"
-  type = "TXT"
+  name    = "d3strukt0r.me"
+  value   = "protonmail-verification=5a33bc1e9b0ec499fa297b4f067069d0da2fc0d1"
+  type    = "TXT"
   comment = "ProtonMail Verify"
 }

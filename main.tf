@@ -10,24 +10,24 @@ terraform {
       version = "~> 2.0"
     }
     cloudflare = {
-      source = "cloudflare/cloudflare"
+      source  = "cloudflare/cloudflare"
       version = "~> 4.36"
     }
     namecheap = {
-      source = "namecheap/namecheap"
+      source  = "namecheap/namecheap"
       version = "~> 2.0"
     }
   }
 
   #backend "http" {
-  #  address = "https://opentofu-state.d3strukt0r.dev"
-  #  lock_address = "https://opentofu-state.d3strukt0r.dev"
+  #  address        = "https://opentofu-state.d3strukt0r.dev"
+  #  lock_address   = "https://opentofu-state.d3strukt0r.dev"
   #  unlock_address = "https://opentofu-state.d3strukt0r.dev"
-  #  username = "admin"
-  #  password = "" # or use TF_HTTP_PASSWORD
+  #  username       = "admin"
+  #  password       = "" # or use TF_HTTP_PASSWORD
   #}
 
-  # https://ruben-rodriguez.github.io/posts/minio-s3-terraform-backend/
+  ## https://ruben-rodriguez.github.io/posts/minio-s3-terraform-backend/
   #backend "s3" {
   #  bucket = "default" # Name of the S3 bucket
   #  endpoints = {
@@ -35,28 +35,28 @@ terraform {
   #  }
   #  key = "terraform.tfstate" # Name of the tfstate file
 
-  #  access_key="xxxxxxxxxxxx" # Access and secret keys
-  #  secret_key="xxxxxxxxxxxxxxxxxxxxxx"
+  #  access_key = "xxxxxxxxxxxx" # Access and secret keys
+  #  secret_key = "xxxxxxxxxxxxxxxxxxxxxx"
 
-  #  region = "main" # Region validation will be skipped
-  #  skip_credentials_validation = true # Skip AWS related checks and validations
-  #  skip_requesting_account_id = true
-  #  skip_metadata_api_check = true
-  #  skip_region_validation = true
-  #  use_path_style = true # Enable path-style S3 URLs (https://<HOST>/<BUCKET>
+  #  region                      = "main" # Region validation will be skipped
+  #  skip_credentials_validation = true   # Skip AWS related checks and validations
+  #  skip_requesting_account_id  = true
+  #  skip_metadata_api_check     = true
+  #  skip_region_validation      = true
+  #  use_path_style              = true # Enable path-style S3 URLs (https://<HOST>/<BUCKET>
   #  # https://developer.hashicorp.com/terraform/language/settings/backends/s3#use_path_style
   #  # https://opentofu.org/docs/language/settings/backends/s3/#s3-state-storage
   #}
 
   #encryption {
-  #  #method "unencrypted" "migrate" {}
+  #  method "unencrypted" "migrate" {}
   #  key_provider "pbkdf2" "mykey" {
   #    passphrase = "changeme!"
   #  }
   #  key_provider "openbao" "my_bao" {
   #    key_name = "test-key"
-  #    token = "token-from-bao"
-  #    address = "https://openbao.d3strukt0r.dev"
+  #    token    = "token-from-bao"
+  #    address  = "https://openbao.d3strukt0r.dev"
   #  }
   #  method "aes_gcm" "new_method" {
   #    keys = key_provider.pbkdf2.mykey
@@ -83,48 +83,48 @@ terraform {
 # with "Full Access" scope
 # TODO: Figure out what to set in "Custom Scopes" instead
 variable "do_token" {
-  type = string
+  type        = string
   description = "DigitalOcean API token with Full Access scope"
-  sensitive = true
+  sensitive   = true
   validation {
-    condition = can(regex("^dop_v1_[a-f0-9]{64}$", var.do_token))
+    condition     = can(regex("^dop_v1_[a-f0-9]{64}$", var.do_token))
     error_message = "The do_token must be a valid DigitalOcean API token (`dop_v1_x`) with Full Access scope."
   }
 }
 variable "pvt_key" {
-  type = string
+  type        = string
   description = "Path to the private key file"
   #sensitive = true
   validation {
-    condition = fileexists(var.pvt_key)
+    condition     = fileexists(var.pvt_key)
     error_message = "The pvt_key must be a valid path to the private key file."
   }
 }
 variable "do_monitoring_email" {
-  type = string
+  type        = string
   description = "Email address to receive monitoring alerts"
   validation {
-    condition = can(regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", var.do_monitoring_email))
+    condition     = can(regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", var.do_monitoring_email))
     error_message = "The do_monitoring_email must be a valid email address."
   }
 }
 variable "do_monitoring_slack_webhook" {
-  type = string
+  type        = string
   description = "Slack webhook URL to receive monitoring alerts"
   #sensitive = true
   validation {
-    condition = can(regex("^https://hooks.slack.com/services/[A-Z0-9]+/[A-Z0-9]+/[a-zA-Z0-9]+$", var.do_monitoring_slack_webhook))
+    condition     = can(regex("^https://hooks.slack.com/services/[A-Z0-9]+/[A-Z0-9]+/[a-zA-Z0-9]+$", var.do_monitoring_slack_webhook))
     error_message = "The do_monitoring_slack_webhook must be a valid Slack webhook URL (https://hooks.slack.com/services/x/x/x)."
   }
 }
 # https://dash.cloudflare.com/profile/api-tokens
 # Create Custom Token with "Zone.DNS:Edit" permissions
 variable "cloudflare_api_token" {
-  type = string
+  type        = string
   description = "Cloudflare API token"
-  sensitive = true
+  sensitive   = true
   validation {
-    condition = can(regex("^[a-zA-Z0-9_]{40}$", var.cloudflare_api_token))
+    condition     = can(regex("^[a-zA-Z0-9_]{40}$", var.cloudflare_api_token))
     error_message = "The cloudflare_api_token must be a valid Cloudflare API token."
   }
 }
@@ -132,11 +132,11 @@ variable "cloudflare_api_token" {
 # Also add the IP address of the machine running Terraform to the whitelist
 # https://ap.www.namecheap.com/settings/tools/apiaccess/whitelisted-ips
 variable "namecheap_api_key" {
-  type = string
+  type        = string
   description = "Namecheap API key"
-  sensitive = true
+  sensitive   = true
   validation {
-    condition = can(regex("^[a-f0-9]{32}$", var.namecheap_api_key))
+    condition     = can(regex("^[a-f0-9]{32}$", var.namecheap_api_key))
     error_message = "The namecheap_api_key must be a valid Namecheap API key."
   }
 }
@@ -149,8 +149,8 @@ provider "cloudflare" {
 }
 provider "namecheap" {
   user_name = "D3strukt0r2"
-  api_user = "D3strukt0r2"
-  api_key = var.namecheap_api_key
+  api_user  = "D3strukt0r2"
+  api_key   = var.namecheap_api_key
 }
 
 #import {
@@ -165,11 +165,11 @@ import {
   id = "608255c8-7f7f-407d-bf53-ef749ce89c14"
 }
 resource "digitalocean_project" "myproject" {
-  name = "Project D3strukt0r"
+  name        = "Project D3strukt0r"
   description = "All my projects"
-  purpose = "Web Application"
+  purpose     = "Web Application"
   environment = "Production"
-  is_default = true
+  is_default  = true
   resources = [
     digitalocean_droplet.main.urn,
     digitalocean_volume.main.urn,
@@ -180,15 +180,15 @@ import {
   id = "375424082"
 }
 resource "digitalocean_droplet" "main" {
-  image = "ubuntu-22-04-x64"
-  name = "prod-de"
-  region = "fra1"
-  size = "s-2vcpu-4gb"
-  backups = true
-  ipv6 = true
+  image      = "ubuntu-22-04-x64"
+  name       = "prod-de"
+  region     = "fra1"
+  size       = "s-2vcpu-4gb"
+  backups    = true
+  ipv6       = true
   monitoring = true
   volume_ids = [digitalocean_volume.main.id]
-  vpc_uuid = digitalocean_vpc.main.id
+  vpc_uuid   = digitalocean_vpc.main.id
 
   lifecycle {
     prevent_destroy = true
@@ -199,11 +199,11 @@ resource "digitalocean_droplet" "main" {
   #]
 
   #connection {
-  #  host = self.ipv4_address
-  #  user = "root"
-  #  type = "ssh"
+  #  host        = self.ipv4_address
+  #  user        = "root"
+  #  type        = "ssh"
   #  private_key = file(var.pvt_key)
-  #  timeout = "2m"
+  #  timeout     = "2m"
   #}
 
   #provisioner "remote-exec" {
@@ -221,8 +221,8 @@ import {
 }
 resource "digitalocean_volume" "main" {
   region = "fra1"
-  name = "volume-fra1-01"
-  size = 100
+  name   = "volume-fra1-01"
+  size   = 100
   #initial_filesystem_type = "ext4"
   #description = "an example volume"
 
@@ -235,53 +235,53 @@ import {
   id = "3954180e-0234-459f-9b4d-68bedf537ca4"
 }
 resource "digitalocean_firewall" "email" {
-  name = "Email"
+  name        = "Email"
   droplet_ids = [digitalocean_droplet.main.id]
 
   inbound_rule {
-    protocol = "tcp"
-    port_range = "110"
+    protocol         = "tcp"
+    port_range       = "110"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
-    protocol = "tcp"
-    port_range = "143"
+    protocol         = "tcp"
+    port_range       = "143"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
-    protocol = "tcp"
-    port_range = "25"
+    protocol         = "tcp"
+    port_range       = "25"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
-    protocol = "tcp"
-    port_range = "465"
+    protocol         = "tcp"
+    port_range       = "465"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
-    protocol = "tcp"
-    port_range = "587"
+    protocol         = "tcp"
+    port_range       = "587"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
-    protocol = "tcp"
-    port_range = "993"
+    protocol         = "tcp"
+    port_range       = "993"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
-    protocol = "tcp"
-    port_range = "995"
+    protocol         = "tcp"
+    port_range       = "995"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   outbound_rule {
-    protocol = "tcp"
-    port_range = "all"
+    protocol              = "tcp"
+    port_range            = "all"
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
   outbound_rule {
-    protocol = "udp"
-    port_range = "all"
+    protocol              = "udp"
+    port_range            = "all"
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 }
@@ -290,12 +290,12 @@ import {
   id = "2f8c32b2-b051-4517-9775-c1f12fbe1da0"
 }
 resource "digitalocean_firewall" "ssh" {
-  name = "SSH"
+  name        = "SSH"
   droplet_ids = [digitalocean_droplet.main.id]
 
   inbound_rule {
-    protocol = "tcp"
-    port_range = "22"
+    protocol         = "tcp"
+    port_range       = "22"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
 }
@@ -304,33 +304,33 @@ import {
   id = "566a8788-74ea-48fd-8ab8-3cb80e999e41"
 }
 resource "digitalocean_firewall" "web" {
-  name = "Web"
+  name        = "Web"
   droplet_ids = [digitalocean_droplet.main.id]
 
   inbound_rule {
-    protocol = "tcp"
-    port_range = "443"
+    protocol         = "tcp"
+    port_range       = "443"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
-    protocol = "udp"
-    port_range = "443"
+    protocol         = "udp"
+    port_range       = "443"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
   inbound_rule {
-    protocol = "tcp"
-    port_range = "80"
+    protocol         = "tcp"
+    port_range       = "80"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   outbound_rule {
-    protocol = "tcp"
-    port_range = "all"
+    protocol              = "tcp"
+    port_range            = "all"
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
   outbound_rule {
-    protocol = "udp"
-    port_range = "all"
+    protocol              = "udp"
+    port_range            = "all"
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 }
@@ -356,13 +356,13 @@ resource "digitalocean_monitor_alert" "storage_alert" {
     email = [var.do_monitoring_email]
     slack {
       channel = "#digitalocean-alerts"
-      url = var.do_monitoring_slack_webhook
+      url     = var.do_monitoring_slack_webhook
     }
   }
-  window = "5m"
-  type = "v1/insights/droplet/disk_utilization_percent"
+  window  = "5m"
+  type    = "v1/insights/droplet/disk_utilization_percent"
   compare = "GreaterThan"
-  value = 80
+  value   = 80
   enabled = true
   #entities = [digitalocean_droplet.main.id] # all droplets
   description = "Disk Utilization Percent is running high"
@@ -372,13 +372,13 @@ resource "digitalocean_monitor_alert" "memory_alert" {
     email = [var.do_monitoring_email]
     slack {
       channel = "#digitalocean-alerts"
-      url = var.do_monitoring_slack_webhook
+      url     = var.do_monitoring_slack_webhook
     }
   }
-  window = "5m"
-  type = "v1/insights/droplet/memory_utilization_percent"
+  window  = "5m"
+  type    = "v1/insights/droplet/memory_utilization_percent"
   compare = "GreaterThan"
-  value = 90
+  value   = 90
   enabled = true
   #entities = [digitalocean_droplet.main.id] # all droplets
   description = "Memory Utilization Percent is running high"
@@ -395,7 +395,7 @@ resource "digitalocean_uptime_check" "ping" {
 
 #output "droplet_ip_addresses" {
 #  value = {
-#    for droplet in digitalocean_droplet.main:
+#    for droplet in digitalocean_droplet.main :
 #    droplet.name => droplet.ipv4_address
 #  }
 #}

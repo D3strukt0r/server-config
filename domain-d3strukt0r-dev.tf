@@ -10,9 +10,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-dev-root-v4" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_dev
-  name = "prod"
-  value = digitalocean_droplet.main.ipv4_address
-  type = "A"
+  name    = "prod"
+  value   = digitalocean_droplet.main.ipv4_address
+  type    = "A"
   proxied = true
 }
 
@@ -22,9 +22,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-dev-root-v6" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_dev
-  name = "prod"
-  value = digitalocean_droplet.main.ipv6_address
-  type = "AAAA"
+  name    = "prod"
+  value   = digitalocean_droplet.main.ipv6_address
+  type    = "AAAA"
   proxied = true
 }
 
@@ -34,9 +34,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-dev-wildcard" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_dev
-  name = "*"
-  value = "prod.d3strukt0r.dev"
-  type = "CNAME"
+  name    = "*"
+  value   = "prod.d3strukt0r.dev"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -46,9 +46,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-dev-root" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_dev
-  name = "d3strukt0r.dev"
-  value = "prod.d3strukt0r.dev"
-  type = "CNAME"
+  name    = "d3strukt0r.dev"
+  value   = "prod.d3strukt0r.dev"
+  type    = "CNAME"
   proxied = true
 }
 
@@ -58,9 +58,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-dev-ssh" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_dev
-  name = "ssh"
-  value = "d3strukt0r.dev"
-  type = "CNAME"
+  name    = "ssh"
+  value   = "d3strukt0r.dev"
+  type    = "CNAME"
   comment = "SSH for Gitea"
 }
 
@@ -70,9 +70,9 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-dev-portainer-verify" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_dev
-  name = "_acme-challenge.portainer"
-  value = "cA-vwoFtEbGds71F-aUfCqj2gAJydjMb_LvbeSe3lU4"
-  type = "TXT"
+  name    = "_acme-challenge.portainer"
+  value   = "cA-vwoFtEbGds71F-aUfCqj2gAJydjMb_LvbeSe3lU4"
+  type    = "TXT"
 }
 
 import {
@@ -81,8 +81,8 @@ import {
 }
 resource "cloudflare_record" "d3strukt0r-dev-openai-verify" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_dev
-  name = "d3strukt0r.dev"
-  value = "openai-domain-verification=dv-iGnk42gpu7REPIIMHXN9H5xz"
-  type = "TXT"
+  name    = "d3strukt0r.dev"
+  value   = "openai-domain-verification=dv-iGnk42gpu7REPIIMHXN9H5xz"
+  type    = "TXT"
   comment = "OpenAI/ChatGPT Verify"
 }
