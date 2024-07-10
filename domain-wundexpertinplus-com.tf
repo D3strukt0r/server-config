@@ -11,10 +11,10 @@ import {
 resource "cloudflare_record" "wundexpertinplus-com-root" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
   name    = "wundexpertinplus.com"
-  value   = "prod.d3strukt0r.dev"
+  value   = cloudflare_record.d3strukt0r-dev-root-v6.hostname
   type    = "CNAME"
   proxied = true
-  comment = "Alternative (Cyon): s096.cyon.net / prod.d3strukt0r.dev"
+  comment = "Alternative (Cyon): s096.cyon.net / ${cloudflare_record.d3strukt0r-dev-root-v6.hostname}"
 }
 
 import {
@@ -24,7 +24,7 @@ import {
 resource "cloudflare_record" "wundexpertinplus-com-www" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
   name    = "www"
-  value   = "wundexpertinplus.com"
+  value   = cloudflare_record.wundexpertinplus-com-root.hostname
   type    = "CNAME"
   proxied = true
 }
@@ -48,7 +48,7 @@ import {
 resource "cloudflare_record" "wundexpertinplus-com-mail" {
   zone_id = local.cloudflare_zone_id_wundexpertinplus_com
   name    = "mail"
-  value   = "wundexpertinplus.com"
+  value   = cloudflare_record.wundexpertinplus-com-root.hostname
   type    = "CNAME"
 }
 
@@ -59,7 +59,7 @@ import {
 resource "cloudflare_record" "wundexpertinplus-com-mx" {
   zone_id  = local.cloudflare_zone_id_wundexpertinplus_com
   name     = "wundexpertinplus.com"
-  value    = "mail.wundexpertinplus.com"
+  value    = cloudflare_record.wundexpertinplus-com-mail.hostname
   type     = "MX"
   comment  = "Cyon"
   priority = 10

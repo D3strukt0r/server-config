@@ -5,25 +5,25 @@ locals {
 }
 
 import {
-  to = cloudflare_record.manuele-robine-wedding-wildcard
-  id = "${local.cloudflare_zone_id_manuele_robine_wedding}/59c4a690f6660416ad3dae94328d7a8b"
-}
-resource "cloudflare_record" "manuele-robine-wedding-wildcard" {
-  zone_id = local.cloudflare_zone_id_manuele_robine_wedding
-  name    = "*"
-  value   = "manuele-robine.wedding"
-  type    = "CNAME"
-  proxied = true
-}
-
-import {
   to = cloudflare_record.manuele-robine-wedding-root
   id = "${local.cloudflare_zone_id_manuele_robine_wedding}/85341da6bbf85f2470f41e45a54f9f37"
 }
 resource "cloudflare_record" "manuele-robine-wedding-root" {
   zone_id = local.cloudflare_zone_id_manuele_robine_wedding
   name    = "manuele-robine.wedding"
-  value   = "prod.d3strukt0r.dev"
+  value   = cloudflare_record.d3strukt0r-dev-root-v6.hostname
+  type    = "CNAME"
+  proxied = true
+}
+
+import {
+  to = cloudflare_record.manuele-robine-wedding-wildcard
+  id = "${local.cloudflare_zone_id_manuele_robine_wedding}/59c4a690f6660416ad3dae94328d7a8b"
+}
+resource "cloudflare_record" "manuele-robine-wedding-wildcard" {
+  zone_id = local.cloudflare_zone_id_manuele_robine_wedding
+  name    = "*"
+  value   = cloudflare_record.manuele-robine-wedding-root.hostname
   type    = "CNAME"
   proxied = true
 }

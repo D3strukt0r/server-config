@@ -17,25 +17,25 @@ locals {
 #}
 
 import {
-  to = cloudflare_record.d3strukt0r-me-wildcard
-  id = "${local.cloudflare_zone_id_d3strukt0r_me}/77b1c9dffeabfeb7d9e2d856b280a388"
-}
-resource "cloudflare_record" "d3strukt0r-me-wildcard" {
-  zone_id = local.cloudflare_zone_id_d3strukt0r_me
-  name    = "*"
-  value   = "d3strukt0r.me"
-  type    = "CNAME"
-  proxied = true
-}
-
-import {
   to = cloudflare_record.d3strukt0r-me-root
   id = "${local.cloudflare_zone_id_d3strukt0r_me}/4afb066a0e06370d47b46f46de296493"
 }
 resource "cloudflare_record" "d3strukt0r-me-root" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_me
   name    = "d3strukt0r.me"
-  value   = "prod.d3strukt0r.dev"
+  value   = cloudflare_record.d3strukt0r-dev-root-v6.hostname
+  type    = "CNAME"
+  proxied = true
+}
+
+import {
+  to = cloudflare_record.d3strukt0r-me-wildcard
+  id = "${local.cloudflare_zone_id_d3strukt0r_me}/77b1c9dffeabfeb7d9e2d856b280a388"
+}
+resource "cloudflare_record" "d3strukt0r-me-wildcard" {
+  zone_id = local.cloudflare_zone_id_d3strukt0r_me
+  name    = "*"
+  value   = cloudflare_record.d3strukt0r-me-root.hostname
   type    = "CNAME"
   proxied = true
 }

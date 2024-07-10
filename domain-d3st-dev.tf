@@ -5,25 +5,25 @@ locals {
 }
 
 import {
-  to = cloudflare_record.d3st-dev-wildcard
-  id = "${local.cloudflare_zone_id_d3st_dev}/f1072fc500596a01166b10d7e30a7bd3"
-}
-resource "cloudflare_record" "d3st-dev-wildcard" {
-  zone_id = local.cloudflare_zone_id_d3st_dev
-  name    = "*"
-  value   = "d3st.dev"
-  type    = "CNAME"
-  proxied = true
-}
-
-import {
   to = cloudflare_record.d3st-dev-root
   id = "${local.cloudflare_zone_id_d3st_dev}/2870a524a43a365a380ae52e3c9246f5"
 }
 resource "cloudflare_record" "d3st-dev-root" {
   zone_id = local.cloudflare_zone_id_d3st_dev
   name    = "d3st.dev"
-  value   = "prod.d3strukt0r.dev"
+  value   = cloudflare_record.d3strukt0r-dev-root-v6.hostname
+  type    = "CNAME"
+  proxied = true
+}
+
+import {
+  to = cloudflare_record.d3st-dev-wildcard
+  id = "${local.cloudflare_zone_id_d3st_dev}/f1072fc500596a01166b10d7e30a7bd3"
+}
+resource "cloudflare_record" "d3st-dev-wildcard" {
+  zone_id = local.cloudflare_zone_id_d3st_dev
+  name    = "*"
+  value   = cloudflare_record.d3st-dev-root.hostname
   type    = "CNAME"
   proxied = true
 }

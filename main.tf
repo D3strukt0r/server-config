@@ -393,9 +393,6 @@ resource "digitalocean_uptime_check" "ping" {
   regions = ["eu_west", "se_asia", "us_east", "us_west"]
 }
 
-#output "droplet_ip_addresses" {
-#  value = {
-#    for droplet in digitalocean_droplet.main :
-#    droplet.name => droplet.ipv4_address
-#  }
-#}
+output "droplet_ip_addresses" {
+  value = digitalocean_droplet.main.ipv4_address
+}

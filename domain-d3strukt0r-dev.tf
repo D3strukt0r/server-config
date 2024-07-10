@@ -29,25 +29,25 @@ resource "cloudflare_record" "d3strukt0r-dev-root-v6" {
 }
 
 import {
-  to = cloudflare_record.d3strukt0r-dev-wildcard
-  id = "${local.cloudflare_zone_id_d3strukt0r_dev}/f459f20c6afc3cba8145ec3e6ab98f1a"
-}
-resource "cloudflare_record" "d3strukt0r-dev-wildcard" {
-  zone_id = local.cloudflare_zone_id_d3strukt0r_dev
-  name    = "*"
-  value   = "prod.d3strukt0r.dev"
-  type    = "CNAME"
-  proxied = true
-}
-
-import {
   to = cloudflare_record.d3strukt0r-dev-root
   id = "${local.cloudflare_zone_id_d3strukt0r_dev}/ed3c835644b82da1d06bce861fa085bd"
 }
 resource "cloudflare_record" "d3strukt0r-dev-root" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_dev
   name    = "d3strukt0r.dev"
-  value   = "prod.d3strukt0r.dev"
+  value   = cloudflare_record.d3strukt0r-dev-root-v6.hostname
+  type    = "CNAME"
+  proxied = true
+}
+
+import {
+  to = cloudflare_record.d3strukt0r-dev-wildcard
+  id = "${local.cloudflare_zone_id_d3strukt0r_dev}/f459f20c6afc3cba8145ec3e6ab98f1a"
+}
+resource "cloudflare_record" "d3strukt0r-dev-wildcard" {
+  zone_id = local.cloudflare_zone_id_d3strukt0r_dev
+  name    = "*"
+  value   = cloudflare_record.d3strukt0r-dev-root.hostname
   type    = "CNAME"
   proxied = true
 }
@@ -59,7 +59,7 @@ import {
 resource "cloudflare_record" "d3strukt0r-dev-ssh" {
   zone_id = local.cloudflare_zone_id_d3strukt0r_dev
   name    = "ssh"
-  value   = "d3strukt0r.dev"
+  value   = cloudflare_record.d3strukt0r-dev-root.hostname
   type    = "CNAME"
   comment = "SSH for Gitea"
 }
