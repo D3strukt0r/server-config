@@ -48,6 +48,16 @@ terraform {
   #  # https://opentofu.org/docs/language/settings/backends/s3/#s3-state-storage
   #}
 
+  # Instead of backend use cloud
+  #cloud {
+  #  organization = "my-org"
+  #  hostname     = "tacos.d3strukt0r.dev"
+
+  #  workspaces {
+  #    name = "my-infrastructure-prod"
+  #  }
+  #}
+
   #encryption {
   #  method "unencrypted" "migrate" {}
   #  key_provider "pbkdf2" "mykey" {
