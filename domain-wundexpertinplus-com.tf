@@ -74,9 +74,9 @@ resource "cloudflare_record" "wundexpertinplus-com-autodiscover" {
   name    = "_autodiscover._tcp"
   type    = "SRV"
   data {
-    service  = "_autodiscover"
-    proto    = "_tcp"
-    name     = "wundexpertinplus.com"
+    #service  = "_autodiscover"
+    #proto    = "_tcp"
+    #name     = "wundexpertinplus.com"
     priority = 0
     weight   = 0
     port     = 443

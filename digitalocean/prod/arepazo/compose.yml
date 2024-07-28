@@ -75,10 +75,16 @@ services:
         tag: ${COMPOSE_PROJECT_NAME}.prod.web-nginx
     labels:
       - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}0.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}0.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}0.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}0.tls.certresolver=le
+
+      # Handle these domains separately, as we can't resolve using default DNS resolver
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`arepazo.ch`) || Host(`www.arepazo.ch`) || Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`arepazo.ch`) || Host(`www.arepazo.ch`)
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le-tls
 
 networks:
   traefik_proxy:
