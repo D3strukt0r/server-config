@@ -4,17 +4,17 @@ locals {
   cloudflare_zone_id_d3strukt0r_me = "572bdbbd687053ca652d80a0beb8f611"
 }
 
-#import {
-#  to = namecheap_domain_records.d3strukt0r-me
-#  id = "d3strukt0r.me"
-#}
-#resource "namecheap_domain_records" "d3strukt0r-me" {
-#  domain = "d3strukt0r.me"
-#  nameservers = [
-#    "brenda.ns.cloudflare.com",
-#    "wesley.ns.cloudflare.com",
-#  ]
-#}
+import {
+  to = namecheap_domain_records.d3strukt0r-me
+  id = "d3strukt0r.me"
+}
+resource "namecheap_domain_records" "d3strukt0r-me" {
+  domain = "d3strukt0r.me"
+  nameservers = [
+    "brenda.ns.cloudflare.com",
+    "wesley.ns.cloudflare.com",
+  ]
+}
 
 import {
   to = cloudflare_record.d3strukt0r-me-root

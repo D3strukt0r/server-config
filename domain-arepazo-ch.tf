@@ -54,11 +54,11 @@ import {
 }
 resource "cloudflare_record" "arepazo-ch-www" {
   provider = cloudflare.arepazo
-  zone_id = local.cloudflare_zone_id_arepazo_ch
-  name    = "www"
-  value   = cloudflare_record.arepazo-ch-root-v4.hostname
-  type    = "CNAME"
-  proxied = true
+  zone_id  = local.cloudflare_zone_id_arepazo_ch
+  name     = "www"
+  value    = cloudflare_record.arepazo-ch-root-v4.hostname
+  type     = "CNAME"
+  proxied  = true
 }
 
 import {
@@ -127,8 +127,8 @@ import {
 }
 resource "cloudflare_record" "arepazo-ch-spf" {
   provider = cloudflare.arepazo
-  zone_id = local.cloudflare_zone_id_arepazo_ch
-  name    = "arepazo.ch"
-  value   = "v=spf1 include:spf.protection.outlook.com -all"
-  type    = "TXT"
+  zone_id  = local.cloudflare_zone_id_arepazo_ch
+  name     = "arepazo.ch"
+  value    = "v=spf1 include:spf.protection.outlook.com -all"
+  type     = "TXT"
 }
