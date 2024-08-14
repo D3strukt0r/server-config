@@ -9,7 +9,7 @@ services:
     extends:
       file: ../../../common/snippets.yml
       service: common-service
-    image: d3strukt0r/arepazo:phpfpm-develop
+    image: d3strukt0r/arepazo:phpfpm-latest
     init: false
     deploy:
       resources:
@@ -48,7 +48,7 @@ services:
     extends:
       file: ../../../common/snippets.yml
       service: common-service
-    image: d3strukt0r/arepazo:nginx-develop
+    image: d3strukt0r/arepazo:nginx-latest
     init: false
     deploy:
       resources:
