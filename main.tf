@@ -101,6 +101,24 @@ variable "do_token" {
     error_message = "The do_token must be a valid DigitalOcean API token (`dop_v1_x`) with Full Access scope."
   }
 }
+variable "do_spacess_access_id" {
+  type        = string
+  description = "DigitalOcean Spaces access key"
+  sensitive   = true
+  validation {
+    condition     = can(regex("^[A-Z0-9]{20}$", var.do_spacess_access_id))
+    error_message = "The do_spacess_access_id must be a valid DigitalOcean Spaces access key."
+  }
+}
+variable "do_spacess_secret_key" {
+  type        = string
+  description = "DigitalOcean Spaces secret key"
+  sensitive   = true
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9]{43}$", var.do_spacess_secret_key))
+    error_message = "The do_spacess_secret_key must be a valid DigitalOcean Spaces secret key."
+  }
+}
 variable "pvt_key" {
   type        = string
   description = "Path to the private key file"
@@ -152,7 +170,9 @@ variable "namecheap_api_key" {
 }
 
 provider "digitalocean" {
-  token = var.do_token
+  token             = var.do_token
+  spaces_access_id  = var.do_spacess_access_id
+  spaces_secret_key = var.do_spacess_secret_key
 }
 provider "cloudflare" {
   api_token = var.cloudflare_api_token
@@ -240,6 +260,14 @@ resource "digitalocean_volume" "main" {
     prevent_destroy = true
   }
 }
+
+# TODO: Import the existing bucket
+resource "digitalocean_spaces_bucket" "main-eu" {
+  name   = "eu-prod-d3strukt0r"
+  region = "fra1"
+  acl    = "private"
+}
+
 import {
   to = digitalocean_firewall.email
   id = "3954180e-0234-459f-9b4d-68bedf537ca4"

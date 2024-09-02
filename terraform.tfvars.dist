@@ -1,5 +1,7 @@
 # https://cloud.digitalocean.com/account/api/tokens
-do_token = "dop_v1_x"
+do_token              = "dop_v1_x"
+do_spacess_access_id  = ""
+do_spacess_secret_key = ""
 
 pvt_key = "~/.ssh/id_ed25519"
 
