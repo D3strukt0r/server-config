@@ -74,7 +74,6 @@ services:
       - traefik.enable=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.middlewares=traefik_auth
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}.service=api@internal
@@ -84,7 +83,8 @@ services:
       # Note: all dollar signs in the hash need to be doubled for escaping.
       # To create user:password pair, it's possible to use this command:
       # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
-      - traefik.http.middlewares.traefik_auth.basicauth.users=${TRAEFIK_USERS:?TRAEFIK_USERS not set}
+      - traefik.http.middlewares.${COMPOSE_PROJECT_NAME}_auth.basicauth.users=${TRAEFIK_USERS:?TRAEFIK_USERS not set}
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.middlewares=${COMPOSE_PROJECT_NAME}_auth
 
       # Standard middleware for other containers to use
       # HTTP to HTTPS redirect

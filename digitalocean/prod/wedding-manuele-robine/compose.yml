@@ -15,7 +15,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 160M
+          memory: 200M
     healthcheck:
       test: curl --fail http://localhost || exit 1
       start_period: 20s
@@ -47,7 +47,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 300M
+          memory: 500M
     healthcheck:
       # TODO: Find out why `php-fpm-healthcheck` doesn't work
       #test: php-fpm-healthcheck && curl --fail http://localhost/ping || exit 1
