@@ -6,9 +6,10 @@ RUN set -e -u -x \
     && apt-get install -y make gcc
 RUN set -e -u -x \
     && gem install --no-document \
-        fluent-plugin-mongo
-        # fluent-plugin-rewrite-tag-filter
-        # fluent-plugin-multi-format-parser
-        # fluent-plugin-route
-        # fluent-plugin-elasticsearch
+        fluent-plugin-mongo \
+        fluent-plugin-s3 \
+        fluent-plugin-rewrite-tag-filter \
+        fluent-plugin-multi-format-parser \
+        fluent-plugin-route \
+        fluent-plugin-elasticsearch
 USER fluent

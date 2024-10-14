@@ -43,3 +43,4 @@ terraform.rc
 *.sql
 backup
 *hidden*
+!.restic-env.dist

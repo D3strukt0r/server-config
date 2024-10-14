@@ -6,7 +6,7 @@ echo "========== Start $0 =========="
 
 # Script dir (https://stackoverflow.com/a/246128/4156752)
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-BACKUP_DIR=$(realpath "$SCRIPT_DIR/../backup/daily")
+BACKUP_DIR=$(realpath "$SCRIPT_DIR/../../backup/daily")
 
 # Change to repo root, so that git command works
 cd "$SCRIPT_DIR/.."

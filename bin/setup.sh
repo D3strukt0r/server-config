@@ -145,6 +145,18 @@ install_package gnupg # To verify git commits, Dependency for docker
 install_package apache2-utils # for htpasswd command to add users to .htpasswd file
 install_package unzip # Was needed for setting up bitwarden first time
 install_package htop # Better top
+install_package bzip2 # For extracting restic # TODO: Is not correctly detected not to be installed
+
+if ! which restic &> /dev/null; then
+    echo_info 'Installing Restic...'
+    version=0.17.1
+    curl -fsSL https://github.com/restic/restic/releases/download/v$version/restic_${version}_linux_amd64.bz2 -o /tmp/restic_${version}_linux_amd64.bz2
+    (cd /tmp; bzip2 -d restic_${version}_linux_amd64.bz2)
+    install -m 0755 /tmp/restic_${version}_linux_amd64 /usr/local/bin/restic
+    rm /tmp/restic_${version}_linux_amd64
+else
+    echo_skip 'Restic is already installed.'
+fi
 
 # Install Tofu (check with which)
 if ! which tofu &> /dev/null; then
@@ -361,31 +373,39 @@ fi
 
 # Add 'backup-daily.sh', 'backup-weekly.sh' and 'backup-monthly.sh' to crontab
 # - Execute the daily backup script everyday at 12:15 AM
+# - Execute the restic backup script in the 42nd minute of every hour, day, month, and day of week
 # - Execute the weekly backup script every Monday at 12:30 AM
 # - Execute the monthly backup script the 1st of every month at 12:45 AM
 # - Execute the docker prune script everyday at 12:10 AM
 # The first one must check for the 'no crontab for root' error
-if [[ $(crontab -l 2>/dev/null | grep 'backup-daily.sh') == '' ]]; then
-  echo_info 'Adding daily backup to crontab...'
-  (crontab -l 2>/dev/null || true; echo '15 0 * * * '"$SCRIPT_DIR/backup-daily.sh 2>&1 | tee -a $SCRIPT_DIR/../backup/cron.log") | crontab -
+# To clear crontab: crontab -r
+#if [[ $(crontab -l 2>/dev/null | grep 'backup-daily.sh') == '' ]]; then
+#  echo_info 'Adding daily backup to crontab...'
+#  (crontab -l 2>/dev/null || true; echo '15 0 * * * '"$SCRIPT_DIR/backup-daily.sh 2>&1 | tee -a $(realpath "$SCRIPT_DIR/../../backup")/cron.log") | crontab -
+#else
+#  echo_skip 'backup-daily.sh is already added to crontab.'
+#fi
+#if [[ $(crontab -l 2>/dev/null | grep backup-weekly.sh) == '' ]]; then
+#  echo_info 'Adding backup-weekly.sh to crontab...'
+#  (crontab -l 2>/dev/null || true; echo '30 0 * * 1 '"$SCRIPT_DIR/backup-weekly.sh 2>&1 | tee -a $(realpath "$SCRIPT_DIR/../../backup")/cron.log") | crontab -
+#else
+#  echo_skip 'backup-weekly.sh is already in crontab.'
+#fi
+#if [[ $(crontab -l 2>/dev/null | grep backup-monthly.sh) == '' ]]; then
+#  echo_info 'Adding backup-monthly.sh to crontab...'
+#  (crontab -l 2>/dev/null || true; echo '45 0 1 * * '"$SCRIPT_DIR/backup-monthly.sh 2>&1 | tee -a $(realpath "$SCRIPT_DIR/../../backup")/cron.log") | crontab -
+#else
+#  echo_skip 'backup-monthly.sh is already in crontab.'
+#fi
+if [[ $(crontab -l 2>/dev/null | grep backup-restic.sh) == '' ]]; then
+  echo_info 'Adding backup-restic.sh to crontab...'
+  (crontab -l 2>/dev/null || true; echo '42 * * * * '"$SCRIPT_DIR/backup-restic.sh 2>&1 | tee -a $(realpath "$SCRIPT_DIR/../../backup")/cron.log") | crontab -
 else
-  echo_skip 'backup-daily.sh is already added to crontab.'
+  echo_skip 'backup-restic.sh is already in crontab.'
 fi
-if [[ $(crontab -l | grep backup-weekly.sh) == '' ]]; then
-  echo_info 'Adding backup-weekly.sh to crontab...'
-  (crontab -l 2>/dev/null; echo '30 0 * * 1 '"$SCRIPT_DIR/backup-weekly.sh 2>&1 | tee -a $SCRIPT_DIR/../backup/cron.log") | crontab -
-else
-  echo_skip 'backup-weekly.sh is already in crontab.'
-fi
-if [[ $(crontab -l | grep backup-monthly.sh) == '' ]]; then
-  echo_info 'Adding backup-monthly.sh to crontab...'
-  (crontab -l 2>/dev/null; echo '45 0 1 * * '"$SCRIPT_DIR/backup-monthly.sh 2>&1 | tee -a $SCRIPT_DIR/../backup/cron.log") | crontab -
-else
-  echo_skip 'backup-monthly.sh is already in crontab.'
-fi
-if [[ $(crontab -l | grep docker-prune.sh) == '' ]]; then
+if [[ $(crontab -l 2>/dev/null | grep docker-prune.sh) == '' ]]; then
   echo_info 'Adding docker-prune.sh to crontab...'
-  (crontab -l 2>/dev/null; echo '10 0 * * * '"$SCRIPT_DIR/docker-prune.sh 2>&1 | tee -a $SCRIPT_DIR/../backup/cron.log") | crontab -
+  (crontab -l 2>/dev/null || true; echo '10 0 * * * '"$SCRIPT_DIR/docker-prune.sh 2>&1 | tee -a $(realpath "$SCRIPT_DIR/../../backup")/cron.log") | crontab -
 else
   echo_skip 'docker-prune.sh is already in crontab.'
 fi
@@ -397,6 +417,7 @@ binary_installed_or_linked tofu "$SCRIPT_DIR/opentofu.sh" # https://opentofu.org
 binary_installed_or_linked doctl "$SCRIPT_DIR/doctl.sh" # https://github.com/digitalocean/doctl
 binary_installed_or_linked docker-services-start "$SCRIPT_DIR/docker-services-start.sh"
 binary_installed_or_linked docker-services-stop "$SCRIPT_DIR/docker-services-stop.sh"
+binary_installed_or_linked restic2 "$SCRIPT_DIR/restic2.sh"
 
 # Login to Docker Hub
 if [[ $(docker system info | grep 'Username') == '' ]]; then
