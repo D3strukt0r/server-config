@@ -12,6 +12,14 @@ services:
       options:
         # TODO: Use "${COMPOSE_PROJECT_NAME}" if we can remove "-dev" from the string
         tag: wedding-manuele-robine.dev.phpmyadmin
+  tiredofit-db-backup:
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    logging:
+      options:
+        # TODO: Use "${COMPOSE_PROJECT_NAME}" if we can remove "-dev" from the string
+        tag: wedding-manuele-robine.dev.tiredofit-db-backup
   #minio:
   #  volumes:
   #    - ./minio:/data

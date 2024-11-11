@@ -13,6 +13,7 @@ cd "$SCRIPT_DIR/.."
 # Read environment variables
 . .restic-env
 
+# https://www.digitalocean.com/community/tutorials/how-to-back-up-data-to-an-object-storage-service-with-the-restic-backup-client
 restic backup . --skip-if-unchanged \
     --exclude 'backup/**'
 restic forget --prune \
