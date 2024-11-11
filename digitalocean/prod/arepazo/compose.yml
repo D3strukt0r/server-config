@@ -1,6 +1,8 @@
 include:
   - path: ../../../common/mariadb.compose.yml
     env_file: .mariadb.env
+  - path: ../../../common/tiredofit-db-backup.yml
+    env_file: .tiredofit-db-backup.env
   - path: ../../../common/phpmyadmin.compose.yml
     env_file: .phpmyadmin.env
 
