@@ -37,7 +37,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pwa.entrypoints=websecure
-      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pwa.rule=Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`eleunam-enibor.wedding`) || Host(`www.eleunam-enibor.wedding`) || Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pwa.rule=Host(`manuele-robine.wedding`) || Host(`www.manuele-robine.wedding`) || Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pwa.tls=true
       - traefik.http.routers.${COMPOSE_PROJECT_NAME}-pwa.tls.certresolver=le
 
@@ -64,7 +64,7 @@ services:
       APP_URL: https://${COMPOSE_PROJECT_NAME}.d3strukt0r.dev
       TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       CLEAR_SESSIONS_IN: /var/cache/sessions/prod
-      CORS_ALLOW_ORIGIN: ^https?://(wedding-manuele-robine\.d3strukt0r\.dev|(?:www\.)?manuele-robine\.wedding|(?:www\.)?eleunam-enibor\.wedding|localhost|127\.0\.0\.1)(:[0-9]+)?$
+      CORS_ALLOW_ORIGIN: ^https?://(wedding-manuele-robine\.d3strukt0r\.dev|(?:www\.)?manuele-robine\.wedding|localhost|127\.0\.0\.1)(:[0-9]+)?$
       JWT_PASSPHRASE: ${JWT_PASSPHRASE:?JWT_PASSPHRASE not set}
 
       DEFAULT_STORAGE_SOURCE: default.storage.aws
