@@ -26,6 +26,7 @@ services:
       - mariadb
     volumes:
       - ./wordpress:/var/www/html
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
     environment:
       WORDPRESS_DB_HOST: mariadb
       WORDPRESS_DB_USER: db
