@@ -1,0 +1,62 @@
+---
+- name: Configure networking server VM
+  hosts: networking_server
+  become: true
+  vars:
+    swap_size: 2G
+    swappiness: 1
+    vfs_cache_pressure: 50
+    packages:
+      - sudo
+      - ncdu
+      - curl
+      - git
+      - htop
+      - gnupg
+      - podman
+    user_groups:
+      - name: d3strukt0r
+        groups:
+          - sudo
+    deploy_user: d3strukt0r
+    git_user_name: D3strukt0r
+    git_user_email: dev@d3strukt0r.dev
+    git_user_signingkey: C9E5AB85364CA764!
+    gpg_key_src: ./private.gpg # only needed once to import the key, can be removed after that
+    ssh_key_src: ./id_ed25519 # only needed once to deploy the key, can be removed after that
+    server_config_repo: git@github.com:D3strukt0r/server-config.git
+    server_config_dest: /home/d3strukt0r/server-config
+  tasks:
+    - name: Remove CD-ROM apt source
+      ansible.builtin.include_tasks: tasks/apt_cdrom_cleanup.yml
+    - name: Install packages
+      ansible.builtin.include_tasks: tasks/packages.yml
+    - name: Configure user groups
+      ansible.builtin.include_tasks: tasks/user_groups.yml
+    - name: Configure swap
+      ansible.builtin.include_tasks: tasks/swap.yml
+    - name: Configure swappiness
+      ansible.builtin.include_tasks: tasks/swappiness.yml
+    - name: Configure vfs_cache_pressure
+      ansible.builtin.include_tasks: tasks/vfs_cache_pressure.yml
+    - name: Configure daily apt upgrade
+      ansible.builtin.include_tasks: tasks/apt_daily_upgrade.yml
+    - name: Harden SSH
+      ansible.builtin.include_tasks: tasks/sshd.yml
+    - name: Configure podman
+      ansible.builtin.include_tasks: tasks/podman.yml
+    - name: Install wrapper scripts
+      ansible.builtin.include_tasks: tasks/scripts.yml
+    - name: Deploy SSH key
+      ansible.builtin.include_tasks: tasks/ssh_key.yml
+    - name: Import GPG key
+      ansible.builtin.include_tasks: tasks/gpg_import.yml
+    - name: Configure git
+      ansible.builtin.include_tasks: tasks/git_config.yml
+    - name: Clone server-config repository
+      ansible.builtin.include_tasks: tasks/git_clone.yml
+  handlers:
+    - name: Restart sshd
+      ansible.builtin.service:
+        name: sshd
+        state: restarted

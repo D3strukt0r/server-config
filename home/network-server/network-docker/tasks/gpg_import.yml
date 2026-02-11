@@ -1,0 +1,50 @@
+---
+- name: Check if GPG secret keys are already imported
+  ansible.builtin.command:
+    cmd: gpg --list-secret-keys
+  become_user: "{{ deploy_user }}"
+  register: gpg_keys
+  changed_when: false
+
+- name: Import GPG key
+  when: gpg_keys.stdout == ''
+  block:
+    - name: Check if GPG key source exists on control machine
+      ansible.builtin.stat:
+        path: "{{ gpg_key_src }}"
+      delegate_to: localhost
+      become: false
+      register: gpg_key_file
+
+    - name: Warn if GPG key source does not exist
+      ansible.builtin.debug:
+        msg: >-
+          GPG key file not found at '{{ gpg_key_src }}' on the control machine.
+          Skipping import. To import, place your private.gpg file there or
+          override with --extra-vars "gpg_key_src=/path/to/key.gpg"
+      when: not gpg_key_file.stat.exists
+
+    - name: Copy GPG key to remote server
+      when: gpg_key_file.stat.exists
+      ansible.builtin.copy:
+        src: "{{ gpg_key_src }}"
+        dest: /tmp/private.gpg
+        owner: "{{ deploy_user }}"
+        mode: "0600"
+
+    - name: Import GPG key from file
+      when: gpg_key_file.stat.exists
+      ansible.builtin.command:
+        # Export gpg keys with --export-options export-backup to ensure all necessary key data is included for re-importing,
+        # such as subkeys and user IDs. This is important for a complete backup and restore of GPG keys.
+        # $ gpg --list-secret-keys --keyid-format long
+        # $ gpg --export-options export-backup --export-secret-keys --armor YOUR_KEY_ID/EMAIL > private.gpg
+        cmd: gpg --batch --import-options import-restore --import /tmp/private.gpg
+      become_user: "{{ deploy_user }}"
+      changed_when: true
+
+    - name: Remove temporary GPG key file
+      when: gpg_key_file.stat.exists
+      ansible.builtin.file:
+        path: /tmp/private.gpg
+        state: absent

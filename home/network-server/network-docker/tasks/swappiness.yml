@@ -1,0 +1,7 @@
+---
+# Check with `cat /etc/sysctl.conf` & `cat /proc/sys/vm/swappiness`
+- name: Set vm.swappiness
+  ansible.builtin.sysctl:
+    name: vm.swappiness
+    value: "{{ swappiness }}"
+    sysctl_set: true

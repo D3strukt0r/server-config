@@ -1,0 +1,7 @@
+---
+# Check with `cat /etc/sysctl.conf` & `cat /proc/sys/vm/vfs_cache_pressure`
+- name: Set vm.vfs_cache_pressure
+  ansible.builtin.sysctl:
+    name: vm.vfs_cache_pressure
+    value: "{{ vfs_cache_pressure }}"
+    sysctl_set: true

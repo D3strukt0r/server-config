@@ -1,0 +1,49 @@
+---
+- name: Ensure .ssh directory exists
+  ansible.builtin.file:
+    path: /home/{{ deploy_user }}/.ssh
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0700"
+
+- name: Check if SSH private key already exists
+  ansible.builtin.stat:
+    path: /home/{{ deploy_user }}/.ssh/id_ed25519
+  register: ssh_key_stat
+
+- name: Deploy SSH key
+  when: not ssh_key_stat.stat.exists
+  block:
+    - name: Check if SSH private key source exists on control machine
+      ansible.builtin.stat:
+        path: "{{ ssh_key_src }}"
+      delegate_to: localhost
+      become: false
+      register: ssh_key_file
+
+    - name: Warn if SSH key source does not exist
+      ansible.builtin.debug:
+        msg: >-
+          SSH key not found at '{{ ssh_key_src }}' on the control machine.
+          Skipping deploy. To deploy, place your id_ed25519 there or
+          override with --extra-vars "ssh_key_src=/path/to/id_ed25519"
+      when: not ssh_key_file.stat.exists
+
+    - name: Copy SSH private key to remote server
+      when: ssh_key_file.stat.exists
+      ansible.builtin.copy:
+        src: "{{ ssh_key_src }}"
+        dest: /home/{{ deploy_user }}/.ssh/id_ed25519
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0600"
+
+    - name: Copy SSH public key to remote server
+      when: ssh_key_file.stat.exists
+      ansible.builtin.copy:
+        src: "{{ ssh_key_src }}.pub"
+        dest: /home/{{ deploy_user }}/.ssh/id_ed25519.pub
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0644"
