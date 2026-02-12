@@ -1,0 +1,28 @@
+---
+# Check with `ip addr show {{ network_interface }}`
+- name: Configure static IP
+  ansible.builtin.copy:
+    content: |
+      # This file describes the network interfaces available on your system
+      # and how to activate them. For more information, see interfaces(5).
+
+      source /etc/network/interfaces.d/*
+
+      # The loopback network interface
+      auto lo
+      iface lo inet loopback
+
+      # The primary network interface
+      #allow-hotplug ens18
+      allow-hotplug {{ network_interface }}
+      #iface ens18 inet dhcp
+      iface {{ network_interface }} inet static
+          address {{ network_ip }}
+          gateway {{ network_gateway }}
+          dns-nameservers {{ network_dns }}
+      # This is an autoconfigured IPv6 interface
+      #iface ens18 inet6 auto
+      iface {{ network_interface }} inet6 auto
+    dest: /etc/network/interfaces
+    mode: "0644"
+  notify: Restart networking

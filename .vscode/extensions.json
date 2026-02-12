@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "github.copilot",
         "mads-hartmann.bash-ide-vscode",
         "ms-azuretools.vscode-docker",
         "editorconfig.editorconfig",

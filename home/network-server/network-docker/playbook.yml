@@ -14,6 +14,7 @@
       - htop
       - gnupg
       - podman
+      - qemu-guest-agent
     user_groups:
       - name: d3strukt0r
         groups:
@@ -24,6 +25,10 @@
     git_user_signingkey: C9E5AB85364CA764!
     gpg_key_src: ./private.gpg # only needed once to import the key, can be removed after that
     ssh_key_src: ./id_ed25519 # only needed once to deploy the key, can be removed after that
+    network_interface: ens18
+    network_ip: 192.168.1.13/24
+    network_gateway: 192.168.1.1
+    network_dns: 192.168.1.1
     server_config_repo: git@github.com:D3strukt0r/server-config.git
     server_config_dest: /home/d3strukt0r/server-config
   tasks:
@@ -31,6 +36,8 @@
       ansible.builtin.include_tasks: tasks/apt_cdrom_cleanup.yml
     - name: Install packages
       ansible.builtin.include_tasks: tasks/packages.yml
+    - name: Configure network
+      ansible.builtin.include_tasks: tasks/network.yml
     - name: Configure user groups
       ansible.builtin.include_tasks: tasks/user_groups.yml
     - name: Configure swap
@@ -45,6 +52,8 @@
       ansible.builtin.include_tasks: tasks/sshd.yml
     - name: Configure podman
       ansible.builtin.include_tasks: tasks/podman.yml
+    - name: Configure qemu-guest-agent
+      ansible.builtin.include_tasks: tasks/qemu_guest_agent.yml
     - name: Install wrapper scripts
       ansible.builtin.include_tasks: tasks/scripts.yml
     - name: Deploy SSH key
@@ -59,4 +68,8 @@
     - name: Restart sshd
       ansible.builtin.service:
         name: sshd
+        state: restarted
+    - name: Restart networking
+      ansible.builtin.service:
+        name: networking
         state: restarted

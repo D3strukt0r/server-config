@@ -1,0 +1,7 @@
+---
+# Check with `systemctl status qemu-guest-agent`
+- name: Enable and start qemu-guest-agent
+  ansible.builtin.systemd:
+    name: qemu-guest-agent
+    enabled: true
+    state: started
