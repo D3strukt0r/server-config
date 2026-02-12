@@ -33,37 +33,37 @@
     server_config_dest: /home/d3strukt0r/server-config
   tasks:
     - name: Remove CD-ROM apt source
-      ansible.builtin.include_tasks: tasks/apt_cdrom_cleanup.yml
+      ansible.builtin.include_tasks: ../common/tasks/apt_cdrom_cleanup.yml
     - name: Install packages
-      ansible.builtin.include_tasks: tasks/packages.yml
+      ansible.builtin.include_tasks: ../common/tasks/packages.yml
     - name: Configure network
-      ansible.builtin.include_tasks: tasks/network.yml
+      ansible.builtin.include_tasks: ../common/tasks/network.yml
     - name: Configure user groups
-      ansible.builtin.include_tasks: tasks/user_groups.yml
+      ansible.builtin.include_tasks: ../common/tasks/user_groups.yml
     - name: Configure swap
-      ansible.builtin.include_tasks: tasks/swap.yml
+      ansible.builtin.include_tasks: ../common/tasks/swap.yml
     - name: Configure swappiness
-      ansible.builtin.include_tasks: tasks/swappiness.yml
+      ansible.builtin.include_tasks: ../common/tasks/swappiness.yml
     - name: Configure vfs_cache_pressure
-      ansible.builtin.include_tasks: tasks/vfs_cache_pressure.yml
+      ansible.builtin.include_tasks: ../common/tasks/vfs_cache_pressure.yml
     - name: Configure daily apt upgrade
-      ansible.builtin.include_tasks: tasks/apt_daily_upgrade.yml
+      ansible.builtin.include_tasks: ../common/tasks/apt_daily_upgrade.yml
     - name: Harden SSH
-      ansible.builtin.include_tasks: tasks/sshd.yml
+      ansible.builtin.include_tasks: ../common/tasks/sshd.yml
     - name: Configure podman
-      ansible.builtin.include_tasks: tasks/podman.yml
+      ansible.builtin.include_tasks: ../common/tasks/podman.yml
     - name: Configure qemu-guest-agent
-      ansible.builtin.include_tasks: tasks/qemu_guest_agent.yml
+      ansible.builtin.include_tasks: ../common/tasks/qemu_guest_agent.yml
     - name: Install wrapper scripts
-      ansible.builtin.include_tasks: tasks/scripts.yml
+      ansible.builtin.include_tasks: ../common/tasks/scripts.yml
     - name: Deploy SSH key
-      ansible.builtin.include_tasks: tasks/ssh_key.yml
+      ansible.builtin.include_tasks: ../common/tasks/ssh_key.yml
     - name: Import GPG key
-      ansible.builtin.include_tasks: tasks/gpg_import.yml
+      ansible.builtin.include_tasks: ../common/tasks/gpg_import.yml
     - name: Configure git
-      ansible.builtin.include_tasks: tasks/git_config.yml
+      ansible.builtin.include_tasks: ../common/tasks/git_config.yml
     - name: Clone server-config repository
-      ansible.builtin.include_tasks: tasks/git_clone.yml
+      ansible.builtin.include_tasks: ../common/tasks/git_clone.yml
   handlers:
     - name: Restart sshd
       ansible.builtin.service:
