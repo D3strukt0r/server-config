@@ -2,7 +2,6 @@
 - name: Check if GPG secret keys are already imported
   ansible.builtin.command:
     cmd: gpg --list-secret-keys
-  become_user: "{{ deploy_user }}"
   register: gpg_keys
   changed_when: false
 
@@ -29,7 +28,6 @@
       ansible.builtin.copy:
         src: "{{ gpg_key_src }}"
         dest: /tmp/private.gpg
-        owner: "{{ deploy_user }}"
         mode: "0600"
 
     - name: Import GPG key from file
@@ -40,7 +38,6 @@
         # $ gpg --list-secret-keys --keyid-format long
         # $ gpg --export-options export-backup --export-secret-keys --armor YOUR_KEY_ID/EMAIL > private.gpg
         cmd: gpg --batch --import-options import-restore --import /tmp/private.gpg
-      become_user: "{{ deploy_user }}"
       changed_when: true
 
     - name: Remove temporary GPG key file

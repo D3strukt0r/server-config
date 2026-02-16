@@ -1,6 +1,7 @@
 ---
 # Check with `sudo swapon --show` and `free -h`
 - name: Check if swapfile exists
+  become: true
   ansible.builtin.stat:
     path: /swapfile
   register: swapfile_stat
@@ -12,6 +13,7 @@
          swapfile_stat.stat.size != (swap_size | human_to_bytes) }}
 
 - name: Remove old swapfile
+  become: true
   when: swap_needs_resize
   block:
     - name: Disable old swapfile
@@ -25,6 +27,7 @@
         state: absent
 
 - name: Set up swapfile
+  become: true
   when: not swapfile_stat.stat.exists or swap_needs_resize
   block:
     - name: Create swapfile
@@ -48,6 +51,7 @@
       changed_when: true
 
 - name: Ensure swapfile permissions
+  become: true
   ansible.builtin.file:
     path: /swapfile
     owner: root
@@ -56,6 +60,7 @@
   when: swapfile_stat.stat.exists and not swap_needs_resize
 
 - name: Ensure swapfile is in fstab
+  become: true
   ansible.builtin.lineinfile:
     path: /etc/fstab
     line: /swapfile none swap sw 0 0

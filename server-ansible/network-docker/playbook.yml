@@ -1,7 +1,6 @@
 ---
 - name: Configure networking server VM
   hosts: networking_server
-  become: true
   vars:
     swap_size: 2G
     swappiness: 1
@@ -14,12 +13,12 @@
       - htop
       - gnupg
       - podman
-      - qemu-guest-agent
+      - qemu-guest-agent # needed for graceful shutdowns and to get the IP address of the VM from the host
+      - resolvconf # needed for `dns-nameservers` to work in `/etc/network/interfaces`
     user_groups:
       - name: d3strukt0r
         groups:
           - sudo
-    deploy_user: d3strukt0r
     git_user_name: D3strukt0r
     git_user_email: dev@d3strukt0r.dev
     git_user_signingkey: C9E5AB85364CA764!
@@ -66,10 +65,12 @@
       ansible.builtin.include_tasks: ../common/tasks/git_clone.yml
   handlers:
     - name: Restart sshd
+      become: true
       ansible.builtin.service:
         name: sshd
         state: restarted
     - name: Restart networking
+      become: true
       ansible.builtin.service:
         name: networking
         state: restarted

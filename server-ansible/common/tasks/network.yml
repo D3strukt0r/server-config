@@ -1,6 +1,7 @@
 ---
 # Check with `ip addr show {{ network_interface }}`
 - name: Configure static IP
+  become: true
   ansible.builtin.copy:
     content: |
       # This file describes the network interfaces available on your system
@@ -26,3 +27,12 @@
     dest: /etc/network/interfaces
     mode: "0644"
   notify: Restart networking
+
+# Might be needed when switching from DHCP to static IP, otherwise the resolver might not be able to resolve domain names
+#- name: Configure DNS resolver
+#  become: true
+#  ansible.builtin.copy:
+#    content: |
+#      nameserver {{ network_dns }}
+#    dest: /etc/resolv.conf
+#    mode: "0644"

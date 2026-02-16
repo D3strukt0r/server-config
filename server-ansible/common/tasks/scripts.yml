@@ -1,5 +1,6 @@
 ---
 - name: Install ctop wrapper script
+  become: true
   ansible.builtin.copy:
     content: |
       #!/bin/sh

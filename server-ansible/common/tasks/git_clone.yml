@@ -1,7 +1,7 @@
 ---
 - name: Check if SSH key exists
   ansible.builtin.stat:
-    path: /home/{{ deploy_user }}/.ssh/id_ed25519
+    path: ~/.ssh/id_ed25519
   register: ssh_key_stat
 
 - name: Clone server-config repository
@@ -9,5 +9,4 @@
     repo: "{{ server_config_repo }}"
     dest: "{{ server_config_dest }}"
     accept_newhostkey: true
-  become_user: "{{ deploy_user }}"
   when: ssh_key_stat.stat.exists

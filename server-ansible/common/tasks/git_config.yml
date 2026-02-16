@@ -4,19 +4,16 @@
     name: user.name
     value: "{{ git_user_name }}"
     scope: global
-  become_user: "{{ deploy_user }}"
 
 - name: Set git user.email
   community.general.git_config:
     name: user.email
     value: "{{ git_user_email }}"
     scope: global
-  become_user: "{{ deploy_user }}"
 
 - name: Check if GPG keys are available for signing config
   ansible.builtin.command:
     cmd: gpg --list-secret-keys
-  become_user: "{{ deploy_user }}"
   register: gpg_keys_check
   changed_when: false
 
@@ -28,11 +25,9 @@
         name: commit.gpgsign
         value: "true"
         scope: global
-      become_user: "{{ deploy_user }}"
 
     - name: Set git user.signingkey
       community.general.git_config:
         name: user.signingkey
         value: "{{ git_user_signingkey }}"
         scope: global
-      become_user: "{{ deploy_user }}"

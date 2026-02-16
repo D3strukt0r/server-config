@@ -1,6 +1,7 @@
 ---
 # Check with `crontab -l`
 - name: Set up daily apt update and upgrade cron job
+  become: true
   ansible.builtin.cron:
     name: Daily apt update and upgrade
     minute: "0"
