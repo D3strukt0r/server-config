@@ -72,13 +72,13 @@ type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh d3strukt0r@192.168.1.73 "mkdir -
 Run from this directory:
 
 ```shell
-ansible-playbook playbook.yml --ask-become-pass
+ansible-playbook playbook.yml
 ```
 
 To check what would change without applying:
 
 ```shell
-ansible-playbook playbook.yml --ask-become-pass --check --diff
+ansible-playbook playbook.yml --check --diff
 ```
 
 ## What it configures

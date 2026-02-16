@@ -15,6 +15,8 @@
       - podman
       - qemu-guest-agent # needed for graceful shutdowns and to get the IP address of the VM from the host
       - resolvconf # needed for `dns-nameservers` to work in `/etc/network/interfaces`
+      - avahi-daemon # needed for mDNS (.local) hostname resolution (server)
+      - libnss-mdns # needed for mDNS (.local) hostname resolution (client)
     user_groups:
       - name: d3strukt0r
         groups:
@@ -28,6 +30,7 @@
     network_ip: 192.168.1.13/24
     network_gateway: 192.168.1.1
     network_dns: 192.168.1.1
+    mdns_hostname: network-docker
     server_config_repo: git@github.com:D3strukt0r/server-config.git
     server_config_dest: /home/d3strukt0r/server-config
   tasks:
@@ -37,6 +40,8 @@
       ansible.builtin.include_tasks: ../common/tasks/packages.yml
     - name: Configure network
       ansible.builtin.include_tasks: ../common/tasks/network.yml
+    - name: Configure mDNS
+      ansible.builtin.include_tasks: ../common/tasks/mdns.yml
     - name: Configure user groups
       ansible.builtin.include_tasks: ../common/tasks/user_groups.yml
     - name: Configure swap

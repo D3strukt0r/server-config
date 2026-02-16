@@ -1,0 +1,21 @@
+---
+# Check with `hostname` and `avahi-browse -a`
+- name: Set hostname
+  become: true
+  ansible.builtin.hostname:
+    name: "{{ mdns_hostname }}"
+
+- name: Ensure hostname in /etc/hosts
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s'
+    line: "127.0.1.1\t{{ mdns_hostname }}"
+    state: present
+
+- name: Enable and start avahi-daemon
+  become: true
+  ansible.builtin.systemd:
+    name: avahi-daemon
+    enabled: true
+    state: started
