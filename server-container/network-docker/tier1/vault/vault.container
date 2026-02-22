@@ -1,0 +1,31 @@
+[Unit]
+Description=HashiCorp Vault secret store
+After=proxy.network
+Requires=proxy.network
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+[Container]
+Image=docker.io/hashicorp/vault:latest
+ContainerName=vault
+EnvironmentFile=%h/.config/containers/systemd/env/vault.env
+PublishPort=8200:8200
+Volume=vault-data.volume:/vault/file
+Network=proxy.network
+PodmanArgs=--init --cap-add=IPC_LOCK
+HealthCmd=vault status || exit 1
+HealthInterval=30s
+HealthTimeout=5s
+HealthStartPeriod=30s
+Label=traefik.enable=true
+Label=traefik.http.routers.vault.rule=Host(`vault.network-docker.local`)
+Label=traefik.http.routers.vault.entrypoints=websecure
+Label=traefik.http.routers.vault.tls=true
+Label=traefik.http.services.vault.loadbalancer.server.port=8200
+
+[Install]
+WantedBy=default.target

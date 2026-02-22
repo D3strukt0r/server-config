@@ -1,0 +1,7 @@
+[Network]
+NetworkName=proxy
+Driver=bridge
+Internal=false
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,22 @@
+[Unit]
+Description=Python Matter Server
+After=openthread-border-router.container
+Wants=openthread-border-router.container
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=10s
+
+[Container]
+Image=ghcr.io/home-assistant-libs/python-matter-server:{{ .containerTag }}
+ContainerName=matter-server
+Network=host
+SecurityLabelDisable=true
+Volume=matter-server-data:/data
+Volume=/run/dbus:/run/dbus:ro
+PodmanArgs=--init
+
+[Install]
+WantedBy=default.target

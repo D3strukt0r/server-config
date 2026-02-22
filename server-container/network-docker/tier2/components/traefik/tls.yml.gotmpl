@@ -1,0 +1,14 @@
+tls:
+  certificates:
+    - certFile: /etc/traefik/certs/letsencrypt/live/d3strukt0r.dev/fullchain.pem
+      keyFile: /etc/traefik/certs/letsencrypt/live/d3strukt0r.dev/privkey.pem
+
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /etc/traefik/certs/selfsigned/network-docker.local.crt
+        keyFile: /etc/traefik/certs/selfsigned/network-docker.local.key
+
+  options:
+    default:
+      minVersion: VersionTLS12

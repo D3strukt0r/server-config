@@ -5,9 +5,9 @@
     content: |
       #!/bin/sh
       set -e -u
-      sudo podman run --rm --interactive --tty \
+      podman run --rm --interactive --tty \
         --name=ctop \
-        --volume /run/podman/podman.sock:/var/run/docker.sock:ro \
+        --volume "$XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock:ro" \
         quay.io/vektorlab/ctop:latest
     dest: /usr/local/bin/ctop
     mode: "0755"

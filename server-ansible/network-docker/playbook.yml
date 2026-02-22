@@ -17,6 +17,7 @@
       - resolvconf # needed for `dns-nameservers` to work in `/etc/network/interfaces`
       - avahi-daemon # needed for mDNS (.local) hostname resolution (server)
       - libnss-mdns # needed for mDNS (.local) hostname resolution (client)
+      - openssl # needed for generating self-signed certificates
     user_groups:
       - name: d3strukt0r
         groups:
@@ -31,9 +32,13 @@
     network_gateway: 192.168.1.1
     network_dns: 192.168.1.1
     mdns_hostname: network-docker
-    server_config_repo: git@github.com:D3strukt0r/server-config.git
-    server_config_dest: /home/d3strukt0r/server-config
+    container_data_dir: ~/container-data
+    tier1_dir: "{{ playbook_dir }}/../../server-container/network-docker/tier1"
+    materia_age_private_key: "" # set via --extra-vars or Ansible vault
+    vault_agent_token: "" # set via --extra-vars after Vault initialization
+    backbone_interface: "{{ network_interface }}" # Used by sysctl_thread.yml for IPv6 router advertisements
   tasks:
+    # --- Base system setup ---
     - name: Remove CD-ROM apt source
       ansible.builtin.include_tasks: ../common/tasks/apt_cdrom_cleanup.yml
     - name: Install packages
@@ -56,6 +61,8 @@
       ansible.builtin.include_tasks: ../common/tasks/sshd.yml
     - name: Configure podman
       ansible.builtin.include_tasks: ../common/tasks/podman.yml
+    - name: Configure sysctl
+      ansible.builtin.include_tasks: ../common/tasks/sysctl.yml
     - name: Configure qemu-guest-agent
       ansible.builtin.include_tasks: ../common/tasks/qemu_guest_agent.yml
     - name: Install wrapper scripts
@@ -66,8 +73,24 @@
       ansible.builtin.include_tasks: ../common/tasks/gpg_import.yml
     - name: Configure git
       ansible.builtin.include_tasks: ../common/tasks/git_config.yml
-    - name: Clone server-config repository
-      ansible.builtin.include_tasks: ../common/tasks/git_clone.yml
+    # --- Tier 1: Bootstrap infrastructure ---
+    - name: Deploy proxy network
+      ansible.builtin.include_tasks: ../common/tasks/quadlet_network.yml
+    - name: Prepare certificate directories
+      ansible.builtin.include_tasks: ../common/tasks/certs.yml
+    - name: Deploy Vault
+      ansible.builtin.include_tasks: ../common/tasks/vault.yml
+    - name: Deploy Vault Agent
+      ansible.builtin.include_tasks: ../common/tasks/vault_agent.yml
+    # --- System prerequisites for Tier 2 HA stack (rootless, Materia-managed) ---
+    - name: Configure sysctl for Thread
+      ansible.builtin.include_tasks: ../common/tasks/sysctl_thread.yml
+    - name: Load kernel modules for Thread
+      ansible.builtin.include_tasks: ../common/tasks/kernel_modules.yml
+
+    # --- Tier 2: Materia-managed services ---
+    - name: Deploy Materia
+      ansible.builtin.include_tasks: ../common/tasks/materia.yml
   handlers:
     - name: Restart sshd
       become: true
@@ -79,3 +102,7 @@
       ansible.builtin.service:
         name: networking
         state: restarted
+    - name: Reload systemd user daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+        scope: user

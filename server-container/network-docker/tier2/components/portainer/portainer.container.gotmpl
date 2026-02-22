@@ -1,0 +1,30 @@
+[Unit]
+Description=Portainer CE container management UI
+After=proxy.network
+Requires=proxy.network
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+[Container]
+Image=docker.io/portainer/portainer-ce:{{ .containerTag }}
+ContainerName=portainer
+Volume=/run/user/1000/podman/podman.sock:/var/run/docker.sock
+Volume={{ .container_data_dir }}/portainer:/data
+Network=proxy.network
+PodmanArgs=--init --cpus=0.5 --memory=100m
+HealthCmd=wget --no-verbose --tries=1 --spider http://localhost:9000 || exit 1
+HealthInterval=60s
+HealthTimeout=3s
+HealthStartPeriod=10s
+Label=traefik.enable=true
+Label=traefik.http.services.portainer.loadbalancer.server.port=9000
+Label=traefik.http.routers.portainer.entrypoints=websecure
+Label=traefik.http.routers.portainer.rule=Host(`portainer.{{ .domain }}`) || Host(`portainer.d3strukt0r.dev`)
+Label=traefik.http.routers.portainer.tls=true
+
+[Install]
+WantedBy=default.target

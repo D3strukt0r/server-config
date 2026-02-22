@@ -1,0 +1,32 @@
+[Unit]
+Description=Materia GitOps Quadlet manager
+After=vault.container vault-agent.container
+Wants=vault.container vault-agent.container
+
+[Service]
+Type=oneshot
+
+[Container]
+Image=ghcr.io/stryan/materia:stable
+ContainerName=materia
+Exec=update
+Network=host
+SecurityLabelDisable=true
+HostName=network-docker
+Environment=MATERIA_SOURCE__KIND=git
+Environment=MATERIA_SOURCE__URL=git@github.com:D3strukt0r/server-config.git
+Environment=MATERIA_SOURCE__BRANCH=master
+Environment=MATERIA_SOURCE__DIR=server-container/network-docker/tier2
+Environment=MATERIA_ROOTLESS=true
+Environment=MATERIA_ATTRIBUTES=age
+Environment=MATERIA_AGE__BASE_DIR=attributes
+Environment=MATERIA_AGE__KEYFILE=/var/lib/materia/age-key.txt
+Environment=MATERIA_HOSTNAME=network-docker
+Volume=/run/user/%U/bus:/run/dbus/system_bus_socket
+Volume=/run/user/%U/podman/podman.sock:/run/podman/podman.sock
+Volume=%h/.ssh/id_ed25519:/root/.ssh/id_ed25519:ro
+Volume=%h/.ssh/known_hosts:/root/.ssh/known_hosts:ro
+Volume=%S/materia:/var/lib/materia
+Volume=%E/containers/systemd:/etc/containers/systemd
+Volume=%h/.local/bin:/usr/local/bin
+Volume=%S/systemd/user:/etc/systemd/system

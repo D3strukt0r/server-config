@@ -5,5 +5,14 @@
   ansible.builtin.cron:
     name: Daily apt update and upgrade
     minute: "0"
-    hour: "4"
+    hour: "1"
     job: apt-get update -qq && apt-get upgrade -y -qq
+
+- name: Set up weekly reboot check (Saturday 2am)
+  become: true
+  ansible.builtin.cron:
+    name: Weekly reboot if required
+    minute: "0"
+    hour: "2"
+    weekday: "6"
+    job: test -f /var/run/reboot-required && reboot

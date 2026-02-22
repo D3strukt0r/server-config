@@ -1,0 +1,6 @@
+[Defaults]
+containerTag = "latest"
+
+[[Services]]
+Service = "pihole.service"
+RestartedBy = ["pihole.container"]

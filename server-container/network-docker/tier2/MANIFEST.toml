@@ -1,0 +1,2 @@
+[Hosts.network-docker]
+Components = ["traefik", "certbot", "portainer", "watchtower", "omada", "pihole", "mosquitto", "zigbee2mqtt", "openthread-border-router", "matter-server", "homeassistant"]

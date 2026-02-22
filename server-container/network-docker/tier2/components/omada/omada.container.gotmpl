@@ -1,0 +1,38 @@
+[Unit]
+Description=TP-Link Omada SDN Controller
+After=proxy.network
+Requires=proxy.network
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=10s
+
+[Container]
+Image=docker.io/mbentley/omada-controller:{{ .containerTag }}
+ContainerName=omada
+Volume={{ .container_data_dir }}/omada/data:/opt/tplink/EAPController/data
+Volume={{ .container_data_dir }}/omada/logs:/opt/tplink/EAPController/logs
+Network=proxy.network
+PublishPort=8088:8088
+PublishPort=8043:8043
+PublishPort=27001:27001/udp
+PublishPort=29810:29810/udp
+PublishPort=29811:29811
+PublishPort=29812:29812
+PublishPort=29813:29813
+PublishPort=29814:29814
+Environment=MANAGE_HTTP_PORT=8088
+Environment=MANAGE_HTTPS_PORT=8043
+Environment=TZ=Europe/Zurich
+PodmanArgs=--init --cpus=1.0 --memory=512m
+Label=traefik.enable=true
+Label=traefik.http.services.omada.loadbalancer.server.port=8043
+Label=traefik.http.services.omada.loadbalancer.server.scheme=https
+Label=traefik.http.routers.omada.entrypoints=websecure
+Label=traefik.http.routers.omada.rule=Host(`omada.{{ .domain }}`) || Host(`omada.d3strukt0r.dev`)
+Label=traefik.http.routers.omada.tls=true
+
+[Install]
+WantedBy=default.target

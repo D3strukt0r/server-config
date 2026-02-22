@@ -39,8 +39,19 @@ terraform.rc
 
 ### Custom ignore
 .*env
+!.env.dist
 *.tar.gz
 *.sql
 backup
 *hidden*
 !.restic-env.dist
+.claude/settings.local.json
+age-key.txt
+
+# Certbot credentials (actual secrets, not templates)
+certbot-cloudflare.ini
+!certbot-cloudflare.ini.dist
+
+# Vault env (actual secrets, not templates)
+vault.env
+!vault.env.dist

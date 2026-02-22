@@ -1,0 +1,114 @@
+---
+- name: Create Vault Agent config directory
+  ansible.builtin.file:
+    path: "~/.config/vault-agent"
+    state: directory
+    mode: "0700"
+
+- name: Create Vault Agent templates directory
+  ansible.builtin.file:
+    path: "~/.config/vault-agent/templates"
+    state: directory
+    mode: "0700"
+
+- name: Create Vault Agent token directory
+  ansible.builtin.file:
+    path: "~/.config/vault-agent/token"
+    state: directory
+    mode: "0700"
+
+- name: Create Vault Agent rendered output directory
+  ansible.builtin.file:
+    path: "{{ container_data_dir }}/vault-secrets"
+    state: directory
+    mode: "0700"
+
+- name: Create placeholder Certbot credentials (pre-Vault-init)
+  ansible.builtin.copy:
+    content: "dns_cloudflare_api_token = placeholder"
+    dest: "{{ container_data_dir }}/vault-secrets/certbot-cloudflare.ini"
+    mode: "0600"
+    force: false
+
+- name: Create placeholder Pi-hole password (pre-Vault-init)
+  ansible.builtin.copy:
+    content: "WEBPASSWORD=changeme"
+    dest: "{{ container_data_dir }}/vault-secrets/pihole-web-password.env"
+    mode: "0600"
+    force: false
+
+- name: Create placeholder Zigbee2MQTT secret (pre-Vault-init)
+  ansible.builtin.copy:
+    content: "mqtt_password: changeme"
+    dest: "{{ container_data_dir }}/vault-secrets/zigbee2mqtt-secret.yaml"
+    mode: "0600"
+    force: false
+
+- name: Create Mosquitto config directory
+  ansible.builtin.file:
+    path: "{{ container_data_dir }}/mosquitto/config"
+    state: directory
+    mode: "0755"
+
+- name: Create empty Mosquitto password file
+  ansible.builtin.file:
+    path: "{{ container_data_dir }}/mosquitto/config/password_file"
+    state: touch
+    mode: "0600"
+    modification_time: preserve
+    access_time: preserve
+
+- name: Deploy Vault Agent config
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/vault-agent/vault-agent-config.hcl"
+    dest: "~/.config/vault-agent/config.hcl"
+    mode: "0600"
+
+- name: Deploy Vault Agent Certbot template
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/vault-agent/templates/certbot-cloudflare.ini.ctmpl"
+    dest: "~/.config/vault-agent/templates/certbot-cloudflare.ini.ctmpl"
+    mode: "0600"
+
+- name: Deploy Vault Agent Pi-hole template
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/vault-agent/templates/pihole-web-password.env.ctmpl"
+    dest: "~/.config/vault-agent/templates/pihole-web-password.env.ctmpl"
+    mode: "0600"
+
+- name: Deploy Vault Agent Zigbee2MQTT template
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/vault-agent/templates/zigbee2mqtt-secret.yaml.ctmpl"
+    dest: "~/.config/vault-agent/templates/zigbee2mqtt-secret.yaml.ctmpl"
+    mode: "0600"
+
+- name: Deploy Vault Agent token
+  ansible.builtin.copy:
+    content: "{{ vault_agent_token }}"
+    dest: "~/.config/vault-agent/token/vault-agent-token"
+    mode: "0600"
+  when: vault_agent_token | default('') | length > 0
+
+- name: Deploy Vault Agent Quadlet
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/vault-agent/vault-agent.container"
+    dest: "~/.config/containers/systemd/vault-agent.container"
+    mode: "0644"
+  notify: Reload systemd user daemon
+
+- name: Deploy Vault Agent sync timer
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/vault-agent/vault-agent-sync.timer"
+    dest: "~/.config/containers/systemd/vault-agent-sync.timer"
+    mode: "0644"
+  notify: Reload systemd user daemon
+
+- name: Flush handlers to reload systemd
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable Vault Agent sync timer
+  ansible.builtin.systemd:
+    name: vault-agent-sync.timer
+    enabled: true
+    state: started
+    scope: user

@@ -1,0 +1,28 @@
+[Unit]
+Description=Zigbee2MQTT bridge
+After=proxy.network mosquitto.container
+Requires=proxy.network
+Wants=mosquitto.container
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+[Container]
+Image=docker.io/koenkk/zigbee2mqtt:{{ .containerTag }}
+ContainerName=zigbee2mqtt
+Volume={{ .container_data_dir }}/zigbee2mqtt/data:/app/data
+Volume={{ .container_data_dir }}/vault-secrets/zigbee2mqtt-secret.yaml:/app/data/secret.yaml:ro
+Network=proxy.network
+Environment=TZ=Europe/Zurich
+PodmanArgs=--init --cpus=0.5 --memory=256m
+Label=traefik.enable=true
+Label=traefik.http.services.zigbee2mqtt.loadbalancer.server.port=8080
+Label=traefik.http.routers.zigbee2mqtt.entrypoints=websecure
+Label=traefik.http.routers.zigbee2mqtt.rule=Host(`z2m.{{ .domain }}`) || Host(`z2m.d3strukt0r.dev`)
+Label=traefik.http.routers.zigbee2mqtt.tls=true
+
+[Install]
+WantedBy=default.target

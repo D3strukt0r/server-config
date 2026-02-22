@@ -1,0 +1,6 @@
+[Defaults]
+containerTag = "latest"
+
+[[Services]]
+Service = "mosquitto.service"
+RestartedBy = ["mosquitto.container"]

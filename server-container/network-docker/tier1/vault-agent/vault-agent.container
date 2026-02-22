@@ -1,0 +1,22 @@
+[Unit]
+Description=Vault Agent secret renderer
+After=vault.container
+Requires=vault.container
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+
+[Container]
+Image=docker.io/hashicorp/vault:latest
+ContainerName=vault-agent
+Network=host
+Exec=agent -config=/vault-agent/config.hcl -exit-after-auth
+Volume=%E/vault-agent/config.hcl:/vault-agent/config.hcl:ro
+Volume=%E/vault-agent/templates:/vault-agent/templates:ro
+Volume=%E/vault-agent/token:/vault-agent/token:ro
+Volume=%h/container-data/vault-secrets:/vault-agent/rendered
+PodmanArgs=--init
+Environment=VAULT_ADDR=http://127.0.0.1:8200

@@ -1,0 +1,23 @@
+[Unit]
+Description=Eclipse Mosquitto MQTT broker
+After=proxy.network
+Requires=proxy.network
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+[Container]
+Image=docker.io/eclipse-mosquitto:{{ .containerTag }}
+ContainerName=mosquitto
+Volume={{ .m_dataDir }}/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+Volume=mosquitto-data:/mosquitto/data
+Volume={{ .container_data_dir }}/mosquitto/config/password_file:/mosquitto/config/password_file:ro
+Network=proxy.network
+PublishPort={{ .server_ip }}:1883:1883
+PodmanArgs=--init --cpus=0.5 --memory=64m
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,32 @@
+[Unit]
+Description=Traefik reverse proxy
+After=proxy.network vault.container
+Requires=proxy.network
+Wants=vault.container
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+[Container]
+Image=docker.io/traefik:{{ .containerTag }}
+ContainerName=traefik
+PublishPort=80:80
+PublishPort=443:443
+Volume={{ .container_data_dir }}/traefik/config/traefik.yml:/etc/traefik/traefik.yml:ro
+Volume={{ .container_data_dir }}/traefik/config/tls.yml:/etc/traefik/config/tls.yml:ro
+Volume={{ .container_data_dir }}/traefik/certs:/etc/traefik/certs:ro
+Volume={{ .m_dataDir }}/homeassistant-routes.yml:/etc/traefik/config/homeassistant-routes.yml:ro
+Volume=/run/user/1000/podman/podman.sock:/var/run/docker.sock:ro
+Network=proxy.network
+PodmanArgs=--init
+Label=traefik.enable=true
+Label=traefik.http.routers.traefik.rule=Host(`traefik.{{ .domain }}`)
+Label=traefik.http.routers.traefik.entrypoints=websecure
+Label=traefik.http.routers.traefik.tls=true
+Label=traefik.http.routers.traefik.service=api@internal
+
+[Install]
+WantedBy=default.target

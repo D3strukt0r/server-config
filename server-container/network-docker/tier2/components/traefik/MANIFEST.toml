@@ -1,0 +1,6 @@
+[Defaults]
+containerTag = "3"
+
+[[Services]]
+Service = "traefik.service"
+RestartedBy = ["traefik.container", "homeassistant-routes.yml"]

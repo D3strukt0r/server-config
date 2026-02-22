@@ -1,0 +1,31 @@
+[Unit]
+Description=Pi-hole DNS ad blocker
+After=proxy.network
+Requires=proxy.network
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+[Container]
+Image=docker.io/pihole/pihole:{{ .containerTag }}
+ContainerName=pihole
+Volume={{ .container_data_dir }}/pihole/etc-pihole:/etc/pihole
+Volume={{ .container_data_dir }}/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
+Network=proxy.network
+PublishPort={{ .server_ip }}:53:53/tcp
+PublishPort={{ .server_ip }}:53:53/udp
+Environment=TZ=Europe/Zurich
+Environment=DNSMASQ_LISTENING=all
+EnvironmentFile={{ .container_data_dir }}/vault-secrets/pihole-web-password.env
+PodmanArgs=--init --cpus=0.5 --memory=128m --dns=127.0.0.1
+Label=traefik.enable=true
+Label=traefik.http.services.pihole.loadbalancer.server.port=80
+Label=traefik.http.routers.pihole.entrypoints=websecure
+Label=traefik.http.routers.pihole.rule=Host(`pihole.{{ .domain }}`) || Host(`pihole.d3strukt0r.dev`)
+Label=traefik.http.routers.pihole.tls=true
+
+[Install]
+WantedBy=default.target

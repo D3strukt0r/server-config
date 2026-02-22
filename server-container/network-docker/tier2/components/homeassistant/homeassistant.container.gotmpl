@@ -1,0 +1,21 @@
+[Unit]
+Description=Home Assistant
+After=openthread-border-router.container matter-server.container
+Wants=openthread-border-router.container matter-server.container
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=10s
+
+[Container]
+Image=ghcr.io/home-assistant/home-assistant:{{ .containerTag }}
+ContainerName=homeassistant
+Network=host
+Volume=homeassistant-data:/config
+Volume=/run/dbus:/run/dbus:ro
+PodmanArgs=--privileged --init
+
+[Install]
+WantedBy=default.target
