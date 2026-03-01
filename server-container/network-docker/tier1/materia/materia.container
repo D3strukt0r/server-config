@@ -15,8 +15,7 @@ SecurityLabelDisable=true
 HostName=network-docker
 Environment=MATERIA_SOURCE__KIND=git
 Environment=MATERIA_SOURCE__URL=git@github.com:D3strukt0r/server-config.git
-Environment=MATERIA_SOURCE__BRANCH=master
-Environment=MATERIA_SOURCE__DIR=server-container/network-docker/tier2
+Environment=MATERIA_GIT__BRANCH=master
 Environment=MATERIA_ROOTLESS=true
 Environment=MATERIA_ATTRIBUTES=age
 Environment=MATERIA_AGE__BASE_DIR=attributes

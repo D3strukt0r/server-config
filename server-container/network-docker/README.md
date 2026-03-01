@@ -24,24 +24,25 @@ network-docker/
         pihole-web-password.env.ctmpl  # Pi-hole web password
         zigbee2mqtt-secret.yaml.ctmpl  # MQTT password for Zigbee2MQTT
     materia/
-      materia.container                # Materia GitOps agent (pulls tier2 from Git)
+      materia.container                # Materia GitOps agent (pulls repo from Git)
       materia-update.timer             # Daily timer for automatic updates (04:00 UTC)
-  tier2/                               # Materia-managed components
-    MANIFEST.toml                      # Maps host "network-docker" to its components
-    attributes/
-      network-docker.toml              # Age-encrypted config for this host (non-sensitive only)
-    components/
-      traefik/                         # Reverse proxy with TLS
-      certbot/                         # DNS-01 certificate renewal via Cloudflare
-      portainer/                       # Container management UI
-      watchtower/                      # Automatic container image updates
-      omada/                           # TP-Link Omada SDN controller
-      pihole/                          # DNS ad blocker + wildcard *.network-docker.local
-      mosquitto/                       # Eclipse Mosquitto MQTT broker
-      zigbee2mqtt/                     # Zigbee2MQTT bridge (SLZB-MR4U via TCP)
-      openthread-border-router/        # OpenThread Border Router (rootless privileged, host network)
-      matter-server/                   # Python Matter Server
-      homeassistant/                   # Home Assistant Core
+
+# Materia-managed components (repo root)
+MANIFEST.toml                          # Maps hosts to their components
+attributes/
+  network-docker.toml                  # Age-encrypted config for this host (non-sensitive only)
+components/
+  traefik/                             # Reverse proxy with TLS
+  certbot/                             # DNS-01 certificate renewal via Cloudflare
+  portainer/                           # Container management UI
+  watchtower/                          # Automatic container image updates
+  omada/                               # TP-Link Omada SDN controller
+  pihole/                              # DNS ad blocker + wildcard *.network-docker.local
+  mosquitto/                           # Eclipse Mosquitto MQTT broker
+  zigbee2mqtt/                         # Zigbee2MQTT bridge (SLZB-MR4U via TCP)
+  openthread-border-router/            # OpenThread Border Router (rootless privileged, host network)
+  matter-server/                       # Python Matter Server
+  homeassistant/                       # Home Assistant Core
 ```
 
 ## Prerequisites
@@ -105,15 +106,15 @@ age-keygen -y age-key.txt
 
 ### 2. Add Your Public Key to the Recipients File
 
-Paste the public key from step 1 into `tier2/attributes/recipients` (one key per line):
+Paste the public key from step 1 into `attributes/recipients` (one key per line):
 
 ```bash
-echo "age1abc123..." >> tier2/attributes/recipients
+echo "age1abc123..." >> attributes/recipients
 ```
 
 ### 3. Configure Attributes
 
-Edit `tier2/attributes/network-docker.toml` with your values. This file holds **non-sensitive** configuration only — actual secrets (API tokens, passwords) are stored in Vault.
+Edit `attributes/network-docker.toml` with your values. This file holds **non-sensitive** configuration only — actual secrets (API tokens, passwords) are stored in Vault.
 
 ```toml
 [globals]
@@ -165,7 +166,7 @@ containerTag = "stable"
 ### 4. Encrypt the Attributes File
 
 ```bash
-cd tier2/attributes
+cd attributes
 age -e -R recipients -o network-docker.toml.age network-docker.toml
 mv network-docker.toml.age network-docker.toml
 ```
@@ -175,8 +176,8 @@ The encrypted file replaces the plaintext one. Do not commit the unencrypted ver
 ### 5. Commit and Push
 
 ```bash
-git add tier2/attributes/recipients
-git add tier2/attributes/network-docker.toml
+git add attributes/recipients
+git add attributes/network-docker.toml
 git push
 ```
 
@@ -186,7 +187,7 @@ git push
 cd server-ansible/network-docker
 
 ansible-playbook playbook.yml \
-  --extra-vars "materia_age_private_key=$(cat ../../server-container/network-docker/tier2/attributes/age-key.txt)"
+  --extra-vars "materia_age_private_key=$(cat ../../attributes/age-key.txt)"
 ```
 
 This deploys the full stack:
@@ -251,7 +252,7 @@ podman exec vault vault token create \
 
 ```bash
 ansible-playbook playbook.yml \
-  --extra-vars "materia_age_private_key=$(cat ../../server-container/network-docker/tier2/attributes/age-key.txt)" \
+  --extra-vars "materia_age_private_key=$(cat ../../attributes/age-key.txt)" \
   --extra-vars "vault_agent_token=hvs.YOUR_TOKEN_HERE"
 ```
 
@@ -382,7 +383,7 @@ Re-run the Ansible playbook — these are not managed by Materia.
 
 ```bash
 # Decrypt
-cd tier2/attributes
+cd attributes
 age -d -i /path/to/age-key.txt -o network-docker.toml.plain network-docker.toml
 
 # Edit
