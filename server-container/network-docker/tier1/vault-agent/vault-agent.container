@@ -1,7 +1,7 @@
 [Unit]
 Description=Vault Agent secret renderer
-After=vault.container
-Requires=vault.container
+After=vault.service
+Requires=vault.service
 StartLimitIntervalSec=300
 StartLimitBurst=5
 

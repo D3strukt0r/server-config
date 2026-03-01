@@ -1,7 +1,7 @@
 [Unit]
 Description=Home Assistant
-After=openthread-border-router.container matter-server.container
-Wants=openthread-border-router.container matter-server.container
+After=openthread-border-router.service matter-server.service
+Wants=openthread-border-router.service matter-server.service
 StartLimitIntervalSec=300
 StartLimitBurst=5
 

@@ -96,10 +96,16 @@
     mode: "0644"
   notify: Reload systemd user daemon
 
+- name: Ensure systemd user unit directory exists
+  ansible.builtin.file:
+    path: "~/.config/systemd/user"
+    state: directory
+    mode: "0755"
+
 - name: Deploy Vault Agent sync timer
   ansible.builtin.copy:
     src: "{{ tier1_dir }}/vault-agent/vault-agent-sync.timer"
-    dest: "~/.config/containers/systemd/vault-agent-sync.timer"
+    dest: "~/.config/systemd/user/vault-agent-sync.timer"
     mode: "0644"
   notify: Reload systemd user daemon
 

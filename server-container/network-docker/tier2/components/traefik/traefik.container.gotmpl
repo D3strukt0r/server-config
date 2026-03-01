@@ -1,8 +1,8 @@
 [Unit]
 Description=Traefik reverse proxy
-After=proxy.network vault.container
-Requires=proxy.network
-Wants=vault.container
+After=proxy-network.service vault.service
+Requires=proxy-network.service
+Wants=vault.service
 StartLimitIntervalSec=300
 StartLimitBurst=5
 

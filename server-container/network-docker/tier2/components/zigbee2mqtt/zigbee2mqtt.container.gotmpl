@@ -1,8 +1,8 @@
 [Unit]
 Description=Zigbee2MQTT bridge
-After=proxy.network mosquitto.container
-Requires=proxy.network
-Wants=mosquitto.container
+After=proxy-network.service mosquitto.service
+Requires=proxy-network.service
+Wants=mosquitto.service
 StartLimitIntervalSec=300
 StartLimitBurst=5
 

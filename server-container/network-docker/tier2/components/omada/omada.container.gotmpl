@@ -1,7 +1,7 @@
 [Unit]
 Description=TP-Link Omada SDN Controller
-After=proxy.network
-Requires=proxy.network
+After=proxy-network.service
+Requires=proxy-network.service
 StartLimitIntervalSec=300
 StartLimitBurst=5
 

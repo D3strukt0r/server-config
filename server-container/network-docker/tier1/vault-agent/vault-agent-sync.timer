@@ -2,6 +2,7 @@
 Description=Vault Agent periodic secret refresh
 
 [Timer]
+Unit=vault-agent.service
 OnCalendar=*-*-* 00,06,12,18:00:00
 RandomizedDelaySec=900
 Persistent=true

@@ -1,15 +1,41 @@
 ---
 - name: Create Materia data directory
   ansible.builtin.file:
-    path: "~/.local/share/materia"
+    path: "~/.local/state/materia"
     state: directory
     mode: "0700"
 
 - name: Deploy age private key for Materia
   ansible.builtin.copy:
     content: "{{ materia_age_private_key }}"
-    dest: "~/.local/share/materia/age-key.txt"
+    dest: "~/.local/state/materia/age-key.txt"
     mode: "0600"
+
+- name: Create local bin directory for Materia
+  ansible.builtin.file:
+    path: "~/.local/bin"
+    state: directory
+    mode: "0755"
+
+- name: Create systemd user state directory for Materia
+  ansible.builtin.file:
+    path: "~/.local/state/systemd/user"
+    state: directory
+    mode: "0755"
+
+- name: Enable SSH agent socket
+  ansible.builtin.systemd:
+    name: ssh-agent.socket
+    enabled: true
+    state: started
+    scope: user
+
+- name: Deploy SSH key loader service
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/materia/ssh-add-keys.service"
+    dest: "~/.config/systemd/user/ssh-add-keys.service"
+    mode: "0644"
+  notify: Reload systemd user daemon
 
 - name: Deploy Materia Quadlet
   ansible.builtin.copy:
@@ -21,12 +47,19 @@
 - name: Deploy Materia update timer
   ansible.builtin.copy:
     src: "{{ tier1_dir }}/materia/materia-update.timer"
-    dest: "~/.config/containers/systemd/materia-update.timer"
+    dest: "~/.config/systemd/user/materia-update.timer"
     mode: "0644"
   notify: Reload systemd user daemon
 
 - name: Flush handlers to reload systemd
   ansible.builtin.meta: flush_handlers
+
+- name: Enable SSH key loader service
+  ansible.builtin.systemd:
+    name: ssh-add-keys.service
+    enabled: true
+    state: started
+    scope: user
 
 - name: Enable Materia update timer
   ansible.builtin.systemd:
