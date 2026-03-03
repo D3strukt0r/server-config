@@ -96,7 +96,7 @@ age-keygen -o age-key.txt
 # Output: Public key: age1abc123...
 ```
 
-This creates `age-key.txt` (private key) and prints the public key to stdout. Store the private key securely (password manager, encrypted drive) — do **not** commit it to the repo. Ansible deploys it to the server via `--extra-vars "materia_age_private_key=$(cat /path/to/age-key.txt)"`.
+This creates `age-key.txt` (private key) and prints the public key to stdout. Store the private key at `attributes/age-key.txt` in the repo root (it's gitignored). Ansible automatically deploys it to the server from this fixed path.
 
 To re-extract the public key later:
 
@@ -117,7 +117,7 @@ echo "age1abc123..." >> attributes/recipients
 Edit `attributes/network-docker.toml` with your values. This file holds **non-sensitive** configuration only — actual secrets (API tokens, passwords) are stored in Vault.
 
 ```toml
-[globals]
+[global]
 domain = "network-docker.local"
 proxy_network = "proxy"
 container_data_dir = "/home/d3strukt0r/container-data"
@@ -186,9 +186,10 @@ git push
 ```bash
 cd server-ansible/network-docker
 
-ansible-playbook playbook.yml \
-  --extra-vars "materia_age_private_key=$(cat ../../attributes/age-key.txt)"
+ansible-playbook playbook.yml
 ```
+
+The playbook automatically reads the age private key from `attributes/age-key.txt` in the repo root. If the key doesn't exist locally or on the server, the playbook will fail with a clear error message.
 
 This deploys the full stack:
 
@@ -252,7 +253,6 @@ podman exec vault vault token create \
 
 ```bash
 ansible-playbook playbook.yml \
-  --extra-vars "materia_age_private_key=$(cat ../../attributes/age-key.txt)" \
   --extra-vars "vault_agent_token=hvs.YOUR_TOKEN_HERE"
 ```
 
@@ -347,7 +347,7 @@ systemctl --user restart pihole
 ```
 Local machine (Ansible control)
   |
-  |-- ansible-playbook --extra-vars "materia_age_private_key=... vault_agent_token=..."
+  |-- ansible-playbook --extra-vars "vault_agent_token=..."
   |     |
   |     |-- Base system: packages, networking, podman, sysctl (Thread), kernel modules
   |     |-- Tier 1 (rootless): proxy.network, Vault, Vault Agent + token, Materia + age key

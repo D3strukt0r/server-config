@@ -1,0 +1,44 @@
+[global]
+domain = "network-docker.local"
+proxy_network = "proxy"
+container_data_dir = "/home/d3strukt0r/container-data"
+server_ip = "192.168.1.13"
+
+[components.traefik]
+containerTag = "3"
+
+[components.certbot]
+containerTag = "latest"
+certbot_email = "dev@d3strukt0r.dev"
+
+[components.portainer]
+containerTag = "alpine"
+
+[components.watchtower]
+containerTag = "latest"
+
+[components.omada]
+containerTag = "latest"
+
+[components.pihole]
+containerTag = "latest"
+
+[components.mosquitto]
+containerTag = "latest"
+
+[components.zigbee2mqtt]
+containerTag = "latest"
+slzb_host = "slzb-mr4u.local"
+slzb_zigbee_port = "6638"
+
+[components.openthread-border-router]
+containerTag = "latest"
+slzb_host = "slzb-mr4u.local"
+slzb_thread_port = "9999"
+backbone_interface = "ens18"
+
+[components.matter-server]
+containerTag = "stable"
+
+[components.homeassistant]
+containerTag = "stable"

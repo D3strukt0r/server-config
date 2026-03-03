@@ -11,6 +11,7 @@ Image=ghcr.io/stryan/materia:stable
 ContainerName=materia
 Exec=update
 Network=host
+# optional, depending on OS security settings
 SecurityLabelDisable=true
 HostName=network-docker
 Environment=MATERIA_SOURCE__KIND=git
@@ -20,14 +21,26 @@ Environment=MATERIA_ROOTLESS=true
 Environment=MATERIA_ATTRIBUTES=age
 Environment=MATERIA_AGE__BASE_DIR=attributes
 Environment=MATERIA_AGE__KEYFILE=/var/lib/materia/age-key.txt
+Environment=MATERIA_AGE__LOAD_ALL_VAULTS=true
 Environment=MATERIA_HOSTNAME=network-docker
 Environment=SSH_AUTH_SOCK=/run/openssh_agent
+# needed to manage systemd units
 Volume=/run/user/%U/bus:/run/dbus/system_bus_socket
+# needed to get container status
 Volume=/run/user/%U/podman/podman.sock:/run/podman/podman.sock
 Volume=/run/user/%U/openssh_agent:/run/openssh_agent
 Volume=%h/.ssh/id_ed25519:/root/.ssh/id_ed25519:ro
+# Optional, used for git+ssh checkouts
 Volume=%h/.ssh/known_hosts:/root/.ssh/known_hosts:ro
+# Where materia stores its source cache and component data
 Volume=%S/materia:/var/lib/materia
+# needed to install Quadlets
 Volume=%E/containers/systemd:/etc/containers/systemd
+# customizable, change to where ever you want scripts to be installed to
 Volume=%h/.local/bin:/usr/local/bin
+# Needed to manage services, can also use /usr/local/lib/systemd/system/
 Volume=%S/systemd/user:/etc/systemd/system
+# Optional, used for age decryption
+#Volume=/etc/materia/key.txt:/etc/materia/key.txt
+# Optional, used for git+ssh checkouts
+#Volume=/etc/materia/materia_key:/etc/materia/materia_key

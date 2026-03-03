@@ -18,6 +18,7 @@
       - avahi-daemon # needed for mDNS (.local) hostname resolution (server)
       - libnss-mdns # needed for mDNS (.local) hostname resolution (client)
       - openssl # needed for generating self-signed certificates
+      - age # needed for manual secrets decryption with the Materia Age plugin
     user_groups:
       - name: d3strukt0r
         groups:
@@ -34,7 +35,7 @@
     mdns_hostname: network-docker
     container_data_dir: ~/container-data
     tier1_dir: "{{ playbook_dir }}/../../server-container/network-docker/tier1"
-    materia_age_private_key: "" # set via --extra-vars or Ansible vault
+    materia_age_key_src: "{{ playbook_dir }}/../../attributes/age-key.txt"
     vault_agent_token: "" # set via --extra-vars after Vault initialization
     backbone_interface: "{{ network_interface }}" # Used by sysctl_thread.yml for IPv6 router advertisements
   tasks:

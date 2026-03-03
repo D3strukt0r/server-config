@@ -5,11 +5,53 @@
     state: directory
     mode: "0700"
 
+- name: Check if age private key exists on remote
+  ansible.builtin.stat:
+    path: "~/.local/state/materia/age-key.txt"
+  register: age_key_remote
+
 - name: Deploy age private key for Materia
-  ansible.builtin.copy:
-    content: "{{ materia_age_private_key }}"
-    dest: "~/.local/state/materia/age-key.txt"
-    mode: "0600"
+  when: not age_key_remote.stat.exists
+  block:
+    - name: Check if age key source exists on control machine
+      ansible.builtin.stat:
+        path: "{{ materia_age_key_src }}"
+      delegate_to: localhost
+      become: false
+      register: age_key_local
+
+    - name: Fail if age key is missing everywhere
+      ansible.builtin.fail:
+        msg: >-
+          Age private key not found on the server or at
+          '{{ materia_age_key_src }}' on the control machine.
+          Place your age-key.txt there or override with
+          --extra-vars "materia_age_key_src=/path/to/age-key.txt"
+      when: not age_key_local.stat.exists
+
+    - name: Copy age private key to remote server
+      when: age_key_local.stat.exists
+      ansible.builtin.copy:
+        src: "{{ materia_age_key_src }}"
+        dest: "~/.local/state/materia/age-key.txt"
+        mode: "0600"
+
+- name: Update age private key if local copy available
+  when: age_key_remote.stat.exists
+  block:
+    - name: Check if age key source exists on control machine
+      ansible.builtin.stat:
+        path: "{{ materia_age_key_src }}"
+      delegate_to: localhost
+      become: false
+      register: age_key_local_update
+
+    - name: Sync age private key from local copy
+      when: age_key_local_update.stat.exists
+      ansible.builtin.copy:
+        src: "{{ materia_age_key_src }}"
+        dest: "~/.local/state/materia/age-key.txt"
+        mode: "0600"
 
 - name: Create local bin directory for Materia
   ansible.builtin.file:
