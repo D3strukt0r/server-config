@@ -1,0 +1,6 @@
+[Defaults]
+containerTag = "stable"
+
+[[Services]]
+Service = "homeassistant.service"
+RestartedBy = ["homeassistant.container"]

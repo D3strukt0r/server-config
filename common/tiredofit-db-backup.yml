@@ -1,0 +1,44 @@
+services:
+  tiredofit-db-backup:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: tiredofit/db-backup:${VERSION:-latest}
+    init: false
+    volumes:
+      - ./tiredofit-db-backup-s3-restore.sh:/usr/local/bin/restore-s3:ro
+    environment:
+      # https://github.com/tiredofit/docker-alpine/?tab=readme-ov-file#monitoring-options
+      CONTAINER_ENABLE_MONITORING: 'FALSE' # Disable Zabbix Agent (Monitoring)
+      # https://github.com/tiredofit/docker-db-backup?tab=readme-ov-file#job-defaults
+      DEFAULT_BACKUP_LOCATION: S3
+      DEFAULT_CHECKSUM: SHA1
+      #DEFAULT_LOG_LEVEL: DEBUG
+      # https://github.com/tiredofit/docker-db-backup?tab=readme-ov-file#compression-options
+      DEFAULT_COMPRESSION: GZ
+      DEFAULT_COMPRESSION_LEVEL: 6
+      # https://github.com/tiredofit/docker-db-backup?tab=readme-ov-file#scheduling-options
+      #DEFAULT_CLEANUP_TIME: 11520 # delete after 8 days
+      # https://github.com/tiredofit/docker-db-backup?tab=readme-ov-file#mariadbmysql
+      DEFAULT_MYSQL_CLIENT: ${DEFAULT_MYSQL_CLIENT:-mariadb}
+      # https://github.com/tiredofit/docker-db-backup?tab=readme-ov-file#s3
+      DEFAULT_S3_BUCKET: db-backup-d3strukt0r
+      DEFAULT_S3_KEY_ID: ${DEFAULT_S3_KEY_ID:?DEFAULT_S3_KEY_ID not set}
+      DEFAULT_S3_KEY_SECRET: ${DEFAULT_S3_KEY_SECRET:?DEFAULT_S3_KEY_SECRET not set}
+      DEFAULT_S3_PATH: ${DEFAULT_S3_PATH:?DEFAULT_S3_PATH not set}
+      DEFAULT_S3_REGION: fra1
+      DEFAULT_S3_HOST: fra1.digitaloceanspaces.com
+      # https://github.com/tiredofit/docker-db-backup?tab=readme-ov-file#job-backup-options
+      DB01_TYPE: ${DB01_TYPE:-mysql}
+      DB01_HOST: ${DB01_HOST:-db}
+      DB01_NAME: ${DB01_NAME:-db}
+      DB01_USER: ${DB01_USER:-db}
+      DB01_PASS: ${DB01_PASS:?DB01_PASS not set}
+    depends_on:
+      - ${DB_SERVICE:-mariadb}
+    links:
+      - ${DB_SERVICE:-mariadb}:db
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.${ENV:-prod}.tiredofit-db-backup

@@ -1,0 +1,23 @@
+http:
+  routers:
+    homeassistant:
+      rule: "Host(`ha.{{ .domain }}`) || Host(`ha.d3strukt0r.dev`)"
+      entryPoints:
+        - websecure
+      tls: {}
+      service: homeassistant
+    openthread-border-router:
+      rule: "Host(`otbr.{{ .domain }}`) || Host(`otbr.d3strukt0r.dev`)"
+      entryPoints:
+        - websecure
+      tls: {}
+      service: openthread-border-router
+  services:
+    homeassistant:
+      loadBalancer:
+        servers:
+          - url: "http://{{ .server_ip }}:8123"
+    openthread-border-router:
+      loadBalancer:
+        servers:
+          - url: "http://{{ .server_ip }}:8080"

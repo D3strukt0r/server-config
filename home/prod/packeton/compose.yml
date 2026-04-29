@@ -1,0 +1,156 @@
+include:
+  - path: ../../../common/mariadb.compose.yml
+    env_file: .mariadb.env
+  - path: ../../../common/phpmyadmin.compose.yml
+    env_file: .phpmyadmin.env
+  - path: ../../../common/redis.compose.yml
+    env_file: .redis.env
+  - path: ../../../common/minio.compose.yml
+    env_file: .minio.env
+
+# https://github.com/vtsykun/packeton/blob/master/docker-compose-split.yml
+# https://docs.packeton.org/installation-docker.html
+
+x-volumes: &default-volume
+  volumes:
+    - ./data:/data
+    - ./var:/var/www/packagist/var
+    - ./config.yaml:/var/www/packagist/config/packages/config.yaml
+
+x-environment: &default-environment
+  REDIS_URL: redis://redis
+  DATABASE_URL: mysql://db:${DB_PASSWORD:?DB_PASSWORD not set}@mariadb:3306/db?serverVersion=10.11.2-MariaDB&charset=utf8mb4
+  SKIP_INIT: 1
+  STORAGE_SOURCE: s3
+  STORAGE_AWS_BUCKET: default
+  STORAGE_AWS_ARGS: '{"endpoint": "http://minio:9000", "accessKeyId": "minio", "accessKeySecret": "${MINIO_PASSWORD:?MINIO_PASSWORD not set}", "region": "eu-west-1"}'
+
+services:
+  php-fpm:
+    extends:
+      file: ../../../common/snippets.yml
+      service: common-service
+    image: packeton/packeton
+    command: ['php-fpm', '-F']
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+    # TODO: How to check this
+    # healthcheck:
+    #   test: curl --fail http://localhost || exit 1
+    #   test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
+    <<: [*default-volume]
+    environment:
+      <<: *default-environment
+      SKIP_INIT: 0
+      WAIT_FOR_HOST: 'db:3306'
+    depends_on:
+      - mariadb
+      - redis
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.php-fpm
+
+  nginx:
+    extends:
+      file: ../../../common/snippets.yml
+      service: common-service
+    image: packeton/packeton
+    command: >
+      bash -c 'sed s/_PHP_FPM_HOST_/php-fpm:9000/g < docker/nginx/nginx-tpl.conf > /etc/nginx/nginx.conf && nginx'
+    healthcheck:
+      test: curl --fail http://localhost || exit 1
+      start_period: 20s
+    <<: [*default-volume]
+    networks:
+      - default
+      - traefik_proxy
+    environment:
+      <<: *default-environment
+      WAIT_FOR_HOST: 'php-fpm:9000'
+    depends_on:
+      - php-fpm
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.nginx
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=le
+
+  worker:
+    extends:
+      file: ../../../common/snippets.yml
+      service: common-service
+    image: packeton/packeton
+    command: ['bin/console', 'packagist:run-workers', '-v']
+    hostname: packeton-worker
+    deploy:
+      resources:
+        limits:
+          memory: 60M
+    # TODO: How to check this
+    # healthcheck:
+    #   test: curl --fail http://localhost || exit 1
+    #   test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
+    user: www-data
+    <<: [*default-volume]
+    environment:
+      <<: *default-environment
+      WAIT_FOR_HOST: 'php-fpm:9000'
+    depends_on:
+      - php-fpm
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.worker
+
+  cron:
+    extends:
+      file: ../../../common/snippets.yml
+      service: common-service
+    image: packeton/packeton
+    hostname: packeton-cron
+    command: ['bin/console', 'okvpn:cron', '--demand', '--time-limit=3600']
+    # TODO: How to check this
+    # healthcheck:
+    #   test: curl --fail http://localhost || exit 1
+    #   test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
+    user: www-data
+    <<: [*default-volume]
+    environment:
+      <<: *default-environment
+      WAIT_FOR_HOST: 'php-fpm:9000'
+    depends_on:
+      - php-fpm
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.prod.cron
+
+  # https://stackoverflow.com/questions/76401435/why-i-cant-get-access-to-minio-console-from-docker-container
+  minio-setup:
+    extends:
+      file: ../../../common/snippets.yml
+      service: common-service
+    image: minio/mc:latest
+    restart: 'no'
+    environment:
+      MC_HOST_minio: http://minio:${MINIO_PASSWORD:?MINIO_PASSWORD not set}@minio:9000
+    entrypoint:
+      - sh
+      - -c
+      - |
+        until mc ls minio > /dev/null 2>&1; do
+          sleep 0.5
+        done
+        mc mb minio/default
+
+networks:
+  traefik_proxy:
+    external: true

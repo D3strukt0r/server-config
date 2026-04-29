@@ -1,0 +1,15 @@
+services:
+  mongo:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: mongo:${VERSION:-latest}
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet || exit 1
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-300M}
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${ROOT_USER:?ROOT_USER not set}
+      MONGO_INITDB_ROOT_PASSWORD: ${ROOT_PASSWORD:?ROOT_PASSWORD not set}

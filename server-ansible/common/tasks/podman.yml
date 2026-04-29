@@ -1,0 +1,15 @@
+---
+# Enable lingering so user's systemd instance persists after logout
+- name: Enable lingering for user
+  become: true
+  ansible.builtin.command:
+    cmd: loginctl enable-linger {{ ansible_user_id }}
+  changed_when: false
+
+- name: Enable and start podman socket (user)
+  ansible.builtin.systemd:
+    name: podman.socket
+    enabled: true
+    state: started
+    scope: user
+

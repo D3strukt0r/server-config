@@ -1,0 +1,41 @@
+services:
+  mongo-express:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: mongo-express:${VERSION:-latest}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-120M}
+    # TODO: How to handle this?
+    #healthcheck:
+    #  # Note: localhost doesn't work (Connection refused)
+    #  test: wget --no-verbose --tries=1 --spider --user ${MONGOEXPRESS_LOGIN:?MONGOEXPRESS_LOGIN not set} --password ${MONGOEXPRESS_PASSWORD:?MONGOEXPRESS_PASSWORD not set} http://127.0.0.1:8081 || exit 1
+    #  # echo $ME_CONFIG_BASICAUTH_PASSWORD | wget --no-verbose --tries=1 --spider --auth-no-challenge http://127.0.0.1:8081
+    #  # wget --no-verbose --tries=1 --spider --user=$ME_CONFIG_BASICAUTH_USERNAME --password=$ME_CONFIG_BASICAUTH_PASSWORD http://127.0.0.1:8081
+    networks:
+      - default
+      - traefik_proxy
+    environment:
+      # To avoid error "Command listDatabases requires authentication"
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_AUTH_USERNAME: ${ROOT_USER:?ROOT_USER not set}
+      ME_CONFIG_MONGODB_AUTH_PASSWORD: ${ROOT_PASSWORD:?ROOT_PASSWORD not set}
+
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGOEXPRESS_LOGIN:?MONGOEXPRESS_LOGIN not set}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGOEXPRESS_PASSWORD:?MONGOEXPRESS_PASSWORD not set}
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}-mongo-express.loadbalancer.server.port=8081
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-mongo-express.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-mongo-express.rule=Host(`mongo-express-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-mongo-express.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-mongo-express.tls.certresolver=le
+
+networks:
+  traefik_proxy:
+    external: true

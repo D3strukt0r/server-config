@@ -1,0 +1,9 @@
+# https://github.com/containrrr/watchtower/blob/main/prometheus/prometheus.yml
+scrape_configs:
+  - job_name: watchtower
+    scrape_interval: 5s
+    metrics_path: /v1/metrics
+    bearer_token: put-WATCHTOWER_HTTP_API_TOKEN-here
+    static_configs:
+      - targets:
+        - 'watchtower:8080'

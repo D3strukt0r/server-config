@@ -1,0 +1,12 @@
+[Unit]
+Description=Certbot certificate renewal (DNS-01 / Cloudflare)
+
+[Service]
+Type=oneshot
+
+[Container]
+Image=docker.io/certbot/dns-cloudflare:{{ .containerTag }}
+ContainerName=certbot-renew
+Volume={{ .container_data_dir }}/traefik/certs/letsencrypt:/etc/letsencrypt
+Volume={{ .container_data_dir }}/vault-secrets/certbot-cloudflare.ini:/etc/letsencrypt/cloudflare.ini:ro
+Exec=renew --dns-cloudflare --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini

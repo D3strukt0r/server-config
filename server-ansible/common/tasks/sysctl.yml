@@ -1,0 +1,9 @@
+---
+# Check with `sysctl net.ipv4.ip_unprivileged_port_start`
+- name: Allow unprivileged users to bind to low ports
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "53"
+    sysctl_set: true
+    reload: true

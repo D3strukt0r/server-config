@@ -1,0 +1,6 @@
+[Defaults]
+containerTag = "latest"
+
+[[Services]]
+Service = "openthread-border-router.service"
+RestartedBy = ["openthread-border-router.container"]

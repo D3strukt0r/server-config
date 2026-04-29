@@ -1,0 +1,38 @@
+---
+- name: Create certificate directories
+  ansible.builtin.file:
+    path: "{{ container_data_dir }}/traefik/certs/{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - selfsigned
+    - letsencrypt
+
+- name: Create Traefik config directory
+  ansible.builtin.file:
+    path: "{{ container_data_dir }}/traefik/config"
+    state: directory
+    mode: "0755"
+
+- name: Create Certbot data directory
+  ansible.builtin.file:
+    path: "{{ container_data_dir }}/certbot"
+    state: directory
+    mode: "0700"
+
+- name: Check if self-signed certificate exists
+  ansible.builtin.stat:
+    path: "{{ container_data_dir }}/traefik/certs/selfsigned/network-docker.local.crt"
+  register: selfsigned_cert
+
+- name: Generate self-signed certificate for *.network-docker.local
+  when: not selfsigned_cert.stat.exists
+  ansible.builtin.command:
+    cmd: >-
+      openssl req -x509 -nodes -days 3650
+      -newkey rsa:2048
+      -keyout {{ container_data_dir }}/traefik/certs/selfsigned/network-docker.local.key
+      -out {{ container_data_dir }}/traefik/certs/selfsigned/network-docker.local.crt
+      -subj "/CN=*.network-docker.local"
+      -addext "subjectAltName=DNS:*.network-docker.local,DNS:network-docker.local"
+  changed_when: true

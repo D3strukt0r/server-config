@@ -1,0 +1,13 @@
+---
+- name: Load ip6table_filter kernel module
+  become: true
+  community.general.modprobe:
+    name: ip6table_filter
+    state: present
+
+- name: Persist ip6table_filter module across reboots
+  become: true
+  ansible.builtin.copy:
+    content: "ip6table_filter"
+    dest: /etc/modules-load.d/ip6table_filter.conf
+    mode: "0644"

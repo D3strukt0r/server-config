@@ -1,0 +1,32 @@
+services:
+  web:
+    image: nginx
+    restart: always
+    networks:
+      - traefik_proxy
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.home-proxy0.entrypoints=http
+      - traefik.http.routers.home-proxy0.rule=Host(`d3strukt0r.dev`) || Host(`www.d3strukt0r.dev`) || Host(`3d-printer-1.d3strukt0r.dev`)
+      - traefik.http.routers.home-proxy0.middlewares=to_https
+
+      # Redirect to main domain
+      - traefik.http.routers.home-proxy1.entrypoints=https
+      - traefik.http.routers.home-proxy1.rule=Host(`d3strukt0r.dev`)
+      - traefik.http.routers.home-proxy1.tls=true
+      - traefik.http.routers.home-proxy1.tls.certresolver=le
+      - traefik.http.routers.home-proxy1.middlewares=redirect_to_home-proxy
+      - traefik.http.middlewares.redirect_to_home-proxy.redirectregex.regex=^https:\/\/([^\/]*)\/(.*)
+      - traefik.http.middlewares.redirect_to_home-proxy.redirectregex.replacement=https://www.d3strukt0r.dev/$${2}
+
+      - traefik.http.routers.home-proxy.entrypoints=https
+      - traefik.http.routers.home-proxy.rule=Host(`www.d3strukt0r.dev`) || Host(`3d-printer-1.d3strukt0r.dev`)
+      - traefik.http.routers.home-proxy.tls=true
+      - traefik.http.routers.home-proxy.tls.certresolver=le
+
+networks:
+  traefik_proxy:
+    external: true

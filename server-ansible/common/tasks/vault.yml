@@ -1,0 +1,37 @@
+---
+- name: Create Quadlet env directory
+  ansible.builtin.file:
+    path: "~/.config/containers/systemd/env"
+    state: directory
+    mode: "0700"
+
+- name: Deploy Vault env file
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/vault/vault.env.dist"
+    dest: "~/.config/containers/systemd/env/vault.env"
+    mode: "0600"
+    force: false
+
+- name: Deploy Vault Quadlet
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/vault/vault.container"
+    dest: "~/.config/containers/systemd/vault.container"
+    mode: "0644"
+  notify: Reload systemd user daemon
+
+- name: Deploy vault-data volume Quadlet
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/vault/vault-data.volume"
+    dest: "~/.config/containers/systemd/vault-data.volume"
+    mode: "0644"
+  notify: Reload systemd user daemon
+
+- name: Flush handlers to reload systemd
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start Vault
+  ansible.builtin.systemd:
+    name: vault
+    enabled: true
+    state: started
+    scope: user

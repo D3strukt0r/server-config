@@ -1,0 +1,23 @@
+---
+- name: Ensure Quadlet directory exists
+  ansible.builtin.file:
+    path: "~/.config/containers/systemd"
+    state: directory
+    mode: "0755"
+
+- name: Deploy proxy network Quadlet
+  ansible.builtin.copy:
+    src: "{{ tier1_dir }}/proxy.network"
+    dest: "~/.config/containers/systemd/proxy.network"
+    mode: "0644"
+  notify: Reload systemd user daemon
+
+- name: Flush handlers to reload systemd
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start proxy network
+  ansible.builtin.systemd:
+    name: proxy-network
+    enabled: true
+    state: started
+    scope: user

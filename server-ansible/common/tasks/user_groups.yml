@@ -1,0 +1,8 @@
+---
+- name: Ensure users are in required groups
+  become: true
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups }}"
+    append: true
+  loop: "{{ user_groups }}"

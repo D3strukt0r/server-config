@@ -1,0 +1,10 @@
+[Unit]
+Description=Nginx test on {{ .myvariable }}
+
+[Container]
+Image=docker.io/nginx:alpine
+ContainerName=nginx-test
+PublishPort=8080:80
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,6 @@
+[Defaults]
+myvariable = "overwrite me"
+
+[[Services]]
+Service = "nginx-test.service"
+Timeout = 120

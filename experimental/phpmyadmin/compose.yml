@@ -1,0 +1,41 @@
+services:
+  phpmyadmin:
+    build: .
+    init: true
+    # https://github.com/phpmyadmin/docker/blob/2335c3151b93ea6a4cf8779c4c90cb21572b6c50/Dockerfile-debian.template#L146
+    command: >
+      bash -c 'sed -i "71i echo \"Test\";" /etc/phpmyadmin/config.inc.php
+      && apache2-foreground'
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 100M
+    networks:
+      - default
+      - traefik_proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    logging:
+      driver: fluentd
+      options:
+        tag: phpmyadmin.prod.phpmyadmin
+    labels:
+      traefik.enable: true
+      traefik.http.routers.phpmyadmin.entrypoints: websecure
+      traefik.http.routers.phpmyadmin.rule: Host(`phpmyadmin.d3strukt0r.dev`)
+      traefik.http.routers.phpmyadmin.tls: true
+      traefik.http.routers.phpmyadmin.tls.certresolver: le
+
+  check_containers:
+    image: debian
+    command: >
+      bash -c 'while true; do
+      docker ps -a | grep -q phpmyadmin || docker-compose -f /app/compose.yml up -d phpmyadmin;
+      sleep 10;
+      done'
+
+networks:
+  traefik_proxy:
+    external: true
