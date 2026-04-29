@@ -1,0 +1,5 @@
+# age public key(s) for encrypting attributes
+# Paste your public key below (starts with age1...)
+# Generate with: age-keygen -o age-key.txt
+# Re-extract with: age-keygen -y age-key.txt
+age16tpfwh7kgza44ry8cjac23l8tcpcuc7vp27d5vsglqn4a0wwv3eslg6zcr

@@ -1,0 +1,27 @@
+services:
+  adminer:
+    extends:
+      file: ./snippets.yml
+      service: common-service
+    image: adminer:${VERSION:-latest}
+    # TODO: How to handle this?
+    #healthcheck:
+    #  test: curl --fail http://localhost || exit 1
+    #  test: wget --no-verbose --tries=1 --spider http://localhost || exit 1
+    logging:
+      driver: fluentd
+      options:
+        tag: ${COMPOSE_PROJECT_NAME}.${ENV:-prod}.adminer
+    networks:
+      - default
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-adminer.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-adminer.rule=Host(`adminer-${COMPOSE_PROJECT_NAME}.d3strukt0r.dev`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-adminer.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}-adminer.tls.certresolver=le
+
+networks:
+  traefik_proxy:
+    external: true

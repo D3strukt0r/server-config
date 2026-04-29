@@ -1,0 +1,25 @@
+[Unit]
+Description=OpenThread Border Router (OTBR)
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=10s
+
+[Container]
+Image=docker.io/bnutzer/otbr-tcp:{{ .containerTag }}
+ContainerName=openthread-border-router
+Network=host
+AddCapability=NET_ADMIN
+AddCapability=SYS_ADMIN
+AddDevice=/dev/net/tun
+Environment=RCP_HOST={{ .slzb_host }}
+Environment=RCP_PORT={{ .slzb_thread_port }}
+Environment=BACKBONE_IF={{ .backbone_interface }}
+PodmanArgs=--privileged --init
+
+[Install]
+WantedBy=default.target

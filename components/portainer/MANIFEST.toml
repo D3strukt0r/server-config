@@ -1,0 +1,6 @@
+[Defaults]
+containerTag = "alpine"
+
+[[Services]]
+Service = "portainer.service"
+RestartedBy = ["portainer.container"]

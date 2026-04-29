@@ -1,0 +1,6 @@
+[Defaults]
+containerTag = "stable"
+
+[[Services]]
+Service = "matter-server.service"
+RestartedBy = ["matter-server.container"]

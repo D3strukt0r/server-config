@@ -1,0 +1,19 @@
+[Unit]
+Description=Watchtower automatic container updates
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+[Container]
+Image=docker.io/containrrr/watchtower:{{ .containerTag }}
+ContainerName=watchtower
+Volume=/run/user/1000/podman/podman.sock:/var/run/docker.sock
+Environment=WATCHTOWER_CLEANUP=true
+Environment=WATCHTOWER_POLL_INTERVAL=86400
+PodmanArgs=--init --cpus=0.25 --memory=50m
+
+[Install]
+WantedBy=default.target

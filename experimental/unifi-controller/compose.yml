@@ -1,0 +1,52 @@
+services:
+  mongo:
+    image: mongo:3.6
+    restart: always
+    networks:
+      - default
+    volumes:
+      - ./database:/data/db
+      - ./database-config:/data/configdb
+
+  controller:
+    image: jacobalberty/unifi:${TAG:-latest}
+    restart: always
+    depends_on:
+      - mongo
+    networks:
+      - default
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    init: true
+    volumes:
+      - ./unifi:/unifi
+    environment:
+      DB_URI: mongodb://mongo/unifi
+      STATDB_URI: mongodb://mongo/unifi_stat
+      DB_NAME:
+      RUNAS_UID0: "false"
+      UNIFI_UID: 1000
+      UNIFI_GID: 1000
+      TZ: Europe/Zurich
+    ports:
+      - 3478:3478/udp # STUN
+      - 6789:6789/tcp # Speed test
+      - 8080:8080/tcp # Device/ controller comm.
+      - 8443:8443/tcp # Controller GUI/API as seen in a web browser
+      - 8880:8880/tcp # HTTP portal redirection
+      - 8843:8843/tcp # HTTPS portal redirection
+      - 10001:10001/udp # AP discovery
+
+  logs:
+    image: bash
+    command: bash -c 'tail -F /unifi/log/*.log'
+    restart: always
+    depends_on:
+      - controller
+    volumes:
+      - ./unifi/log:/unifi/log
+
+# networks:
+#   internal:
+#     external: false

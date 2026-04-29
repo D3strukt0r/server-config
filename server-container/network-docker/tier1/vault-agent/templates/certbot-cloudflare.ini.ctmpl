@@ -1,0 +1,3 @@
+{{- with secret "secret/data/network-docker" -}}
+dns_cloudflare_api_token = {{ .Data.data.cloudflare_api_token }}
+{{- end }}
