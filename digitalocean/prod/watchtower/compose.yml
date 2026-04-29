@@ -8,7 +8,8 @@ services:
     extends:
       file: ../../../common/snippets.yml
       service: common-service
-    image: containrrr/watchtower
+    # containrrr/watchtower has been archived, so using https://github.com/nicholas-fedor/watchtower instead which is a fork of the original
+    image: nickfedor/watchtower
     # healthcheck already done by container `/watchtower --health-check`
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
