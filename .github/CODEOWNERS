@@ -1,4 +1,5 @@
 # https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+# Last matching pattern wins. Only ONE listed owner needs to approve, not all.
 
-# These owners will be the default owners for everything in the repo.
+# Default owner for everything.
 * @D3strukt0r
