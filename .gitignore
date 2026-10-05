@@ -56,3 +56,5 @@ certbot-cloudflare.ini
 # Vault env (actual secrets, not templates)
 vault.env
 !vault.env.dist
+
+spaces/
