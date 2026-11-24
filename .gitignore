@@ -58,3 +58,4 @@ vault.env
 !vault.env.dist
 
 spaces/
+.idea/

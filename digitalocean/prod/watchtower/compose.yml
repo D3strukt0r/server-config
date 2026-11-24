@@ -8,6 +8,7 @@ services:
     extends:
       file: ../../../common/snippets.yml
       service: common-service
+    # https://github.com/pyouroboros/ouroboros is unmaintained
     # containrrr/watchtower has been archived, so using https://github.com/nicholas-fedor/watchtower instead which is a fork of the original
     image: nickfedor/watchtower
     # healthcheck already done by container `/watchtower --health-check`
